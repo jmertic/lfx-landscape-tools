@@ -74,6 +74,7 @@ class Cli:
         args.func(args)
         logging.getLogger().info("This took {} seconds".format(datetime.now() - self._starttime))
 
+    @staticmethod
     def run():
         Cli() 
 
