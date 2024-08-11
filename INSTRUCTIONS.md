@@ -1,6 +1,16 @@
-# How this all works?
+# How does this all work?
 
-The main script [landscapemembers.py](landscapemembers.py) is designed to pull a list of all current members of the given project from LF Members endpoint, using that as the primary source of data for the landscape. Data pulled includes...
+There is one main command, `landscape,` which has several different sub-commands depending on what you are looking to pull.
+
+- `landscape build_members` pulls LFX member data, replacing what is currently in the landscape.
+- `landscape build_projects` pulls LFX project data, replacing what is currently in the landscape.
+- `landscape sync_projects` pulls LFX project data, adding new entries that are not in the landscape and syncing entries that are.
+
+There are two primary script paths used to pull data from LFX.
+
+## `build_members`
+
+The primary
 
 - Member name
 - Website
