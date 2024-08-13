@@ -96,6 +96,10 @@ class LFXProjects(Members):
                     member.logo = SVGLogo(name=member.orgname)
                 member.crunchbase = record['CrunchBaseUrl'] if 'CrunchbaseUrl' in record else self.defaultCrunchbase
                 try:
+                    member.linkedin = record['LinkedIn'] if 'LinkedIn' in record else None
+                except (ValueError,KeyError) as e:
+                    logger.warning(e)
+                try:
                     member.twitter = record['Twitter'] if 'Twitter' in record else None
                 except (ValueError,KeyError) as e:
                     logger.warning(e)
