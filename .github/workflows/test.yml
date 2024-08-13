@@ -32,7 +32,7 @@ jobs:
       with:
         python-version: '3.x'
     - name: Install poetry
-      uses: abatilo/actions-poetry@v3
+      uses: abatilo/actions-poetry@7b6d33e44b4f08d7021a1dee3c044e9c253d6439 # v3.0.0
     - name: Run tests
       run: |
         poetry install --with test
@@ -45,7 +45,7 @@ jobs:
         name: debug-log 
         path: ./debug.log
     - name: SonarCloud Scan
-      uses: SonarSource/sonarcloud-github-action@master
+      uses: SonarSource/sonarcloud-github-action@f5003fc9688ade81ce47b57a3fa97a8d3f12de4c # master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
