@@ -12,9 +12,9 @@ from contextlib import suppress
 import ruamel.yaml
 import requests
 
-from landscape_tools.members import Members
-from landscape_tools.member import Member
-from landscape_tools.config import Config
+from lfx_landscape_tools.members import Members
+from lfx_landscape_tools.member import Member
+from lfx_landscape_tools.config import Config
 
 class LandscapeMembers(Members):
 

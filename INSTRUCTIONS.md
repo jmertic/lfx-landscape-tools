@@ -6,21 +6,25 @@ There is one main command, `landscape,` which has several different sub-commands
 - `landscape build_projects` pulls LFX project data, replacing what is currently in the landscape.
 - `landscape sync_projects` pulls LFX project data, adding new entries that are not in the landscape and syncing entries that are.
 
-There are two primary script paths used to pull data from LFX.
+Let's break down what each command does.
 
-## `build_members`
+## `landscape build_members`
 
-The primary
+The pull will look for active members based on the Purchase History, and respect the 'Don't show logo on website' item if selected. The data for the landscape item entry fields come from these fields from the ['Get Project Members' endpoint](https://api-gw.platform.linuxfoundation.org/project-service/v1/api-docs#tag/public/operation/getPublicProjectMembers)
 
-- Member name
-- Website
-- Crunchbase URL
-- Twitter handle
-- Logo URL
+- `Name` - The name of the member (required)
+- `Website` - Website for the member (required)
+- `CrunchBaseURL` - URL of the member's Crunchbase profile (optional)
+- `LinkedInURL` - URL of the member's LinkedIn profile (optional)
+- `Logo` - Logo for the member (optional)
+- `Membership[Name]` - Name of the membership level for the member (required)
+- `Twitter` - X ( formerly Twitter ) user name for the member (optional)
 
-The pull will look for active members based on the Purchase History, and respect the 'Don't show logo on website' item if selected.
+If `CrunchbaseURL` is not set, then an `organization` entry will be set on the Landscape Item, setting `name` to `Name` and `linkedin` to `LinkedInURL`.
 
-With the data for things like logos and crunchbase entries, there is often more accurate data in other [landscapes](https://landscapes.dev). The script will attempt to look for this, and overlay data from other landscapes if the data from the LF Members endpoint is empty. This also pulls in useful data such as `stock_ticker`, which often has to be set to `null` as the Crunchbase data is inaccurate.
+If `Logo` is not set, a text logo will be generated using the `Name` value
+
+If either `Name` or `Website` is not set, the member will not be added to the landscape.
 
 # How to use
 

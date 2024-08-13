@@ -15,10 +15,10 @@ import requests
 import requests_cache
 from urllib.parse import urlparse
 
-from landscape_tools.members import Members
-from landscape_tools.member import Member
-from landscape_tools.svglogo import SVGLogo
-from landscape_tools.config import Config
+from lfx_landscape_tools.members import Members
+from lfx_landscape_tools.member import Member
+from lfx_landscape_tools.svglogo import SVGLogo
+from lfx_landscape_tools.config import Config
 
 class TACAgendaProject(Members):
 

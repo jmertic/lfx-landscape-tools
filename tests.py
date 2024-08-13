@@ -17,16 +17,16 @@ import requests
 import logging
 import json
 
-from landscape_tools.config import Config
-from landscape_tools.cli import Cli
-from landscape_tools.member import Member
-from landscape_tools.members import Members
-from landscape_tools.lfxmembers import LFXMembers
-from landscape_tools.landscapemembers import LandscapeMembers
-from landscape_tools.landscapeoutput import LandscapeOutput
-from landscape_tools.svglogo import SVGLogo
-from landscape_tools.lfxprojects import LFXProjects
-from landscape_tools.tacagendaproject import TACAgendaProject
+from lfx_landscape_tools.config import Config
+from lfx_landscape_tools.cli import Cli
+from lfx_landscape_tools.member import Member
+from lfx_landscape_tools.members import Members
+from lfx_landscape_tools.lfxmembers import LFXMembers
+from lfx_landscape_tools.landscapemembers import LandscapeMembers
+from lfx_landscape_tools.landscapeoutput import LandscapeOutput
+from lfx_landscape_tools.svglogo import SVGLogo
+from lfx_landscape_tools.lfxprojects import LFXProjects
+from lfx_landscape_tools.tacagendaproject import TACAgendaProject
 
 class TestConfig(unittest.TestCase):
 
@@ -614,7 +614,7 @@ class TestMember(unittest.TestCase):
 
 class TestMembers(unittest.TestCase):
 
-    @patch("landscape_tools.members.Members.__abstractmethods__", set())
+    @patch("lfx_landscape_tools.members.Members.__abstractmethods__", set())
     def testFind(self):
         member = Member()
         member.orgname = 'test'
@@ -628,7 +628,7 @@ class TestMembers(unittest.TestCase):
         self.assertTrue(members.find('dog',member.website))
         self.assertTrue(members.find(member.orgname,'https://bar.com'))
 
-    @patch("landscape_tools.members.Members.__abstractmethods__", set())
+    @patch("lfx_landscape_tools.members.Members.__abstractmethods__", set())
     def testFindFail(self):
         member = Member()
         member.orgname = 'test'
@@ -640,7 +640,7 @@ class TestMembers(unittest.TestCase):
 
         self.assertFalse(members.find('dog','https://bar.com'))
 
-    @patch("landscape_tools.members.Members.__abstractmethods__", set())
+    @patch("lfx_landscape_tools.members.Members.__abstractmethods__", set())
     def testFindMultiple(self):
         members = Members(config=Config())
         
@@ -658,12 +658,12 @@ class TestMembers(unittest.TestCase):
         
         self.assertEqual(len(members.find(member.orgname,member.website)),2)
     
-    @patch("landscape_tools.members.Members.__abstractmethods__", set())
+    @patch("lfx_landscape_tools.members.Members.__abstractmethods__", set())
     def testNormalizeCompanyEmptyOrg(self):
         members = Members(config=Config(),loadData=False)
         self.assertEqual(members.normalizeCompany(None),'')
 
-    @patch("landscape_tools.members.Members.__abstractmethods__", set())
+    @patch("lfx_landscape_tools.members.Members.__abstractmethods__", set())
     def testNormalizeCompany(self):
         companies = [
             {"name":"Foo","normalized":"Foo"},
