@@ -5,13 +5,13 @@
 #
 # encoding=utf8
 
-from landscape_tools.config import Config
-from landscape_tools.lfxmembers import LFXMembers
-from landscape_tools.lfxprojects import LFXProjects
-from landscape_tools.landscapemembers import LandscapeMembers
-from landscape_tools.landscapeoutput import LandscapeOutput
-from landscape_tools.svglogo import SVGLogo
-from landscape_tools.tacagendaproject import TACAgendaProject
+from lfx_landscape_tools.config import Config
+from lfx_landscape_tools.lfxmembers import LFXMembers
+from lfx_landscape_tools.lfxprojects import LFXProjects
+from lfx_landscape_tools.landscapemembers import LandscapeMembers
+from lfx_landscape_tools.landscapeoutput import LandscapeOutput
+from lfx_landscape_tools.svglogo import SVGLogo
+from lfx_landscape_tools.tacagendaproject import TACAgendaProject
 
 from datetime import datetime
 from argparse import ArgumentParser,FileType

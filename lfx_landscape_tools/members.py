@@ -12,7 +12,7 @@ from abc import ABC, abstractmethod
 ## third party modules
 from url_normalize import url_normalize
 
-from landscape_tools.config import Config
+from lfx_landscape_tools.config import Config
 
 #
 # Abstract Members class to normalize the methods used for the other ways of getting a member's info
