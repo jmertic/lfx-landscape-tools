@@ -1,30 +1,16 @@
-# How does this all work?
+# How this all works?
 
-There is one main command, `landscape,` which has several different sub-commands depending on what you are looking to pull.
+The main script [landscapemembers.py](landscapemembers.py) is designed to pull a list of all current members of the given project from LF Members endpoint, using that as the primary source of data for the landscape. Data pulled includes...
 
-- `landscape build_members` pulls LFX member data, replacing what is currently in the landscape.
-- `landscape build_projects` pulls LFX project data, replacing what is currently in the landscape.
-- `landscape sync_projects` pulls LFX project data, adding new entries that are not in the landscape and syncing entries that are.
+- Member name
+- Website
+- Crunchbase URL
+- Twitter handle
+- Logo URL
 
-Let's break down what each command does.
+The pull will look for active members based on the Purchase History, and respect the 'Don't show logo on website' item if selected.
 
-## `landscape build_members`
-
-The pull will look for active members based on the Purchase History, and respect the 'Don't show logo on website' item if selected. The data for the landscape item entry fields come from these fields from the ['Get Project Members' endpoint](https://api-gw.platform.linuxfoundation.org/project-service/v1/api-docs#tag/public/operation/getPublicProjectMembers)
-
-- `Name` - The name of the member (required)
-- `Website` - Website for the member (required)
-- `CrunchBaseURL` - URL of the member's Crunchbase profile (optional)
-- `LinkedInURL` - URL of the member's LinkedIn profile (optional)
-- `Logo` - Logo for the member (optional)
-- `Membership[Name]` - Name of the membership level for the member (required)
-- `Twitter` - X ( formerly Twitter ) user name for the member (optional)
-
-If `CrunchbaseURL` is not set, then an `organization` entry will be set on the Landscape Item, setting `name` to `Name` and `linkedin` to `LinkedInURL`.
-
-If `Logo` is not set, a text logo will be generated using the `Name` value
-
-If either `Name` or `Website` is not set, the member will not be added to the landscape.
+With the data for things like logos and crunchbase entries, there is often more accurate data in other [landscapes](https://landscapes.dev). The script will attempt to look for this, and overlay data from other landscapes if the data from the LF Members endpoint is empty. This also pulls in useful data such as `stock_ticker`, which often has to be set to `null` as the Crunchbase data is inaccurate.
 
 # How to use
 
