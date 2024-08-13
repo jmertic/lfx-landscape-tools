@@ -15,8 +15,8 @@ from contextlib import suppress
 ## third party modules
 import ruamel.yaml
 
-from landscape_tools.config import Config
-from landscape_tools.members import Members
+from lfx_landscape_tools.config import Config
+from lfx_landscape_tools.members import Members
 
 class LandscapeOutput:
 

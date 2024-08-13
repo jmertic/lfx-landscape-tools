@@ -18,7 +18,7 @@ import requests
 import requests_cache
 from github import Github, GithubException, RateLimitExceededException, Auth
 
-from landscape_tools.svglogo import SVGLogo
+from lfx_landscape_tools.svglogo import SVGLogo
 
 #
 # Member object to ensure we have normalization on fields. Only required fields are defined; others can be added dynamically.
