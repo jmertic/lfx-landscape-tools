@@ -31,7 +31,7 @@ class LFXMembers(Members):
             memberList = endpointResponse.json()
             for record in memberList:
                 record['Website'] = '' if 'Website' not in record else record['Website']
-                if self.find(record['Name'],record['Website'],record['Membership']['Name']):
+                if self.find(record['Name'],record['Website'],record['Membership']['Name']) or record['Name'] == "Test account":
                     continue
 
                 member = Member()
