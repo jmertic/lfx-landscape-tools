@@ -59,6 +59,11 @@ runs:
       with:
         name: missing-members 
         path: ./landscape/missing.csv
+    - name: Validate landscape2 data
+      uses: cncf/landscape2-validate-action@v2
+      with:
+        target_kind: data
+        target_path: ./landscape/landscape.yml
     - name: Checkout landscapeapp
       uses: actions/checkout@v4
       with:
