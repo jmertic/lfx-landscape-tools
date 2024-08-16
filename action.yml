@@ -8,25 +8,25 @@ runs:
   using: composite
   steps:
     - name: Checkout landscape
-      uses: actions/checkout@v4
+      uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7@v4
       with:
         token: ${{ env.token }}
         repository: ${{ env.repository }}
         ref: ${{ env.ref }}
         path: landscape
     - name: Checkout landscape-tools
-      uses: actions/checkout@v4
+      uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7@v4
       with:
         token: ${{ env.token }}
         repository: jmertic/landscape-tools
         path: landscape-tools
         ref: include-projects
     - name: Set up Python 3.x
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@39cd14951b08e74b54015e9e001cdefcf80e669f # v5.1.1
       with:
         python-version: '3.x'
     - name: Install poetry
-      uses: abatilo/actions-poetry@v3
+      uses: abatilo/actions-poetry@7b6d33e44b4f08d7021a1dee3c044e9c253d6439 # v3.0.0
     - name: Install dependencies
       shell: bash
       working-directory: ./landscape-tools
@@ -55,22 +55,22 @@ runs:
         GITHUB_TOKEN: ${{ env.token }}
         GH_TOKEN: ${{ env.token }}
     - name: Save missing.csv file
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@834a144ee995460fba8ed112a2fc961b36a5ec5a # v4.3.6
       with:
         name: missing-members 
         path: ./landscape/missing.csv
     - name: Validate landscape2 data
-      uses: cncf/landscape2-validate-action@v2
+      uses: cncf/landscape2-validate-action@7f299c46e9b03b4e8bc2896882734fb0b0756b37 # v2.0.0
       with:
         target_kind: data
         target_path: ./landscape/landscape.yml
     - name: Checkout landscapeapp
-      uses: actions/checkout@v4
+      uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7@v4
       with:
         repository: cncf/landscapeapp
         path: landscapeapp
     - name: Setup node
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
       with:
         node-version: '18'
     - name: Cleanup YAML files
@@ -83,11 +83,11 @@ runs:
         PROJECT_PATH=../landscape node tools/pruneExtraEntries
     - name: Get current date
       id: date
-      uses: Kaven-Universe/github-action-current-date-time@v1
+      uses: Kaven-Universe/github-action-current-date-time@f2c12d90cff9c3e7b1f50430886e632fe31fcee1 # v1.4.0
       with:
         format: "YYYY-MM-DD"
     - name: Create Pull Request
-      uses: peter-evans/create-pull-request@v6
+      uses: peter-evans/create-pull-request@c5a7806660adbe173f04e3e038b0ccdcd758773c # v6.1.0
       with:
         token: ${{ env.token }}
         branch-suffix: timestamp
@@ -95,4 +95,5 @@ runs:
         title: "Update Landscape from LFX ${{ steps.date.outputs.time }}"
         labels: automated-build
         commit-message: Update Landscape from LFX
+        signoff: true
 
