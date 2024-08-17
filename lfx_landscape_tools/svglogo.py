@@ -53,7 +53,7 @@ class SVGLogo:
                     context.set_source_rgb(0,0,0)
                     context.set_font_size(60)
                     context.select_font_face(
-                        "sans-serif", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
+                        "cairo:monospace", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
                     context.move_to(0,50)
                     parts = name.split(" ")
                     n = 2
