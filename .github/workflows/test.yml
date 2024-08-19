@@ -39,7 +39,7 @@ jobs:
         poetry run coverage run --branch tests.py -b
         poetry run coverage xml
     - name: Save debug.log file
-      uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
+      uses: actions/upload-artifact@834a144ee995460fba8ed112a2fc961b36a5ec5a # v4.3.6
       if: always()
       with:
         name: debug-log 
