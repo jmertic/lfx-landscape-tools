@@ -72,14 +72,14 @@ class TACAgendaProject(Members):
             extra['annual_review_url'] = item['content']['url']
             extra['next_annual_review_date'] = item['scheduled Date'] if 'scheduled Date' in item else None
             session = requests_cache.CachedSession()
+            chair = []
             if 'pCC Project ID' in item and 'pCC TSC Committee ID' in item:
                 with session.get(self.pcc_committee_url.format(project_id=item['pCC Project ID'],committee_id=item['pCC TSC Committee ID'])) as endpointResponse:
                     memberList = endpointResponse.json()
                     if 'Data' in memberList and memberList['Data']:
                         for record in memberList['Data']:
                             if 'Role' in record and record['Role'] == 'Chair':
-                                extra['chair'] = '{} {}'.format(record['FirstName'],record['LastName'])
-                                break
-
+                                chair.append('{} {}'.format(record['FirstName'],record['LastName']))
+            extra['chair'] = ", ".join(chair)
             member.extra = extra
             self.members.append(member)
