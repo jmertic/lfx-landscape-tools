@@ -79,7 +79,7 @@ class TACAgendaProject(Members):
                     if 'Data' in memberList and memberList['Data']:
                         for record in memberList['Data']:
                             if 'Role' in record and record['Role'] == 'Chair':
-                                chair.append('{} {}'.format(record['FirstName'],record['LastName']))
+                                chair.append('{} {}'.format(record['FirstName'].title(),record['LastName'].title()))
             extra['chair'] = ", ".join(chair)
             member.extra = extra
             self.members.append(member)
