@@ -27,7 +27,7 @@ class TACAgendaProject(Members):
     parent_slug = None
 
     pcc_committee_url = 'https://api-gw.platform.linuxfoundation.org/project-service/v2/public/projects/{project_id}/committees/{committee_id}/members'
-    gh_cli_call = "gh project item-list {gh_project_id} --owner {gh_org} --format json --limit 100"
+    gh_cli_call = "gh project item-list {gh_project_id} --owner {gh_org} --format json --limit 200"
 
     def processConfig(self, config: type[Config]):
         self.parent_slug = config.slug
@@ -78,7 +78,7 @@ class TACAgendaProject(Members):
                     memberList = endpointResponse.json()
                     if 'Data' in memberList and memberList['Data']:
                         for record in memberList['Data']:
-                            if 'Role' in record and record['Role'] == 'Chair':
+                            if 'Role' in record and ( record['Role'] == 'Chair' or record['Role'] == 'Vice Chair' ):
                                 chair.append('{} {}'.format(record['FirstName'].title(),record['LastName'].title()))
             extra['chair'] = ", ".join(chair)
             member.extra = extra
