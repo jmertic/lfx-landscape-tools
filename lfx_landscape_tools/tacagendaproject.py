@@ -27,7 +27,7 @@ class TACAgendaProject(Members):
     parent_slug = None
 
     pcc_committee_url = 'https://api-gw.platform.linuxfoundation.org/project-service/v2/public/projects/{project_id}/committees/{committee_id}/members'
-    gh_cli_call = "gh project item-list {gh_project_id} --owner {gh_org} --format json"
+    gh_cli_call = "gh project item-list {gh_project_id} --owner {gh_org} --format json --limit 100"
 
     def processConfig(self, config: type[Config]):
         self.parent_slug = config.slug
@@ -64,7 +64,7 @@ class TACAgendaProject(Members):
 
             logger.info("Processing {}...".format(item['content']['title']))
             member = Member()
-            member.orgname = item['content']['title']
+            member.orgname = item['content']['title'].strip()
             member.crunchbase = self.defaultCrunchbase
             extra = {} 
             extra['annual_review_date'] = item['last Review Date'] if 'last Review Date' in item else None
