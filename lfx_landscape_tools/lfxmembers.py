@@ -18,7 +18,7 @@ from lfx_landscape_tools.config import Config
 class LFXMembers(Members):
 
     project = ''
-    endpointURL = 'https://api-gw.platform.linuxfoundation.org/project-service/v1/public/projects/{}/members?orderBy=name&status=Active,At Risk&usePublicMembershipLogo=true' 
+    endpointURL = 'https://api-gw.platform.linuxfoundation.org/project-service/v1/public/projects/{}/members?orderBy=name&status=Active,At Risk' 
     
     def processConfig(self, config: type[Config]):
         self.project = config.project
