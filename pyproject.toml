@@ -9,7 +9,7 @@ license = "Apache-2.0"
 [tool.poetry.dependencies]
 python = ">= 3.12"
 requests = "^2.32.3"
-pycairo = "^1.26.0"
+pycairo = "^1.27.0"
 pygithub = "^2.4.0"
 python-slugify = "^8.0.4"
 requests-cache = "^1.2.1"
