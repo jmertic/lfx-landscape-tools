@@ -35,6 +35,7 @@ class Config:
     missingcsvfile = 'missing.csv'
     hostedLogosDir = 'hosted_logos'
     memberSuffix = None
+    memberUsePublicMembershipLogo = False
     projectsAddTechnologySector = False
     projectsAddIndustrySector = False
     projectsAddPMOManagedStatus = False
@@ -63,6 +64,7 @@ class Config:
             self.missingcsvfile = data_loaded['missingcsvfile'] if 'missingcsvfile' in data_loaded else Config.missingcsvfile
             self.hostedLogosDir = data_loaded['hostedLogosDir'] if 'hostedLogosDir' in data_loaded else Config.hostedLogosDir
             self.memberSuffix = data_loaded['memberSuffix'] if 'memberSuffix' in data_loaded else Config.memberSuffix
+            self.memberUsePublicMembershipLogo = True if 'memberUsePublicMembershipLogo' in data_loaded and data_loaded['memberUsePublicMembershipLogo'] else Config.memberUsePublicMembershipLogo
             self.projectsAddTechnologySector = data_loaded['projectsAddTechnologySector'] if 'projectsAddTechnologySector' in data_loaded else Config.projectsAddTechnologySector
             self.projectsAddIndustrySector = data_loaded['projectsAddIndustrySector'] if 'projectsAddIndustrySector' in data_loaded else Config.projectsAddIndustrySector
             self.projectsAddPMOManagedStatus = data_loaded['projectsAddPMOManagedStatus'] if 'projectsAddPMOManagedStatus' in data_loaded else Config.projectsAddPMOManagedStatus
