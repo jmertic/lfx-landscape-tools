@@ -36,6 +36,7 @@ class LFXProjects(Members):
     addIndustrySector = True
     addPMOManagedStatus = True
     addParentProject = True
+    landscapeProjectsLevels = {}
 
     def processConfig(self, config: type[Config]):
         self.project = config.slug
@@ -46,6 +47,7 @@ class LFXProjects(Members):
         self.defaultCrunchbase = config.projectsDefaultCrunchbase
         self.artworkRepoUrl = config.artworkRepoUrl
         self.projectsFilterByParentSlug = config.projectsFilterByParentSlug
+        self.landscapeProjectsLevels = config.landscapeProjectsLevels
 
     def loadData(self):
         logger = logging.getLogger()
@@ -77,6 +79,12 @@ class LFXProjects(Members):
                 member.repo_url = record['RepositoryURL'] if 'RepositoryURL' in record else None
                 extra['accepted'] = record['StartDate'] if 'StartDate' in record else None 
                 member.description = record['Description'] if 'Description' in record else None
+                if 'Category' in record:
+                    for projectLevel in self.landscapeProjectsLevels:
+                        if projectLevel['name'] == record['Category']:
+                            member.project = projectLevel['level']
+                            logger.info("Project level is {}".format(member.project))
+                            break
                 try:
                     member.website = record['Website'] if 'Website' in record else None
                 except ValueError as e:
