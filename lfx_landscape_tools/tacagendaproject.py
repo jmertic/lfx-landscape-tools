@@ -75,11 +75,14 @@ class TACAgendaProject(Members):
             chair = []
             if 'pCC Project ID' in item and 'pCC TSC Committee ID' in item:
                 with session.get(self.pcc_committee_url.format(project_id=item['pCC Project ID'],committee_id=item['pCC TSC Committee ID'])) as endpointResponse:
-                    memberList = endpointResponse.json()
-                    if 'Data' in memberList and memberList['Data']:
-                        for record in memberList['Data']:
-                            if 'Role' in record and ( record['Role'] == 'Chair' or record['Role'] == 'Vice Chair' ):
-                                chair.append('{} {}'.format(record['FirstName'].title(),record['LastName'].title()))
+                    try:
+                        memberList = endpointResponse.json()
+                        if 'Data' in memberList and memberList['Data']:
+                            for record in memberList['Data']:
+                                if 'Role' in record and ( record['Role'] == 'Chair' or record['Role'] == 'Vice Chair' ):
+                                    chair.append('{} {}'.format(record['FirstName'].title(),record['LastName'].title()))
+                    except Exception as e:
+                        logger.error("Couldn't load TSC Committee data for '{project}' - {error}".format(project=member.orgname,error=e))
             extra['chair'] = ", ".join(chair)
             member.extra = extra
             self.members.append(member)
