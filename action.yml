@@ -11,14 +11,14 @@ runs:
       shell: bash
       run: sudo apt install libcairo2-dev
     - name: Checkout landscape
-      uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7@v4
+      uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.1.7@v4
       with:
         token: ${{ env.token }}
         repository: ${{ env.repository }}
         ref: ${{ env.ref }}
         path: landscape
     - name: Checkout landscape-tools
-      uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7@v4
+      uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.1.7@v4
       with:
         token: ${{ env.token }}
         repository: jmertic/lfx-landscape-tools
@@ -67,7 +67,7 @@ runs:
         target_kind: data
         target_path: ./landscape/landscape.yml
     - name: Checkout landscapeapp
-      uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7@v4
+      uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.1.7@v4
       with:
         repository: cncf/landscapeapp
         path: landscapeapp
