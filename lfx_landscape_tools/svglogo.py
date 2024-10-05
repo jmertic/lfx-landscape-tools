@@ -76,7 +76,9 @@ class SVGLogo:
     def save(self, name, path = './'):
         filename = self.filename(name)
         filenamepath = os.path.normpath("{}/{}".format(path,filename))
-        
+        if not os.path.isdir(path):
+            os.makedirs(path)
+
         with open(filenamepath, 'w') as fp:
             fp.write(self.__contents)
 
