@@ -47,9 +47,11 @@ class LandscapeOutput:
 
     def load(self, resetCategory = False, newLandscape = False):
         if not newLandscape:
-            with open(self.landscapefile, 'r', encoding="utf8", errors='ignore') as fileobject: 
-                self.landscape = ruamel.yaml.YAML().load(fileobject)
-
+            try:
+                with open(self.landscapefile, 'r', encoding="utf8", errors='ignore') as fileobject: 
+                    self.landscape = ruamel.yaml.YAML().load(fileobject)
+            except:
+                newLandscape = True
         found = False
         if self.landscape and 'landscape' in self.landscape:
             for x in self.landscape['landscape']:
