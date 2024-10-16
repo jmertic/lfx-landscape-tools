@@ -59,7 +59,7 @@ class TACAgendaProject(Members):
             return None
 
         for item in projectData['items']:
-            if '2-annual-review' not in item['labels']:
+            if 'labels' not in item or '2-annual-review' not in item['labels']:
                 continue
 
             logger.info("Processing {}...".format(item['content']['title']))
