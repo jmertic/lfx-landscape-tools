@@ -30,6 +30,7 @@ class Member:
     second_path = []
     organization = {}
     extra = {}
+    project = None
     project_org = None
     __orgname = None
     __website = None

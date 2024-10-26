@@ -27,7 +27,7 @@ class TACAgendaProject(Members):
     parent_slug = None
 
     pcc_committee_url = 'https://api-gw.platform.linuxfoundation.org/project-service/v2/public/projects/{project_id}/committees/{committee_id}/members'
-    gh_cli_call = "gh project item-list {gh_project_id} --owner {gh_org} --format json"
+    gh_cli_call = "gh project item-list {gh_project_id} --owner {gh_org} --format json --limit 200"
 
     def processConfig(self, config: type[Config]):
         self.parent_slug = config.slug
@@ -59,12 +59,12 @@ class TACAgendaProject(Members):
             return None
 
         for item in projectData['items']:
-            if '2-annual-review' not in item['labels']:
+            if 'labels' not in item or '2-annual-review' not in item['labels']:
                 continue
 
             logger.info("Processing {}...".format(item['content']['title']))
             member = Member()
-            member.orgname = item['content']['title']
+            member.orgname = item['content']['title'].strip()
             member.crunchbase = self.defaultCrunchbase
             extra = {} 
             extra['annual_review_date'] = item['last Review Date'] if 'last Review Date' in item else None
@@ -72,14 +72,17 @@ class TACAgendaProject(Members):
             extra['annual_review_url'] = item['content']['url']
             extra['next_annual_review_date'] = item['scheduled Date'] if 'scheduled Date' in item else None
             session = requests_cache.CachedSession()
+            chair = []
             if 'pCC Project ID' in item and 'pCC TSC Committee ID' in item:
                 with session.get(self.pcc_committee_url.format(project_id=item['pCC Project ID'],committee_id=item['pCC TSC Committee ID'])) as endpointResponse:
-                    memberList = endpointResponse.json()
-                    if 'Data' in memberList and memberList['Data']:
-                        for record in memberList['Data']:
-                            if 'Role' in record and record['Role'] == 'Chair':
-                                extra['chair'] = '{} {}'.format(record['FirstName'],record['LastName'])
-                                break
-
+                    try:
+                        memberList = endpointResponse.json()
+                        if 'Data' in memberList and memberList['Data']:
+                            for record in memberList['Data']:
+                                if 'Role' in record and ( record['Role'] == 'Chair' or record['Role'] == 'Vice Chair' ):
+                                    chair.append('{} {}'.format(record['FirstName'].title(),record['LastName'].title()))
+                    except Exception as e:
+                        logger.error("Couldn't load TSC Committee data for '{project}' - {error}".format(project=member.orgname,error=e))
+            extra['chair'] = ", ".join(chair)
             member.extra = extra
             self.members.append(member)
