@@ -1585,7 +1585,8 @@ class TestLFXProjects(unittest.TestCase):
         config.projectsAddTechnologySector = True
         config.projectsAddIndustrySector = True
         config.projectsAddPMOManagedStatus = True
-        config.projectsAddParentProject = True 
+        config.projectsAddParentProject = True
+        config.artworkRepoUrl = "https://artwork.aswf.io/projects/{slug}"
         members = LFXProjects(config=config,loadData=False)
        
         responses.add(
@@ -1643,6 +1644,7 @@ class TestLFXProjects(unittest.TestCase):
                     {
                         "AutoJoinEnabled": False,
                         "Description": "OpenCue is an open source render management system. You can use OpenCue in visual effects and animation production to break down complex jobs into individual tasks. You can submit jobs to a configurable dispatch queue that allocates the necessary computational resources.",
+                        "Category": "Adopted",
                         "DisplayOnWebsite": True,
                         "HasProgramManager": False,
                         "Industry": [
@@ -1667,6 +1669,7 @@ class TestLFXProjects(unittest.TestCase):
                         "AutoJoinEnabled": False,
                         "Description": "OpenTimelineIO (OTIO) is an API and interchange format for editorial cut information. You can think of it as a modern Edit Decision List (EDL) that also includes an API for reading, writing, and manipulating editorial data. It also includes a plugin system for translating to/from existing editorial formats as well as a plugin system for linking to proprietary media storage schemas.",
                         "DisplayOnWebsite": True,
+                        "Category": "Incubating",
                         "HasProgramManager": True,
                         "Industry": [
                             "Motion Pictures"
@@ -1689,6 +1692,7 @@ class TestLFXProjects(unittest.TestCase):
                         "AutoJoinEnabled": False,
                         "Description": "The goal of the OpenEXR project is to keep the format reliable and modern and to maintain its place as the preferred image format for entertainment content creation.",
                         "DisplayOnWebsite": True,
+                        "Category": "Adopted",
                         "HasProgramManager": False,
                         "Industry": [
                             "Motion Pictures"
@@ -1709,6 +1713,7 @@ class TestLFXProjects(unittest.TestCase):
                         "AutoJoinEnabled": False,
                         "Description": "The mission of the Project is to develop an open-source interoperability standard for tools and content management systems used in media production.",
                         "DisplayOnWebsite": True,
+                        "Category": "Sandbox",
                         "HasProgramManager": False,
                         "Industry": [
                             "Motion Pictures"
