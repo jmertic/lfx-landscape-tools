@@ -87,6 +87,7 @@ class Cli:
     def buildmembers(self,args):
         config = Config(args.configfile,view='members')
         landscapeoutput = LandscapeOutput(config, resetCategory=True)
+        logging.getLogger().info("Adding LFX Members data")
         landscapeoutput.addItems(LFXMembers(config=config))
         landscapeoutput.save()
         
@@ -95,6 +96,7 @@ class Cli:
     def buildprojects(self,args):
         config = Config(args.configfile,view='projects')
         landscapeoutput = LandscapeOutput(config, resetCategory=True)
+        logging.getLogger().info("Adding LFX Projects data")
         landscapeoutput.addItems(LFXProjects(config=config))
         landscapeoutput.save()
         
@@ -103,7 +105,9 @@ class Cli:
     def syncprojects(self,args):
         config = Config(args.configfile,view='projects')
         landscapeoutput = LandscapeOutput(config=config, resetCategory=False)
+        logging.getLogger().info("Syncing LFX Projects data")
         landscapeoutput.syncItems(LFXProjects(config=config)) 
+        logging.getLogger().info("Syncing TAC Agenda Project data")
         landscapeoutput.syncItems(TACAgendaProject(config=config))
         landscapeoutput.save()
         

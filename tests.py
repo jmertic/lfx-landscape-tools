@@ -277,8 +277,9 @@ class TestMember(unittest.TestCase):
         for invalidLinkedInURL in invalidLinkedInURLs:
             member = Member()
             member.orgname = 'test'
-            with self.assertRaises(ValueError):
+            with self.assertLogs() as cm:
                 member.linkedin = invalidLinkedInURL
+                self.assertEqual(["WARNING:root:Member.linkedin for 'test' must be set to a valid LinkedIn URL - '{}' provided".format(invalidLinkedInURL)], cm.output)
             self.assertIsNone(member.linkedin)
     
     def testSetCrunchbaseValid(self):
@@ -318,8 +319,9 @@ class TestMember(unittest.TestCase):
         for invalidCrunchbaseURL in invalidCrunchbaseURLs:
             member = Member()
             member.orgname = 'test'
-            with self.assertRaises(ValueError):
+            with self.assertLogs() as cm:
                 member.crunchbase = invalidCrunchbaseURL
+                self.assertEqual(["WARNING:root:Member.crunchbase for '{orgname}' must be set to a valid Crunchbase URL - '{crunchbase}' provided".format(crunchbase=invalidCrunchbaseURL,orgname=member.orgname)], cm.output)
             self.assertIsNone(member.crunchbase)
 
     def testSetWebsiteValid(self):
@@ -336,9 +338,9 @@ class TestMember(unittest.TestCase):
     def testSetWebsiteNotValidOnEmpty(self):
         member = Member()
         member.orgname = 'test'
-        with self.assertRaises(ValueError,msg="Member.website must be not be blank for test") as ctx:
+        with self.assertLogs() as cm:
             member.website = ''
-
+            self.assertEqual(["WARNING:root:Member.website must be not be blank for 'test'"], cm.output)
         self.assertIsNone(member.website)
 
     def testSetWebsiteNotValid(self):
@@ -350,8 +352,9 @@ class TestMember(unittest.TestCase):
         for invalidWebsiteURL in invalidWebsiteURLs:
             member = Member()
             member.orgname = 'test'
-            with self.assertRaises(ValueError,msg="Member.website for test must be set to a valid website - '{website}' provided".format(website=invalidWebsiteURL)) as ctx:
+            with self.assertLogs() as cm:
                 member.website = invalidWebsiteURL
+                self.assertEqual(["WARNING:root:Member.website for 'test' must be set to a valid website - '{website}' provided".format(website=invalidWebsiteURL)], cm.output)
 
             self.assertIsNone(member.website)
 
@@ -370,9 +373,9 @@ class TestMember(unittest.TestCase):
     def testSetLogoNotValidOnEmpty(self):
         member = Member()
         member.orgname = 'test'
-        with self.assertRaises(ValueError,msg="Member.logo must be not be blank for test") as ctx:
+        with self.assertLogs() as cm:
             member.logo = ''
-
+            self.assertEqual(["WARNING:root:Member.logo must be not be blank for 'test'"], cm.output)
         self.assertIsNone(member.logo)
 
     def testSetLogoNotValid(self):
@@ -385,9 +388,9 @@ class TestMember(unittest.TestCase):
             with patch("builtins.open", mock_open(read_data="<text")) as mock_file:
                 member = Member()
                 member.orgname = 'test'
-                with self.assertRaises(ValueError,msg="Member.logo for test must be an svg file - '{logo}' provided".format(logo=invalidLogo)) as ctx:
+                with self.assertLogs() as cm:
                     member.logo = invalidLogo
-
+                    self.assertEqual(["WARNING:root:Member.logo for '{orgname}' invalid format".format(orgname=member.orgname)], cm.output)
                 self.assertIsNone(member.logo)
 
     def testTwitterValid(self):
@@ -414,9 +417,9 @@ class TestMember(unittest.TestCase):
         for invalidTwitter in invalidTwitters:
             member = Member()
             member.orgname = 'test'
-            with self.assertRaises(ValueError,msg="Member.twitter for test must be either a Twitter handle, or the URL to a twitter handle - '{twitter}' provided".format(twitter=invalidTwitter)) as ctx:
+            with self.assertLogs() as cm:
                 member.twitter = invalidTwitter
-
+                self.assertEqual(["WARNING:root:Member.twitter for 'test' must be either a Twitter handle, or the URL to a twitter handle - '{twitter}' provided".format(twitter=invalidTwitter)], cm.output)
             self.assertIsNone(member.twitter)
 
     def testSetTwitterNull(self):
@@ -434,13 +437,13 @@ class TestMember(unittest.TestCase):
         member.extra = []
         dict = member.toLandscapeItemAttributes()
 
-        self.assertEqual(dict['name'],member.orgname)
-        self.assertEqual(dict['homepage_url'],member.website)
-        self.assertEqual(dict['crunchbase'],member.crunchbase)
+        self.assertEqual(dict.get('name'),member.orgname)
+        self.assertEqual(dict.get('homepage_url'),member.website)
+        self.assertEqual(dict.get('crunchbase'),member.crunchbase)
         self.assertNotIn('extra',dict)
         self.assertNotIn('membership',dict)
-        self.assertIsNone(dict['logo'])
-        self.assertIsNone(dict['item'])
+        self.assertIsNone(dict.get('logo'))
+        self.assertIsNone(dict.get('item'))
 
     def testToLandscapeItemAttributesEmptyCrunchbase(self):
         member = Member()
@@ -449,11 +452,11 @@ class TestMember(unittest.TestCase):
         member.membership = 'Gold'
         dict = member.toLandscapeItemAttributes()
 
-        self.assertEqual(dict['name'],member.orgname)
-        self.assertEqual(dict['homepage_url'],member.website)
-        self.assertEqual(dict['organization']['name'],member.orgname)
-        self.assertIsNone(dict['logo'])
-        self.assertIsNone(dict['item'])
+        self.assertEqual(dict.get('name'),member.orgname)
+        self.assertEqual(dict.get('homepage_url'),member.website)
+        self.assertEqual(dict.get('organization',{}).get('name'),member.orgname)
+        self.assertIsNone(dict.get('logo'))
+        self.assertIsNone(dict.get('item'))
         self.assertNotIn('crunchbase',dict)
     
     def testToLandscapeItemAttributesWithSuffix(self):
@@ -465,11 +468,11 @@ class TestMember(unittest.TestCase):
         member.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society'
         dict = member.toLandscapeItemAttributes()
 
-        self.assertEqual(dict['name'],member.orgname+" (testme)")
-        self.assertEqual(dict['homepage_url'],member.website)
-        self.assertEqual(dict['crunchbase'],member.crunchbase)
-        self.assertIsNone(dict['logo'])
-        self.assertIsNone(dict['item'])
+        self.assertEqual(dict.get('name'),member.orgname+" (testme)")
+        self.assertEqual(dict.get('homepage_url'),member.website)
+        self.assertEqual(dict.get('crunchbase'),member.crunchbase)
+        self.assertIsNone(dict.get('logo'))
+        self.assertIsNone(dict.get('item'))
         self.assertNotIn('membership',dict)
 
     def testIsValidLandscapeItem(self):
@@ -505,11 +508,9 @@ class TestMember(unittest.TestCase):
     def testIsValidLandscapeItemEmptyWebsiteLogo(self):
         member = Member()
         member.orgname = 'foo'
-        with self.assertRaises(ValueError):
-            member.website = ''
-        with self.assertRaises(ValueError):
-            with patch("builtins.open", mock_open(read_data="data")) as mock_file:
-                member.logo = ''
+        member.website = ''
+        with patch("builtins.open", mock_open(read_data="data")) as mock_file:
+            member.logo = ''
         member.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society'
 
         self.assertFalse(member.isValidLandscapeItem())
@@ -1532,7 +1533,8 @@ class TestLFXProjects(unittest.TestCase):
         member = Member()
         member.orgname = 'test'
         member.website = 'https://foo.com'
-        member.extra['slug'] = 'aswf'
+        member.extra['annotations'] = {}
+        member.extra['annotations']['slug'] = 'aswf'
 
         members = LFXProjects(config=Config(),loadData=False)
         members.members.append(member)

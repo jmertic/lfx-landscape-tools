@@ -58,31 +58,46 @@ class TACAgendaProject(Members):
             logger.error("Invalid response from gh client: '{}'".format(command.stderr))
             return None
 
-        for item in projectData['items']:
-            if 'labels' not in item or '2-annual-review' not in item['labels']:
+        for item in projectData.get('items',{}):
+            if '2-annual-review' not in item.get('labels',{}):
                 continue
 
-            logger.info("Processing {}...".format(item['content']['title']))
+            logger.info("Processing {}...".format(item.get('content',{}).get('title')))
             member = Member()
-            member.orgname = item['content']['title'].strip()
+            member.orgname = item.get('content',{}).get('title').strip()
             member.crunchbase = self.defaultCrunchbase
             extra = {} 
-            extra['annual_review_date'] = item['last Review Date'] if 'last Review Date' in item else None
-            extra['slug'] = item['slug'] if 'slug' in item else None
-            extra['annual_review_url'] = item['content']['url']
-            extra['next_annual_review_date'] = item['scheduled Date'] if 'scheduled Date' in item else None
+            annotations = {}
+            extra['annual_review_date'] = item.get('last Review Date')
+            annotations['slug'] = item.get('slug',self._lookupSlugByProjectID(item.get('pCC Project ID')))
+            extra['annual_review_url'] = item.get('content',{}).get('url')
+            annotations['next_annual_review_date'] = item.get('scheduled Date')
             session = requests_cache.CachedSession()
             chair = []
-            if 'pCC Project ID' in item and 'pCC TSC Committee ID' in item:
-                with session.get(self.pcc_committee_url.format(project_id=item['pCC Project ID'],committee_id=item['pCC TSC Committee ID'])) as endpointResponse:
+            if item.get('pCC Project ID') and item.get('pCC TSC Committee ID'):
+                with session.get(self.pcc_committee_url.format(project_id=item.get('pCC Project ID'),committee_id=item.get('pCC TSC Committee ID'))) as endpointResponse:
                     try:
                         memberList = endpointResponse.json()
-                        if 'Data' in memberList and memberList['Data']:
-                            for record in memberList['Data']:
-                                if 'Role' in record and ( record['Role'] == 'Chair' or record['Role'] == 'Vice Chair' ):
-                                    chair.append('{} {}'.format(record['FirstName'].title(),record['LastName'].title()))
+                        for record in memberList.get('Data',[]):
+                            if record.get('Role') in ['Chair','Vice Chair']:
+                                logger.info("Found '{} {}' for the role '{}".format(record.get('FirstName').title(),record.get('LastName').title(),record.get('Role')))
+                                chair.append('{} {}'.format(record.get('FirstName').title(),record.get('LastName').title()))
                     except Exception as e:
                         logger.error("Couldn't load TSC Committee data for '{project}' - {error}".format(project=member.orgname,error=e))
-            extra['chair'] = ", ".join(chair)
+            annotations['chair'] = ", ".join(chair)
+            extra['annotations'] = annotations
             member.extra = extra
             self.members.append(member)
+
+    def _lookupSlugByProjectID(self,project):
+        singleProjectEndpointURL = 'https://api-gw.platform.linuxfoundation.org/project-service/v1/public/projects?$filter=projectId%20eq%20{}'
+        session = requests_cache.CachedSession()
+        if project:
+            with session.get(singleProjectEndpointURL.format(project)) as endpointResponse:
+                parentProject = endpointResponse.json()
+                if len(parentProject.get('Data')) > 0: 
+                    return parentProject.get('Data')[0]["Slug"]
+        
+        logging.getLogger().warning("Couldn't find slug for project '{}'".format(project)) 
+        
+        return None

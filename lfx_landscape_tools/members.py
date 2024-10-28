@@ -33,6 +33,13 @@ class Members(ABC):
     def loadData(self):
         pass
 
+    def findBySlug(self, slug):
+        if slug:
+            for member in self.members:
+                if member.extra.get('annotations',{}).get('slug') and member.extra.get('annotations',{}).get('slug') == slug:
+                    return member
+        return None
+
     def find(self, org, website):
         normalizedorg = self.normalizeCompany(org)
         normalizedwebsite = self.normalizeURL(website)
