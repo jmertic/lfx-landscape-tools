@@ -45,6 +45,7 @@ class Config:
     projectsAddIndustrySector = False
     projectsAddPMOManagedStatus = False
     projectsAddParentProject = False
+    projectsAddCategory = True
     projectsDefaultCrunchbase = 'https://www.crunchbase.com/organization/linux-foundation'
     projectsFilterByParentSlug = True
     tacAgendaProjectUrl = None
@@ -75,6 +76,7 @@ class Config:
             self.projectsAddIndustrySector = data_loaded.get('projectsAddIndustrySector',Config.projectsAddIndustrySector)
             self.projectsAddPMOManagedStatus = data_loaded.get('projectsAddPMOManagedStatus',Config.projectsAddPMOManagedStatus)
             self.projectsAddParentProject = data_loaded.get('projectsAddParentProject',Config.projectsAddParentProject)
+            self.projectsAddCategory = data_loaded.get('projectsAddCategory',Config.projectsAddCategory)
             self.projectsDefaultCrunchbase = data_loaded.get('projectsDefaultCrunchbase',Config.projectsDefaultCrunchbase)
             self.projectsFilterByParentSlug = data_loaded.get('projectsFilterByParentSlug',Config.projectsFilterByParentSlug)
             self.tacAgendaProjectUrl = data_loaded.get('tacAgendaProjectUrl',Config.tacAgendaProjectUrl)

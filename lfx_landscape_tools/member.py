@@ -116,8 +116,11 @@ class Member:
             except GithubException as e:
                 if e.status == 502:
                     logging.info("Server error - retrying...")
+                if e.status == 404:
+                    return False
                 else:
                     logging.getLogger().warning(e.data)
+                    return
             except socket.timeout:
                 logging.info("Server error - retrying...")
 

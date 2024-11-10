@@ -36,6 +36,7 @@ class LFXProjects(Members):
     addIndustrySector = True
     addPMOManagedStatus = True
     addParentProject = True
+    addCategory = True
     landscapeProjectsLevels = {}
 
     def processConfig(self, config: type[Config]):
@@ -44,6 +45,7 @@ class LFXProjects(Members):
         self.addIndustrySector = config.projectsAddIndustrySector
         self.addPMOManagedStatus = config.projectsAddPMOManagedStatus
         self.addParentProject = config.projectsAddParentProject
+        self.addCategory = config.projectsAddCategory
         self.defaultCrunchbase = config.projectsDefaultCrunchbase
         self.artworkRepoUrl = config.artworkRepoUrl
         self.projectsFilterByParentSlug = config.projectsFilterByParentSlug
@@ -80,7 +82,7 @@ class LFXProjects(Members):
                 member.repo_url = record.get('RepositoryURL')
                 extra['accepted'] = record.get('StartDate')
                 member.description = record.get('Description')
-                if record.get('Category'):
+                if self.addCategory and record.get('Category'):
                     for projectLevel in self.landscapeProjectsLevels:
                         if projectLevel.get('name') == record.get('Category'):
                             member.project = projectLevel.get('level')
@@ -99,6 +101,7 @@ class LFXProjects(Members):
                     logger.info("Trying to create text logo")
                     member.logo = SVGLogo(name=member.orgname)
                 member.crunchbase = record.get('CrunchBaseUrl',self.defaultCrunchbase)
+                member.linkedin = record.get('LinkedIn')
                 member.twitter = record.get('Twitter')
                 if self.addPMOManagedStatus and record.get('HasProgramManager'):
                     second_path.append('PMO Managed / All')
