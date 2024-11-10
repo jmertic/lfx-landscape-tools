@@ -53,7 +53,7 @@ class SVGLogo:
                     context.set_source_rgb(0,0,0)
                     context.set_font_size(60)
                     context.select_font_face(
-                        "Arial", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
+                        "cairo:monospace", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
                     context.move_to(0,50)
                     parts = name.split(" ")
                     n = 2
@@ -76,7 +76,9 @@ class SVGLogo:
     def save(self, name, path = './'):
         filename = self.filename(name)
         filenamepath = os.path.normpath("{}/{}".format(path,filename))
-        
+        if not os.path.isdir(path):
+            os.makedirs(path)
+
         with open(filenamepath, 'w') as fp:
             fp.write(self.__contents)
 

@@ -26,6 +26,11 @@ class Config:
         {"name": "Premier Membership", "category": "Premier"},
         {"name": "General Membership", "category": "General"},
     ]
+    landscapeProjectsLevels = [
+        {"name": "Active", "level": "active"},
+        {"name": "Incubation", "level": "incubation"},
+        {"name": "Sandbox", "level": "sandbox"},
+    ]
     landscapeProjectsCategory = 'Projects'
     landscapeProjectsSubcategories = [
        {"name": "All", "category": "All"} 
@@ -35,6 +40,7 @@ class Config:
     missingcsvfile = 'missing.csv'
     hostedLogosDir = 'hosted_logos'
     memberSuffix = None
+    memberUsePublicMembershipLogo = False
     projectsAddTechnologySector = False
     projectsAddIndustrySector = False
     projectsAddPMOManagedStatus = False
@@ -55,6 +61,7 @@ class Config:
                 raise ValueError("Invalid project specification in config file")
             self.landscapeProjectsCategory = data_loaded['landscapeProjectsCategory'] if 'landscapeProjectsCategory' in data_loaded else Config.landscapeProjectsCategory
             self.landscapeProjectsSubcategories = data_loaded['landscapeProjectsSubcategories'] if 'landscapeProjectsSubcategories' in data_loaded else Config.landscapeProjectsSubcategories
+            self.landscapeProjectsLevels = data_loaded['landscapeProjectsLevels'] if 'landscapeProjectsLevels' in data_loaded else Config.landscapeProjectsLevels
             self.landscapeMembersCategory = data_loaded['landscapeMembersCategory'] if 'landscapeMembersCategory' in data_loaded else Config.landscapeMembersCategory
             self.landscapeMembersCategory = data_loaded['landscapeMemberCategory'] if 'landscapeMemberCategory' in data_loaded else Config.landscapeMembersCategory
             self.landscapeMembersSubcategories = data_loaded['landscapeMembersSubcategories'] if 'landscapeMembersSubcategories' in data_loaded else Config.landscapeMembersSubcategories
@@ -63,6 +70,7 @@ class Config:
             self.missingcsvfile = data_loaded['missingcsvfile'] if 'missingcsvfile' in data_loaded else Config.missingcsvfile
             self.hostedLogosDir = data_loaded['hostedLogosDir'] if 'hostedLogosDir' in data_loaded else Config.hostedLogosDir
             self.memberSuffix = data_loaded['memberSuffix'] if 'memberSuffix' in data_loaded else Config.memberSuffix
+            self.memberUsePublicMembershipLogo = True if 'memberUsePublicMembershipLogo' in data_loaded and data_loaded['memberUsePublicMembershipLogo'] else Config.memberUsePublicMembershipLogo
             self.projectsAddTechnologySector = data_loaded['projectsAddTechnologySector'] if 'projectsAddTechnologySector' in data_loaded else Config.projectsAddTechnologySector
             self.projectsAddIndustrySector = data_loaded['projectsAddIndustrySector'] if 'projectsAddIndustrySector' in data_loaded else Config.projectsAddIndustrySector
             self.projectsAddPMOManagedStatus = data_loaded['projectsAddPMOManagedStatus'] if 'projectsAddPMOManagedStatus' in data_loaded else Config.projectsAddPMOManagedStatus

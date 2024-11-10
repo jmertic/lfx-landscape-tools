@@ -7,26 +7,28 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Install cairo
+      shell: bash
+      run: sudo apt install libcairo2-dev
     - name: Checkout landscape
-      uses: actions/checkout@v4
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.1.7@v4
       with:
         token: ${{ env.token }}
         repository: ${{ env.repository }}
         ref: ${{ env.ref }}
         path: landscape
     - name: Checkout landscape-tools
-      uses: actions/checkout@v4
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.1.7@v4
       with:
         token: ${{ env.token }}
-        repository: jmertic/landscape-tools
+        repository: jmertic/lfx-landscape-tools
         path: landscape-tools
-        ref: include-projects
     - name: Set up Python 3.x
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
       with:
         python-version: '3.x'
     - name: Install poetry
-      uses: abatilo/actions-poetry@v3
+      uses: abatilo/actions-poetry@e78f54a89cb052fff327414dd9ff010b5d2b4dbd # v3.0.1
     - name: Install dependencies
       shell: bash
       working-directory: ./landscape-tools
@@ -34,7 +36,7 @@ runs:
     - name: Build members from LFX
       working-directory: ./landscape-tools
       shell: bash
-      run: poetry run landscape -v build_members -c ../landscape/config.yml
+      run: poetry run landscape build_members -c ../landscape/config.yml
       env:
         GITHUB_TOKEN: ${{ env.token }}
         GH_TOKEN: ${{ env.token }}
@@ -42,7 +44,7 @@ runs:
       if: ${{ inputs.project_processing == 'rebuild' }}
       working-directory: ./landscape-tools
       shell: bash
-      run: poetry run landscape -v build_projects -c ../landscape/config.yml
+      run: poetry run landscape build_projects -c ../landscape/config.yml
       env:
         GITHUB_TOKEN: ${{ env.token }}
         GH_TOKEN: ${{ env.token }}
@@ -50,22 +52,27 @@ runs:
       if: ${{ inputs.project_processing == 'sync' }}
       working-directory: ./landscape-tools
       shell: bash
-      run: poetry run landscape -v sync_projects -c ../landscape/config.yml
+      run: poetry run landscape sync_projects -c ../landscape/config.yml
       env:
         GITHUB_TOKEN: ${{ env.token }}
         GH_TOKEN: ${{ env.token }}
     - name: Save missing.csv file
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
       with:
         name: missing-members 
         path: ./landscape/missing.csv
+    - name: Validate landscape2 data
+      uses: cncf/landscape2-validate-action@7f299c46e9b03b4e8bc2896882734fb0b0756b37 # v2.0.0
+      with:
+        target_kind: data
+        target_path: ./landscape/landscape.yml
     - name: Checkout landscapeapp
-      uses: actions/checkout@v4
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.1.7@v4
       with:
         repository: cncf/landscapeapp
         path: landscapeapp
     - name: Setup node
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
       with:
         node-version: '18'
     - name: Cleanup YAML files
@@ -78,11 +85,11 @@ runs:
         PROJECT_PATH=../landscape node tools/pruneExtraEntries
     - name: Get current date
       id: date
-      uses: Kaven-Universe/github-action-current-date-time@v1
+      uses: Kaven-Universe/github-action-current-date-time@f2c12d90cff9c3e7b1f50430886e632fe31fcee1 # v1.4.0
       with:
         format: "YYYY-MM-DD"
     - name: Create Pull Request
-      uses: peter-evans/create-pull-request@v6
+      uses: peter-evans/create-pull-request@5e914681df9dc83aa4e4905692ca88beb2f9e91f # v7.0.5
       with:
         token: ${{ env.token }}
         branch-suffix: timestamp
@@ -90,4 +97,5 @@ runs:
         title: "Update Landscape from LFX ${{ steps.date.outputs.time }}"
         labels: automated-build
         commit-message: Update Landscape from LFX
+        signoff: true
 
