@@ -27,7 +27,7 @@ responses = "^0.25.3"
 build = "^1.2.2"
 
 [tool.poetry.scripts]
-lfxlandscape = "lfx_landscape_tools.cli:Cli.run"
+lfx_landscape = "lfx_landscape_tools.cli:Cli.run"
 
 [build-system]
 requires = ["poetry-core"]

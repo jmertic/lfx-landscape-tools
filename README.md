@@ -93,7 +93,7 @@ Similarly, you can use the command below to upgrade your local install.
 pipx upgrade lfx-landscape-tools
 ```
 
-You can then use the `lfxlandscape` command to run the various commands. Use `lfxlandscape --help` for the options.
+You can then use the `lfx_landscape` command to run the various commands. Use `lfx_landscape --help` for the options.
 
 ## Contributing
 
