@@ -55,11 +55,6 @@ class Cli:
         maketextlogo_parser.add_argument("-o", "--output", dest="filename", help="Filename to save created logo to")
         maketextlogo_parser.set_defaults(func=self.maketextlogo)
 
-        makelogo_parser = subparsers.add_parser("makelogo", help="Create a logo based off an existing log with name as a caption")
-        makelogo_parser.add_argument("-c", "--crunchbase", dest="crunchbase", required=True, help="Crunchbase entry to match")
-        makelogo_parser.add_argument("-l", "--baselogo", dest="baselogo", required=True, help="Base logo to add captions to")
-        makelogo_parser.add_argument("-x", "--excludecategory", dest="category", help="Categories to not look in")
-
         args = parser.parse_args()
 
         logging.basicConfig(
@@ -71,7 +66,11 @@ class Cli:
             ]
         )
 
-        args.func(args)
+        try:
+            args.func(args)
+        except AttributeError:
+            parser.print_help()
+        
         logging.getLogger().info("This took {} seconds".format(datetime.now() - self._starttime))
 
     @staticmethod
@@ -125,16 +124,3 @@ class Cli:
             print(svglogo)
 
         return True
-
-    def makelogo(self,args):
-        # TODO: create parser for all items in landscape, not just one category
-        landscapeoutput = LandscapeOutput(config=config, resetCategory=True, baseDir=args.basedir)
-
-        for item in items:
-            if os.file.exists(item.logo.filename()) and args.overwrite:
-                svglogo = SVGLogo(url=baselogo)
-                svglogo.caption(item.orgname)
-                item.logo = svglogo
-
-        landscapeoutput.updateLandscape()
-        
