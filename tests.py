@@ -1460,6 +1460,12 @@ class TestSVGLogo(unittest.TestCase):
     def testHostLogoLogoisNone(self):
         self.assertEqual(str(SVGLogo()),'')
     
+
+    @responses.activate
+    def testHostLogoUnicodeError(self):
+        filename = os.path.join(os.path.dirname(__file__), 'testdata/test.jpg')
+        self.assertEqual(str(SVGLogo(filename=filename)),"")
+
     @responses.activate
     def testHostLogo404(self):
         responses.add(

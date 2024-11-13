@@ -104,10 +104,10 @@ class Cli:
     def syncprojects(self,args):
         config = Config(args.configfile,view='projects')
         landscapeoutput = LandscapeOutput(config=config, resetCategory=False)
-        logging.getLogger().info("Syncing LFX Projects data")
-        landscapeoutput.syncItems(LFXProjects(config=config)) 
         logging.getLogger().info("Syncing TAC Agenda Project data")
         landscapeoutput.syncItems(TACAgendaProject(config=config))
+        logging.getLogger().info("Syncing LFX Projects data")
+        landscapeoutput.syncItems(LFXProjects(config=config)) 
         landscapeoutput.save()
         
         logging.getLogger().info("Successfully added {} projects, updated {} projects, and skipped {} projects".format(landscapeoutput.itemsAdded,landscapeoutput.itemsUpdated,landscapeoutput.itemsErrors))

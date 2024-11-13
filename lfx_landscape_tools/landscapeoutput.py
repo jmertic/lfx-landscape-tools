@@ -142,7 +142,7 @@ class LandscapeOutput:
                             elif isinstance(value,list) and value != landscapeItem.get(key):
                                 logger.info("Setting '{}' for '{}' from '{}' to '{}'".format(key,landscapeItem.get('name'),landscapeItem.get(key,''),list(set(value + landscapeItem.get(key,'')))))
                                 landscapeItem[key] = list(set(value + landscapeItem.get(key)))
-                            elif value != None and value != landscapeItem.get(key) if key in landscapeItem else value:
+                            elif value != None and value != landscapeItem.get(key):
                                 logger.info("Setting '{}' for '{}' from '{}' to '{}'".format(key,landscapeItem.get('name'),landscapeItem.get(key,''),value))
                                 landscapeItem[key] = value
                         if foundmember.logo:
