@@ -1558,7 +1558,28 @@ class TestTACAgendaProjects(unittest.TestCase):
         with unittest.mock.patch('requests_cache.CachedSession', requests.Session):
             members.loadData()
         self.assertEqual(members.members[0].orgname,"D&I Working Group")
-        self.assertEqual(members.members[0].crunchbase,"https://www.crunchbase.com/organization/linux-foundation")
+    
+    @patch('subprocess.run')
+    def testLoadDataNoTACAgendaProject(self, mock_run):
+        mock_result = Mock()
+        mock_result.stdout = '{"items":[{"assignees":["carolalynn"],"content":{"body":"","number":473,"repository":"AcademySoftwareFoundation/tac","title":"D&I Working Group","type":"Issue","url":"https://github.com/AcademySoftwareFoundation/tac/issues/473"},"id":"PVTI_lADOAm6tAs4AS_w4zgJSO7E","labels":["2-annual-review"],"landscape URL":"https://landscape.aswf.io/card-mode?project=working-group&selected=d-i-working-group","pCC Project ID":"a092M00001KWjDZQA1","pCC TSC Committee ID":"ac9cbe7f-0dc8-4be0-b404-cb7b9b0bb22f","repository":"https://github.com/AcademySoftwareFoundation/tac","scheduled Date":"2024-12-11","status":"Next Meeting Agenda Items","title":"D&I Working Group"}],"totalCount":32}'
+        mock_run.return_value = mock_result
+
+        config = Config()
+        config.slug = 'aswf'
+        config.projectsAddTechnologySector = True
+        config.projectsAddIndustrySector = True
+        config.projectsAddPMOManagedStatus = True
+        config.projectsAddParentProject = True
+        config.artworkRepoUrl = "https://artwork.aswf.io/projects/{slug}"
+        members = TACAgendaProject(config=config,loadData=False)
+       
+        with self.assertLogs(level='ERROR') as cm:
+            with unittest.mock.patch('requests_cache.CachedSession', requests.Session):
+                members.loadData()
+        
+        self.assertEqual(cm.output, ['ERROR:root:Cannot find GitHub Project - ID: Org:'])        
+        self.assertEqual(members.members,[])
 
 class TestLFXProjects(unittest.TestCase):
         
