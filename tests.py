@@ -261,6 +261,7 @@ class TestMember(unittest.TestCase):
             member = Member()
             member.linkedin = validLinkedInURL
             self.assertEqual(member.linkedin,'https://www.linkedin.com/company/1nce')
+            self.assertEqual(member.toLandscapeItemAttributes().get('organization',{}).get('linkedin'),'https://www.linkedin.com/company/1nce')
 
     def testSetLinkedInNotValidOnEmpty(self):
         member = Member()
