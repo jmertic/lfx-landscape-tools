@@ -55,11 +55,6 @@ class Cli:
         maketextlogo_parser.add_argument("-o", "--output", dest="filename", help="Filename to save created logo to")
         maketextlogo_parser.set_defaults(func=self.maketextlogo)
 
-        makelogo_parser = subparsers.add_parser("makelogo", help="Create a logo based off an existing log with name as a caption")
-        makelogo_parser.add_argument("-c", "--crunchbase", dest="crunchbase", required=True, help="Crunchbase entry to match")
-        makelogo_parser.add_argument("-l", "--baselogo", dest="baselogo", required=True, help="Base logo to add captions to")
-        makelogo_parser.add_argument("-x", "--excludecategory", dest="category", help="Categories to not look in")
-
         args = parser.parse_args()
 
         logging.basicConfig(
@@ -71,7 +66,11 @@ class Cli:
             ]
         )
 
-        args.func(args)
+        try:
+            args.func(args)
+        except AttributeError:
+            parser.print_help()
+        
         logging.getLogger().info("This took {} seconds".format(datetime.now() - self._starttime))
 
     @staticmethod
@@ -87,6 +86,7 @@ class Cli:
     def buildmembers(self,args):
         config = Config(args.configfile,view='members')
         landscapeoutput = LandscapeOutput(config, resetCategory=True)
+        logging.getLogger().info("Adding LFX Members data")
         landscapeoutput.addItems(LFXMembers(config=config))
         landscapeoutput.save()
         
@@ -95,6 +95,7 @@ class Cli:
     def buildprojects(self,args):
         config = Config(args.configfile,view='projects')
         landscapeoutput = LandscapeOutput(config, resetCategory=True)
+        logging.getLogger().info("Adding LFX Projects data")
         landscapeoutput.addItems(LFXProjects(config=config))
         landscapeoutput.save()
         
@@ -103,8 +104,10 @@ class Cli:
     def syncprojects(self,args):
         config = Config(args.configfile,view='projects')
         landscapeoutput = LandscapeOutput(config=config, resetCategory=False)
-        landscapeoutput.syncItems(LFXProjects(config=config)) 
+        logging.getLogger().info("Syncing TAC Agenda Project data")
         landscapeoutput.syncItems(TACAgendaProject(config=config))
+        logging.getLogger().info("Syncing LFX Projects data")
+        landscapeoutput.syncItems(LFXProjects(config=config)) 
         landscapeoutput.save()
         
         logging.getLogger().info("Successfully added {} projects, updated {} projects, and skipped {} projects".format(landscapeoutput.itemsAdded,landscapeoutput.itemsUpdated,landscapeoutput.itemsErrors))
@@ -121,16 +124,3 @@ class Cli:
             print(svglogo)
 
         return True
-
-    def makelogo(self,args):
-        # TODO: create parser for all items in landscape, not just one category
-        landscapeoutput = LandscapeOutput(config=config, resetCategory=True, baseDir=args.basedir)
-
-        for item in items:
-            if os.file.exists(item.logo.filename()) and args.overwrite:
-                svglogo = SVGLogo(url=baselogo)
-                svglogo.caption(item.orgname)
-                item.logo = svglogo
-
-        landscapeoutput.updateLandscape()
-        

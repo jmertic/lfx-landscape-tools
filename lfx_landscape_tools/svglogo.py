@@ -11,6 +11,7 @@ import tempfile
 from pathlib import Path
 from slugify import slugify
 from typing import Self
+import logging
 
 ## third party modules
 import requests
@@ -27,7 +28,7 @@ class SVGLogo:
         if contents:
             self.__contents = contents
         elif filename:
-            with open(filename,'w') as f:
+            with open(filename,'r') as f:
                 self.__contents = f.read()
                 self.__filename = filename
         elif url:
@@ -39,11 +40,14 @@ class SVGLogo:
             while True:
                 try:
                     r = session.get(url, allow_redirects=True)
+                    if r.status_code == 200:
+                        self.__contents = r.content.decode('utf-8')
                     break
                 except requests.exceptions.ChunkedEncodingError:
                     pass
-            if r.status_code == 200:
-                self.__contents = r.content.decode('utf-8')
+                except UnicodeDecodeError:
+                    logging.getLogger().warning("UnicodeDecodeError with '{}'".format(url))
+                    break
         elif name:
            width = len(name) * 40
            height = len(name.split(" ")) * 80 
@@ -63,7 +67,6 @@ class SVGLogo:
                         n += 1
                     context.stroke()
                     context.save()
-
                 fp.seek(0)
                 self.__contents = fp.read().decode('utf-8')
 
@@ -85,7 +88,7 @@ class SVGLogo:
         return filename
 
     def isValid(self):
-        return self.__contents.find('base64') == -1 and self.__contents.find('<text') == -1 and self.__contents.find('<image') == -1 and self.__contents.find('<tspan') == -1
+        return self.__contents != '' and self.__contents.find('base64') == -1 and self.__contents.find('<text') == -1 and self.__contents.find('<image') == -1 and self.__contents.find('<tspan') == -1
 
     def addCaption(self, caption="", title=""):
         postJson = {

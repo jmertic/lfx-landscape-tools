@@ -69,12 +69,12 @@ class LandscapeMembers(Members):
                                 with suppress(ValueError):
                                     if key != 'enduser':
                                         setattr(member, key, value)
-                            member.orgname = item['name'] if 'name' in item else None
+                            member.orgname = item.get('name')
                             member.membership = ''
                             with suppress(ValueError):
-                                member.website = item['homepage_url']
-                                member.logo = self.normalizeLogo(item['logo'],landscape['repo'])
-                                member.crunchbase = item['crunchbase'] if 'crunchbase' in item else None
+                                member.website = item.get('homepage_url')
+                                member.logo = self.normalizeLogo(item.get('logo'),landscape.get('repo'))
+                                member.crunchbase = item.get('crunchbase')
                             self.members.append(member)
 
     def normalizeLogo(self, logo, landscapeRepo):

@@ -36,6 +36,7 @@ class LFXProjects(Members):
     addIndustrySector = True
     addPMOManagedStatus = True
     addParentProject = True
+    addCategory = True
     landscapeProjectsLevels = {}
 
     def processConfig(self, config: type[Config]):
@@ -44,6 +45,7 @@ class LFXProjects(Members):
         self.addIndustrySector = config.projectsAddIndustrySector
         self.addPMOManagedStatus = config.projectsAddPMOManagedStatus
         self.addParentProject = config.projectsAddParentProject
+        self.addCategory = config.projectsAddCategory
         self.defaultCrunchbase = config.projectsDefaultCrunchbase
         self.artworkRepoUrl = config.artworkRepoUrl
         self.projectsFilterByParentSlug = config.projectsFilterByParentSlug
@@ -57,84 +59,74 @@ class LFXProjects(Members):
         with session.get(self.endpointURL.format(self.project if self.projectsFilterByParentSlug else '')) as endpointResponse:
             memberList = endpointResponse.json()
             for record in memberList['Data']:
-                if 'Website' in record and self.find(record['Name'],record['Website']):
+                if self.find(record.get('Name'),record.get('Website')):
                     continue
                 if self.activeOnly and record['Status'] != 'Active':
                     continue
-                if not record['DisplayOnWebsite']:
+                if not record.get('DisplayOnWebsite'):
                     continue
-                if record['TestRecord']:
+                if record.get('TestRecord'):
                     continue
 
                 second_path = []
                 extra = {}
+                annotations = {}
                 member = Member()
                 member.membership = 'All'
-                member.orgname = record['Name'] if 'Name' in record else None
+                member.orgname = record.get('Name')
                 logger.info("Found LFX Project '{}'".format(member.orgname))
-                extra['slug'] = record['Slug'] if 'Slug' in record else None
+                annotations['slug'] = record.get('Slug')
                 # Let's not include the root project
-                if extra['slug'] == self.project:
+                if annotations.get('slug') == self.project:
                     continue
-                member.repo_url = record['RepositoryURL'] if 'RepositoryURL' in record else None
-                extra['accepted'] = record['StartDate'] if 'StartDate' in record else None 
-                member.description = record['Description'] if 'Description' in record else None
-                if 'Category' in record:
+                member.repo_url = record.get('RepositoryURL')
+                extra['accepted'] = record.get('StartDate')
+                member.description = record.get('Description')
+                if self.addCategory and record.get('Category'):
                     for projectLevel in self.landscapeProjectsLevels:
-                        if projectLevel['name'] == record['Category']:
-                            member.project = projectLevel['level']
+                        if projectLevel.get('name') == record.get('Category'):
+                            member.project = projectLevel.get('level')
                             logger.info("Project level is {}".format(member.project))
                             break
-                try:
-                    member.website = record['Website'] if 'Website' in record else None
-                except ValueError as e:
-                    logger.info("{} - try to add RepositoryURL instead".format(e))
-                    try:
-                        member.website = record['RepositoryURL'] if 'RepositoryURL' in record else None
-                    except ValueError as e:
-                        logger.warning(e)
+                member.website = record.get('Website')
+                if not member.website:
+                    logger.info("Trying to use 'RepositoryURL' for 'website' instead")
+                    member.website = record.get('RepositoryURL')
                 if self.addParentProject:
-                    parentName = self.lookupParentProjectNameBySlug(record['ParentSlug'] if 'ParentSlug' in record else self.project)
+                    parentName = self.lookupParentProjectNameBySlug(record.get('ParentSlug',self.project))
                     if parentName:
                         second_path.append('Project Group / {}'.format(parentName.replace("/",":")))
-                try:
-                    member.logo = record['ProjectLogo'] if 'ProjectLogo' in record else None
-                except ValueError as e:
-                    logger.info("{} - will try to create text logo".format(e))
+                member.logo = record.get('ProjectLogo')
+                if not member.logo:
+                    logger.info("Trying to create text logo")
                     member.logo = SVGLogo(name=member.orgname)
-                member.crunchbase = record['CrunchBaseUrl'] if 'CrunchbaseUrl' in record else self.defaultCrunchbase
-                try:
-                    member.twitter = record['Twitter'] if 'Twitter' in record else None
-                except (ValueError,KeyError) as e:
-                    logger.warning(e)
-                if self.addPMOManagedStatus and 'HasProgramManager' in record and record['HasProgramManager']:
+                member.crunchbase = record.get('CrunchBaseUrl',self.defaultCrunchbase)
+                member.linkedin = record.get('LinkedIn')
+                member.twitter = record.get('Twitter')
+                if self.addPMOManagedStatus and record.get('HasProgramManager'):
                     second_path.append('PMO Managed / All')
-                if self.addIndustrySector and 'IndustrySector' in record and record['IndustrySector'] != '':
+                if self.addIndustrySector and record.get('IndustrySector') != '':
                     second_path.append('Industry / {}'.format(record['IndustrySector'].replace("/",":")))
-                if self.addTechnologySector and 'TechnologySector' in record and record['TechnologySector'] != '':
+                if self.addTechnologySector and record.get('TechnologySector') != '':
                     sectors = record['TechnologySector'].split(";")
                     for sector in sectors:
                         second_path.append('Technology Sector / {}'.format(sector.replace("/",":")))
-                extra['dev_stats_url'] = self.lfxinsightsUrl.format(parent_slug=record['ParentSlug'] if 'ParentSlug' in record else self.project,slug=extra['slug'])
-                extra['calendar_url'] = self.calendarUrl.format(slug=extra['slug']) if 'slug' in extra else None
-                extra['ical_url'] = self.icalUrl.format(project_id=record['ProjectID']) if 'ProjectID' in record else None
+                extra['dev_stats_url'] = self.lfxinsightsUrl.format(parent_slug=record.get('ParentSlug',self.project),slug=annotations.get('slug'))
+                annotations['calendar_url'] = self.calendarUrl.format(slug=annotations.get('slug'))
+                annotations['ical_url'] = self.icalUrl.format(project_id=record.get('ProjectID'))
                 if self.artworkRepoUrl:
-                    extra['artwork_url'] = self.artworkRepoUrl.format(slug=extra['slug']) if 'slug' in extra and self.artworkRepoUrl else None
+                    extra['artwork_url'] = self.artworkRepoUrl.format(slug=annotations.get('slug'))
+                extra['annotations'] = annotations
                 member.extra = extra
                 member.second_path = second_path
                 self.members.append(member)
-
-    def findBySlug(self, slug):
-        for member in self.members:
-            if member.extra is not None and 'slug' in member.extra and member.extra['slug'] == slug:
-                return member
 
     def lookupParentProjectNameBySlug(self, slug):
         session = requests_cache.CachedSession()
         if slug:
             with session.get(self.singleSlugEndpointUrl.format(slug=slug)) as endpointResponse:
                 parentProject = endpointResponse.json()
-                if len(parentProject['Data']) > 0: 
+                if len(parentProject.get('Data',[])) > 0: 
                     return parentProject['Data'][0]["Name"]
                 logging.getLogger().warning("Couldn't find project for slug '{}'".format(slug)) 
         

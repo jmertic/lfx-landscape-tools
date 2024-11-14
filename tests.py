@@ -261,6 +261,7 @@ class TestMember(unittest.TestCase):
             member = Member()
             member.linkedin = validLinkedInURL
             self.assertEqual(member.linkedin,'https://www.linkedin.com/company/1nce')
+            self.assertEqual(member.toLandscapeItemAttributes().get('organization',{}).get('linkedin'),'https://www.linkedin.com/company/1nce')
 
     def testSetLinkedInNotValidOnEmpty(self):
         member = Member()
@@ -277,8 +278,9 @@ class TestMember(unittest.TestCase):
         for invalidLinkedInURL in invalidLinkedInURLs:
             member = Member()
             member.orgname = 'test'
-            with self.assertRaises(ValueError):
+            with self.assertLogs() as cm:
                 member.linkedin = invalidLinkedInURL
+                self.assertEqual(["WARNING:root:Member.linkedin for 'test' must be set to a valid LinkedIn URL - '{}' provided".format(invalidLinkedInURL)], cm.output)
             self.assertIsNone(member.linkedin)
     
     def testSetCrunchbaseValid(self):
@@ -318,8 +320,9 @@ class TestMember(unittest.TestCase):
         for invalidCrunchbaseURL in invalidCrunchbaseURLs:
             member = Member()
             member.orgname = 'test'
-            with self.assertRaises(ValueError):
+            with self.assertLogs() as cm:
                 member.crunchbase = invalidCrunchbaseURL
+                self.assertEqual(["WARNING:root:Member.crunchbase for '{orgname}' must be set to a valid Crunchbase URL - '{crunchbase}' provided".format(crunchbase=invalidCrunchbaseURL,orgname=member.orgname)], cm.output)
             self.assertIsNone(member.crunchbase)
 
     def testSetWebsiteValid(self):
@@ -336,9 +339,9 @@ class TestMember(unittest.TestCase):
     def testSetWebsiteNotValidOnEmpty(self):
         member = Member()
         member.orgname = 'test'
-        with self.assertRaises(ValueError,msg="Member.website must be not be blank for test") as ctx:
+        with self.assertLogs() as cm:
             member.website = ''
-
+            self.assertEqual(["WARNING:root:Member.website must be not be blank for 'test'"], cm.output)
         self.assertIsNone(member.website)
 
     def testSetWebsiteNotValid(self):
@@ -350,8 +353,9 @@ class TestMember(unittest.TestCase):
         for invalidWebsiteURL in invalidWebsiteURLs:
             member = Member()
             member.orgname = 'test'
-            with self.assertRaises(ValueError,msg="Member.website for test must be set to a valid website - '{website}' provided".format(website=invalidWebsiteURL)) as ctx:
+            with self.assertLogs() as cm:
                 member.website = invalidWebsiteURL
+                self.assertEqual(["WARNING:root:Member.website for 'test' must be set to a valid website - '{website}' provided".format(website=invalidWebsiteURL)], cm.output)
 
             self.assertIsNone(member.website)
 
@@ -370,9 +374,9 @@ class TestMember(unittest.TestCase):
     def testSetLogoNotValidOnEmpty(self):
         member = Member()
         member.orgname = 'test'
-        with self.assertRaises(ValueError,msg="Member.logo must be not be blank for test") as ctx:
+        with self.assertLogs() as cm:
             member.logo = ''
-
+            self.assertEqual(["WARNING:root:Member.logo must be not be blank for 'test'"], cm.output)
         self.assertIsNone(member.logo)
 
     def testSetLogoNotValid(self):
@@ -385,9 +389,9 @@ class TestMember(unittest.TestCase):
             with patch("builtins.open", mock_open(read_data="<text")) as mock_file:
                 member = Member()
                 member.orgname = 'test'
-                with self.assertRaises(ValueError,msg="Member.logo for test must be an svg file - '{logo}' provided".format(logo=invalidLogo)) as ctx:
+                with self.assertLogs() as cm:
                     member.logo = invalidLogo
-
+                    self.assertEqual(["WARNING:root:Member.logo for '{orgname}' invalid format".format(orgname=member.orgname)], cm.output)
                 self.assertIsNone(member.logo)
 
     def testTwitterValid(self):
@@ -414,9 +418,9 @@ class TestMember(unittest.TestCase):
         for invalidTwitter in invalidTwitters:
             member = Member()
             member.orgname = 'test'
-            with self.assertRaises(ValueError,msg="Member.twitter for test must be either a Twitter handle, or the URL to a twitter handle - '{twitter}' provided".format(twitter=invalidTwitter)) as ctx:
+            with self.assertLogs() as cm:
                 member.twitter = invalidTwitter
-
+                self.assertEqual(["WARNING:root:Member.twitter for 'test' must be either a Twitter handle, or the URL to a twitter handle - '{twitter}' provided".format(twitter=invalidTwitter)], cm.output)
             self.assertIsNone(member.twitter)
 
     def testSetTwitterNull(self):
@@ -434,13 +438,13 @@ class TestMember(unittest.TestCase):
         member.extra = []
         dict = member.toLandscapeItemAttributes()
 
-        self.assertEqual(dict['name'],member.orgname)
-        self.assertEqual(dict['homepage_url'],member.website)
-        self.assertEqual(dict['crunchbase'],member.crunchbase)
+        self.assertEqual(dict.get('name'),member.orgname)
+        self.assertEqual(dict.get('homepage_url'),member.website)
+        self.assertEqual(dict.get('crunchbase'),member.crunchbase)
         self.assertNotIn('extra',dict)
         self.assertNotIn('membership',dict)
-        self.assertIsNone(dict['logo'])
-        self.assertIsNone(dict['item'])
+        self.assertIsNone(dict.get('logo'))
+        self.assertIsNone(dict.get('item'))
 
     def testToLandscapeItemAttributesEmptyCrunchbase(self):
         member = Member()
@@ -449,11 +453,11 @@ class TestMember(unittest.TestCase):
         member.membership = 'Gold'
         dict = member.toLandscapeItemAttributes()
 
-        self.assertEqual(dict['name'],member.orgname)
-        self.assertEqual(dict['homepage_url'],member.website)
-        self.assertEqual(dict['organization']['name'],member.orgname)
-        self.assertIsNone(dict['logo'])
-        self.assertIsNone(dict['item'])
+        self.assertEqual(dict.get('name'),member.orgname)
+        self.assertEqual(dict.get('homepage_url'),member.website)
+        self.assertEqual(dict.get('organization',{}).get('name'),member.orgname)
+        self.assertIsNone(dict.get('logo'))
+        self.assertIsNone(dict.get('item'))
         self.assertNotIn('crunchbase',dict)
     
     def testToLandscapeItemAttributesWithSuffix(self):
@@ -465,11 +469,11 @@ class TestMember(unittest.TestCase):
         member.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society'
         dict = member.toLandscapeItemAttributes()
 
-        self.assertEqual(dict['name'],member.orgname+" (testme)")
-        self.assertEqual(dict['homepage_url'],member.website)
-        self.assertEqual(dict['crunchbase'],member.crunchbase)
-        self.assertIsNone(dict['logo'])
-        self.assertIsNone(dict['item'])
+        self.assertEqual(dict.get('name'),member.orgname+" (testme)")
+        self.assertEqual(dict.get('homepage_url'),member.website)
+        self.assertEqual(dict.get('crunchbase'),member.crunchbase)
+        self.assertIsNone(dict.get('logo'))
+        self.assertIsNone(dict.get('item'))
         self.assertNotIn('membership',dict)
 
     def testIsValidLandscapeItem(self):
@@ -505,11 +509,9 @@ class TestMember(unittest.TestCase):
     def testIsValidLandscapeItemEmptyWebsiteLogo(self):
         member = Member()
         member.orgname = 'foo'
-        with self.assertRaises(ValueError):
-            member.website = ''
-        with self.assertRaises(ValueError):
-            with patch("builtins.open", mock_open(read_data="data")) as mock_file:
-                member.logo = ''
+        member.website = ''
+        with patch("builtins.open", mock_open(read_data="data")) as mock_file:
+            member.logo = ''
         member.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society'
 
         self.assertFalse(member.isValidLandscapeItem())
@@ -1203,6 +1205,69 @@ class TestLandscapeOutput(unittest.TestCase):
         items: []
 """)
 
+    def testNewLandscapeCategory(self):
+        testlandscape = """
+landscape:
+- category:
+  name: no test me
+  subcategories:
+  - subcategory:
+    name: Good
+    items:
+    - item:
+      crunchbase: https://www.crunchbase.com/organization/here-technologies
+      homepage_url: https://here.com/
+      logo: https://raw.githubusercontent.com/ucfoundation/ucf-landscape/master/hosted_logos/here.svg
+      name: HERE Global B.V.
+      twitter: https://twitter.com/here
+"""
+        with tempfile.NamedTemporaryFile(mode='w') as tmpfilename:
+            tmpfilename.write(testlandscape)
+            tmpfilename.flush()
+
+            config = Config()
+            config.landscapeMembersCategory = 'test me'
+            config.landscapeMembersSubcategories = [
+                {"name": "Good Membership", "category": "Good"},
+                {"name": "Bad Membership", "category": "Bad"}
+                ]
+            config.landscapefile = tmpfilename.name
+
+            landscape = LandscapeOutput(config=config)
+
+            self.assertEqual(landscape.landscape['landscape'][0]['name'],'no test me')
+            self.assertEqual(landscape.landscape['landscape'][0]['subcategories'][0]['name'],"Good")
+            self.assertEqual(landscape.landscape['landscape'][0]['subcategories'][0]['items'][0]['name'],"HERE Global B.V.")
+            self.assertEqual(landscape.landscapeItems[0]['name'],"Good")
+
+        landscape.save()
+
+        with open(tmpfilename.name) as fp:
+            self.maxDiff = None
+            self.assertEqual(fp.read(),"""landscape:
+  - category:
+    name: no test me
+    subcategories:
+      - subcategory:
+        name: Good
+        items:
+          - item:
+            crunchbase: https://www.crunchbase.com/organization/here-technologies
+            homepage_url: https://here.com/
+            logo: https://raw.githubusercontent.com/ucfoundation/ucf-landscape/master/hosted_logos/here.svg
+            name: HERE Global B.V.
+            twitter: https://twitter.com/here
+  - category:
+    name: test me
+    subcategories:
+      - subcategory:
+        name: Good
+        items: []
+      - subcategory:
+        name: Bad
+        items: []
+""")
+    
     def testLoadLandscape(self):
         testlandscape = """
 landscape:
@@ -1294,6 +1359,7 @@ landscape:
         member.membership = 'Premier Membership'
         member.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society'
         member.repo_url = "https://github.com/foo/bar"
+        member.second_path = ['Dog / Dog','Cat / Cat']
         member.extra['slug'] = 'testme'
         member.extra['artwork_url'] = 'https://google.com/art'
         members.members.append(member)
@@ -1309,9 +1375,6 @@ landscape:
     - item:
       crunchbase: https://www.crunchbase.com/organization/here-technologies
       homepage_url: https://foo.com/
-      second_path:
-        - Dog / Dog
-        - Cat / Cat
       logo: https://raw.githubusercontent.com/ucfoundation/ucf-landscape/master/hosted_logos/here.svg
       name: HERE Global B.V.
       twitter: https://twitter.com/here
@@ -1458,7 +1521,17 @@ class TestSVGLogo(unittest.TestCase):
 
     def testHostLogoLogoisNone(self):
         self.assertEqual(str(SVGLogo()),'')
-    
+
+    @responses.activate
+    def testHostLogoUnicodeError(self):
+        responses.add(
+            method=responses.GET,
+            url='https://someurl.com/boom.jpg',
+            body=UnicodeDecodeError('funnycodec', b'\x00\x00', 1, 2, 'This is just a fake reason!')
+            )
+        
+        self.assertEqual(str(SVGLogo(url="https://someurl.com/boom.jpg")),"")
+
     @responses.activate
     def testHostLogo404(self):
         responses.add(
@@ -1526,13 +1599,83 @@ class TestSVGLogo(unittest.TestCase):
         
         self.assertEqual(str(cm.exception),'Adding caption failed: this is a file')
 
+class TestTACAgendaProjects(unittest.TestCase):
+
+    @patch('subprocess.run')
+    def testLoadData(self, mock_run):
+        mock_result = Mock()
+        mock_result.stdout = '{"items":[{"assignees":["carolalynn"],"content":{"body":"","number":473,"repository":"AcademySoftwareFoundation/tac","title":"D&I Working Group","type":"Issue","url":"https://github.com/AcademySoftwareFoundation/tac/issues/473"},"id":"PVTI_lADOAm6tAs4AS_w4zgJSO7E","labels":["2-annual-review"],"landscape URL":"https://landscape.aswf.io/card-mode?project=working-group&selected=d-i-working-group","pCC Project ID":"a092M00001KWjDZQA1","pCC TSC Committee ID":"ac9cbe7f-0dc8-4be0-b404-cb7b9b0bb22f","repository":"https://github.com/AcademySoftwareFoundation/tac","scheduled Date":"2024-12-11","status":"Next Meeting Agenda Items","title":"D&I Working Group"},{"assignees":["carolalynn"],"content":{"body":"","number":473,"repository":"AcademySoftwareFoundation/tac","title":"D&I Working Group","type":"Issue","url":"https://github.com/AcademySoftwareFoundation/tac/issues/473"},"id":"PVTI_lADOAm6tAs4AS_w4zgJSO7E","labels":[],"landscape URL":"https://landscape.aswf.io/card-mode?project=working-group&selected=d-i-working-group","pCC Project ID":"a092M00001KWjDZQA1","pCC TSC Committee ID":"ac9cbe7f-0dc8-4be0-b404-cb7b9b0bb22f","repository":"https://github.com/AcademySoftwareFoundation/tac","scheduled Date":"2024-12-11","status":"Next Meeting Agenda Items","title":"D&I Working Group"}],"totalCount":32}'
+        mock_run.return_value = mock_result
+
+        config = Config()
+        config.slug = 'aswf'
+        config.projectsAddTechnologySector = True
+        config.projectsAddIndustrySector = True
+        config.projectsAddPMOManagedStatus = True
+        config.projectsAddParentProject = True
+        config.artworkRepoUrl = "https://artwork.aswf.io/projects/{slug}"
+        config.tacAgendaProjectUrl = "https://github.com/orgs/AcademySoftwareFoundation/projects/19/views/1" 
+        members = TACAgendaProject(config=config,loadData=False)
+       
+        with unittest.mock.patch('requests_cache.CachedSession', requests.Session):
+            members.loadData()
+        self.assertEqual(members.members[0].orgname,"D&I Working Group")
+        self.assertEqual(len(members.members),1)
+    
+    @patch('subprocess.run')
+    def testLoadDataNoTACAgendaProject(self, mock_run):
+        mock_result = Mock()
+        mock_result.stdout = '{"items":[{"assignees":["carolalynn"],"content":{"body":"","number":473,"repository":"AcademySoftwareFoundation/tac","title":"D&I Working Group","type":"Issue","url":"https://github.com/AcademySoftwareFoundation/tac/issues/473"},"id":"PVTI_lADOAm6tAs4AS_w4zgJSO7E","labels":["2-annual-review"],"landscape URL":"https://landscape.aswf.io/card-mode?project=working-group&selected=d-i-working-group","pCC Project ID":"a092M00001KWjDZQA1","pCC TSC Committee ID":"ac9cbe7f-0dc8-4be0-b404-cb7b9b0bb22f","repository":"https://github.com/AcademySoftwareFoundation/tac","scheduled Date":"2024-12-11","status":"Next Meeting Agenda Items","title":"D&I Working Group"}],"totalCount":32}'
+        mock_run.return_value = mock_result
+
+        config = Config()
+        config.slug = 'aswf'
+        config.projectsAddTechnologySector = True
+        config.projectsAddIndustrySector = True
+        config.projectsAddPMOManagedStatus = True
+        config.projectsAddParentProject = True
+        config.artworkRepoUrl = "https://artwork.aswf.io/projects/{slug}"
+        members = TACAgendaProject(config=config,loadData=False)
+       
+        with self.assertLogs(level='ERROR') as cm:
+            with unittest.mock.patch('requests_cache.CachedSession', requests.Session):
+                members.loadData()
+        
+        self.assertEqual(cm.output, ['ERROR:root:Cannot find GitHub Project - ID: Org:'])        
+        self.assertEqual(members.members,[])
+    
+    @patch('subprocess.run')
+    def testLoadDataInvalidJSONResponse(self, mock_run):
+        mock_result = Mock()
+        mock_result.stdout = 'error 12121212'
+        mock_result.stderr = 'foo'
+        mock_run.return_value = mock_result
+
+        config = Config()
+        config.slug = 'aswf'
+        config.projectsAddTechnologySector = True
+        config.projectsAddIndustrySector = True
+        config.projectsAddPMOManagedStatus = True
+        config.projectsAddParentProject = True
+        config.artworkRepoUrl = "https://artwork.aswf.io/projects/{slug}"
+        config.tacAgendaProjectUrl = "https://github.com/orgs/AcademySoftwareFoundation/projects/19/views/1" 
+        members = TACAgendaProject(config=config,loadData=False)
+       
+        with self.assertLogs(level='ERROR') as cm:
+            with unittest.mock.patch('requests_cache.CachedSession', requests.Session):
+                members.loadData()
+        
+        self.assertEqual(cm.output, ["ERROR:root:Invalid response from gh client: 'foo'"])
+        self.assertEqual(members.members,[])
+
 class TestLFXProjects(unittest.TestCase):
         
     def testFindBySlug(self):
         member = Member()
         member.orgname = 'test'
         member.website = 'https://foo.com'
-        member.extra['slug'] = 'aswf'
+        member.extra['annotations'] = {}
+        member.extra['annotations']['slug'] = 'aswf'
 
         members = LFXProjects(config=Config(),loadData=False)
         members.members.append(member)
@@ -1583,7 +1726,8 @@ class TestLFXProjects(unittest.TestCase):
         config.projectsAddTechnologySector = True
         config.projectsAddIndustrySector = True
         config.projectsAddPMOManagedStatus = True
-        config.projectsAddParentProject = True 
+        config.projectsAddParentProject = True
+        config.artworkRepoUrl = "https://artwork.aswf.io/projects/{slug}"
         members = LFXProjects(config=config,loadData=False)
        
         responses.add(
@@ -1641,6 +1785,7 @@ class TestLFXProjects(unittest.TestCase):
                     {
                         "AutoJoinEnabled": False,
                         "Description": "OpenCue is an open source render management system. You can use OpenCue in visual effects and animation production to break down complex jobs into individual tasks. You can submit jobs to a configurable dispatch queue that allocates the necessary computational resources.",
+                        "Category": "Adopted",
                         "DisplayOnWebsite": True,
                         "HasProgramManager": False,
                         "Industry": [
@@ -1665,6 +1810,7 @@ class TestLFXProjects(unittest.TestCase):
                         "AutoJoinEnabled": False,
                         "Description": "OpenTimelineIO (OTIO) is an API and interchange format for editorial cut information. You can think of it as a modern Edit Decision List (EDL) that also includes an API for reading, writing, and manipulating editorial data. It also includes a plugin system for translating to/from existing editorial formats as well as a plugin system for linking to proprietary media storage schemas.",
                         "DisplayOnWebsite": True,
+                        "Category": "Incubating",
                         "HasProgramManager": True,
                         "Industry": [
                             "Motion Pictures"
@@ -1687,6 +1833,7 @@ class TestLFXProjects(unittest.TestCase):
                         "AutoJoinEnabled": False,
                         "Description": "The goal of the OpenEXR project is to keep the format reliable and modern and to maintain its place as the preferred image format for entertainment content creation.",
                         "DisplayOnWebsite": True,
+                        "Category": "Adopted",
                         "HasProgramManager": False,
                         "Industry": [
                             "Motion Pictures"
@@ -1707,6 +1854,7 @@ class TestLFXProjects(unittest.TestCase):
                         "AutoJoinEnabled": False,
                         "Description": "The mission of the Project is to develop an open-source interoperability standard for tools and content management systems used in media production.",
                         "DisplayOnWebsite": True,
+                        "Category": "Sandbox",
                         "HasProgramManager": False,
                         "Industry": [
                             "Motion Pictures"

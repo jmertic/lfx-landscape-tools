@@ -45,6 +45,7 @@ class Config:
     projectsAddIndustrySector = False
     projectsAddPMOManagedStatus = False
     projectsAddParentProject = False
+    projectsAddCategory = True
     projectsDefaultCrunchbase = 'https://www.crunchbase.com/organization/linux-foundation'
     projectsFilterByParentSlug = True
     tacAgendaProjectUrl = None
@@ -54,31 +55,32 @@ class Config:
         if config_file:
             data_loaded = ruamel.yaml.YAML(typ='safe', pure=True).load(config_file)
             self.view = view if self._isValidViewOption(view) else Config.view
-            self.basedir = data_loaded['basedir'] if 'basedir' in data_loaded else os.path.dirname(os.path.normpath(config_file.name))
-            self.slug = data_loaded['slug'] if 'slug' in data_loaded else Config.slug
-            self.project = data_loaded['project'] if 'project' in data_loaded else self._lookupProjectFromSlug(self.slug)
+            self.basedir = data_loaded.get('basedir',os.path.dirname(os.path.normpath(config_file.name)))
+            self.slug = data_loaded.get('slug',self._lookupSlugFromProject(data_loaded.get('project')))
+            self.project = data_loaded.get('project',self._lookupProjectFromSlug(self.slug))
             if not self.slug or not self.project:
                 raise ValueError("Invalid project specification in config file")
-            self.landscapeProjectsCategory = data_loaded['landscapeProjectsCategory'] if 'landscapeProjectsCategory' in data_loaded else Config.landscapeProjectsCategory
-            self.landscapeProjectsSubcategories = data_loaded['landscapeProjectsSubcategories'] if 'landscapeProjectsSubcategories' in data_loaded else Config.landscapeProjectsSubcategories
-            self.landscapeProjectsLevels = data_loaded['landscapeProjectsLevels'] if 'landscapeProjectsLevels' in data_loaded else Config.landscapeProjectsLevels
-            self.landscapeMembersCategory = data_loaded['landscapeMembersCategory'] if 'landscapeMembersCategory' in data_loaded else Config.landscapeMembersCategory
-            self.landscapeMembersCategory = data_loaded['landscapeMemberCategory'] if 'landscapeMemberCategory' in data_loaded else Config.landscapeMembersCategory
-            self.landscapeMembersSubcategories = data_loaded['landscapeMembersSubcategories'] if 'landscapeMembersSubcategories' in data_loaded else Config.landscapeMembersSubcategories
-            self.landscapeMembersSubcategories = data_loaded['landscapeMemberClasses'] if 'landscapeMemberClasses' in data_loaded else Config.landscapeMembersSubcategories
-            self.landscapefile = data_loaded['landscapefile'] if 'landscapefile' in data_loaded else Config.landscapefile
-            self.missingcsvfile = data_loaded['missingcsvfile'] if 'missingcsvfile' in data_loaded else Config.missingcsvfile
-            self.hostedLogosDir = data_loaded['hostedLogosDir'] if 'hostedLogosDir' in data_loaded else Config.hostedLogosDir
-            self.memberSuffix = data_loaded['memberSuffix'] if 'memberSuffix' in data_loaded else Config.memberSuffix
-            self.memberUsePublicMembershipLogo = True if 'memberUsePublicMembershipLogo' in data_loaded and data_loaded['memberUsePublicMembershipLogo'] else Config.memberUsePublicMembershipLogo
-            self.projectsAddTechnologySector = data_loaded['projectsAddTechnologySector'] if 'projectsAddTechnologySector' in data_loaded else Config.projectsAddTechnologySector
-            self.projectsAddIndustrySector = data_loaded['projectsAddIndustrySector'] if 'projectsAddIndustrySector' in data_loaded else Config.projectsAddIndustrySector
-            self.projectsAddPMOManagedStatus = data_loaded['projectsAddPMOManagedStatus'] if 'projectsAddPMOManagedStatus' in data_loaded else Config.projectsAddPMOManagedStatus
-            self.projectsAddParentProject = data_loaded['projectsAddParentProject'] if 'projectsAddParentProject' in data_loaded else Config.projectsAddParentProject
-            self.projectsDefaultCrunchbase = data_loaded['projectsDefaultCrunchbase'] if 'projectsDefaultCrunchbase' in data_loaded else Config.projectsDefaultCrunchbase
-            self.projectsFilterByParentSlug = data_loaded['projectsFilterByParentSlug'] if 'projectsFilterByParentSlug' in data_loaded else Config.projectsFilterByParentSlug
-            self.tacAgendaProjectUrl = data_loaded['tacAgendaProjectUrl'] if 'tacAgendaProjectUrl' in data_loaded else Config.tacAgendaProjectUrl
-            self.artworkRepoUrl = data_loaded['artworkRepoUrl'] if 'artworkRepoUrl' in data_loaded else Config.artworkRepoUrl
+            self.landscapeProjectsCategory = data_loaded.get('landscapeProjectsCategory',Config.landscapeProjectsCategory)
+            self.landscapeProjectsSubcategories = data_loaded.get('landscapeProjectsSubcategories',Config.landscapeProjectsSubcategories)
+            self.landscapeProjectsLevels = data_loaded.get('landscapeProjectsLevels',Config.landscapeProjectsLevels)
+            self.landscapeMembersCategory = data_loaded.get('landscapeMembersCategory',Config.landscapeMembersCategory)
+            self.landscapeMembersCategory = data_loaded.get('landscapeMemberCategory',Config.landscapeMembersCategory)
+            self.landscapeMembersSubcategories = data_loaded.get('landscapeMembersSubcategories',Config.landscapeMembersSubcategories)
+            self.landscapeMembersSubcategories = data_loaded.get('landscapeMemberClasses',Config.landscapeMembersSubcategories)
+            self.landscapefile = data_loaded.get('landscapefile',Config.landscapefile)
+            self.missingcsvfile = data_loaded.get('missingcsvfile',Config.missingcsvfile)
+            self.hostedLogosDir = data_loaded.get('hostedLogosDir',Config.hostedLogosDir)
+            self.memberSuffix = data_loaded.get('memberSuffix',Config.memberSuffix)
+            self.memberUsePublicMembershipLogo = data_loaded.get('memberUsePublicMembershipLogo',Config.memberUsePublicMembershipLogo)
+            self.projectsAddTechnologySector = data_loaded.get('projectsAddTechnologySector',Config.projectsAddTechnologySector)
+            self.projectsAddIndustrySector = data_loaded.get('projectsAddIndustrySector',Config.projectsAddIndustrySector)
+            self.projectsAddPMOManagedStatus = data_loaded.get('projectsAddPMOManagedStatus',Config.projectsAddPMOManagedStatus)
+            self.projectsAddParentProject = data_loaded.get('projectsAddParentProject',Config.projectsAddParentProject)
+            self.projectsAddCategory = data_loaded.get('projectsAddCategory',Config.projectsAddCategory)
+            self.projectsDefaultCrunchbase = data_loaded.get('projectsDefaultCrunchbase',Config.projectsDefaultCrunchbase)
+            self.projectsFilterByParentSlug = data_loaded.get('projectsFilterByParentSlug',Config.projectsFilterByParentSlug)
+            self.tacAgendaProjectUrl = data_loaded.get('tacAgendaProjectUrl',Config.tacAgendaProjectUrl)
+            self.artworkRepoUrl = data_loaded.get('artworkRepoUrl',Config.artworkRepoUrl)
 
     def _isValidViewOption(self,view):
         return view in ['projects','members'] 
@@ -103,9 +105,24 @@ class Config:
         if slug:
             with session.get(singleSlugEndpointURL.format(slug)) as endpointResponse:
                 parentProject = endpointResponse.json()
-                if len(parentProject['Data']) > 0: 
-                    return parentProject['Data'][0]["ProjectID"]
+                if len(parentProject.get('Data')) > 0: 
+                    return parentProject.get('Data')[0].get("ProjectID")
         
         logging.getLogger().warning("Couldn't find project for slug '{}'".format(slug)) 
         
         return None
+
+    def _lookupSlugFromProject(self,project):
+        singleProjectEndpointURL = 'https://api-gw.platform.linuxfoundation.org/project-service/v1/public/projects?$filter=projectId%20eq%20{}'
+        session = requests_cache.CachedSession()
+        if project:
+            with session.get(singleProjectEndpointURL.format(project)) as endpointResponse:
+                parentProject = endpointResponse.json()
+                if len(parentProject.get('Data')) > 0: 
+                    return parentProject.get('Data',[])[0].get("Slug")
+        
+        logging.getLogger().warning("Couldn't find slug for project '{}'".format(project)) 
+        
+        return None
+
+

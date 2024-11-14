@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "lfx-landscape-tools"
-version = "1.0.0"
+version = "20241114"
 description = "Collection of tools for automating the data management of a landscape from LFX"
 authors = ["John Mertic <jmertic@linuxfoundation.org>"]
 readme = "README.md"
@@ -27,7 +27,7 @@ responses = "^0.25.3"
 build = "^1.2.2"
 
 [tool.poetry.scripts]
-landscape = "lfx_landscape_tools.cli:Cli.run"
+lfx_landscape = "lfx_landscape_tools.cli:Cli.run"
 
 [build-system]
 requires = ["poetry-core"]

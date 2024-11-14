@@ -116,8 +116,11 @@ class Member:
             except GithubException as e:
                 if e.status == 502:
                     logging.info("Server error - retrying...")
+                if e.status == 404:
+                    return False
                 else:
-                    raise ValueError(e.data)
+                    logging.getLogger().warning(e.data)
+                    return
             except socket.timeout:
                 logging.info("Server error - retrying...")
 
@@ -125,7 +128,7 @@ class Member:
         session = requests_cache.CachedSession('githubapi')
         with session.get(apiEndPoint) as endpointResponse:
             if not endpointResponse.ok or len(endpointResponse.json()) == 0:
-                raise ValueError("Cannot find repos under GitHub Organization '{}' for '{}'".format(url,self.orgname))
+                logging.getLogger().warning("Cannot find repos under GitHub Organization '{}' for '{}'".format(url,self.orgname))
              
             return endpointResponse.json()[0]["html_url"]
 
@@ -148,7 +151,7 @@ class Member:
             self.__linkedin = "https://www.linkedin.com{}".format(urlparse(linkedin).path)
         else:
             self.__linkedin = None
-            raise ValueError("Member.linkedin for '{orgname}' must be set to a valid LinkedIn URL - '{linkedin}' provided".format(linkedin=linkedin,orgname=self.orgname))
+            logging.getLogger().warning("Member.linkedin for '{orgname}' must be set to a valid LinkedIn URL - '{linkedin}' provided".format(linkedin=linkedin,orgname=self.orgname))
 
     @property
     def crunchbase(self):
@@ -162,7 +165,7 @@ class Member:
             self.__crunchbase = "https://www.crunchbase.com/{}/{}".format(urlparse(crunchbase).path.split('/')[1],urlparse(crunchbase).path.split('/')[2])
         else:
             self.__crunchbase = None
-            raise ValueError("Member.crunchbase for '{orgname}' must be set to a valid Crunchbase URL - '{crunchbase}' provided".format(crunchbase=crunchbase,orgname=self.orgname))
+            logging.getLogger().warning("Member.crunchbase for '{orgname}' must be set to a valid Crunchbase URL - '{crunchbase}' provided".format(crunchbase=crunchbase,orgname=self.orgname))
 
     @property
     def website(self):
@@ -172,12 +175,12 @@ class Member:
     def website(self, website):
         if website == '' or website is None:
             self.__website = None
-            raise ValueError("Member.website must be not be blank for '{orgname}'".format(orgname=self.orgname))
+            logging.getLogger().warning("Member.website must be not be blank for '{orgname}'".format(orgname=self.orgname))
         else:
             normalizedwebsite = url_normalize(website, default_scheme='https')
             if not validators.url(normalizedwebsite):
                 self.__website = None
-                raise ValueError("Member.website for '{orgname}' must be set to a valid website - '{website}' provided".format(website=website,orgname=self.orgname))
+                logging.getLogger().warning("Member.website for '{orgname}' must be set to a valid website - '{website}' provided".format(website=website,orgname=self.orgname))
             else:
                 self.__website = normalizedwebsite
 
@@ -189,7 +192,8 @@ class Member:
     def logo(self, logo):
         if logo is None or logo == '':
             self.__logo = None
-            raise ValueError("Member.logo must be not be blank for '{orgname}'".format(orgname=self.orgname))
+            logging.getLogger().warning("Member.logo must be not be blank for '{orgname}'".format(orgname=self.orgname))
+            return
         elif type(logo) is SVGLogo:
             self.__logo = logo
         elif urlparse(logo).scheme != '':
@@ -199,7 +203,7 @@ class Member:
 
         if not self.__logo.isValid():
             self.__logo = None
-            raise ValueError("Member.logo for '{orgname}' invalid format".format(orgname=self.orgname))
+            logging.getLogger().warning("Member.logo for '{orgname}' invalid format".format(orgname=self.orgname))
     
     def hostLogo(self, path = "./"):
         self.__logo.save(self.orgname,path)
@@ -221,7 +225,7 @@ class Member:
                 self.__twitter = "https://twitter.com{path}".format(path=o.path)
             else:
                 self.__twitter = None
-                raise ValueError("Member.twitter for '{orgname}' must be either a Twitter handle, or the URL to a twitter handle - '{twitter}' provided".format(twitter=twitter,orgname=self.orgname))
+                logging.getLogger().warning("Member.twitter for '{orgname}' must be either a Twitter handle, or the URL to a twitter handle - '{twitter}' provided".format(twitter=twitter,orgname=self.orgname))
         else:
             self.__twitter = twitter
 
@@ -269,7 +273,7 @@ class Member:
                 continue
             elif i == 'organization' and len(self.organization) == 0:
                 continue
-            elif hasattr(self,i):
+            elif getattr(self,i,False):
                 returnentry[i] = getattr(self,i)
 
         if not self.crunchbase:
@@ -278,7 +282,8 @@ class Member:
             returnentry['organization']['name'] = self.orgname
             if self.linkedin:
                 returnentry['organization']['linkedin'] = self.linkedin
-            del returnentry['crunchbase']
+            if returnentry.get('crunchbase'):
+                del returnentry['crunchbase']
 
         return returnentry
         
