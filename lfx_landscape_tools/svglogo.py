@@ -28,12 +28,9 @@ class SVGLogo:
         if contents:
             self.__contents = contents
         elif filename:
-            try:
-                with open(filename,'r') as f:
-                    self.__contents = f.read()
-                    self.__filename = filename
-            except UnicodeDecodeError:
-                logging.getLogger().warning("UnicodeDecodeError with '{}'".format(filename))
+            with open(filename,'r') as f:
+                self.__contents = f.read()
+                self.__filename = filename
         elif url:
             session = requests.Session()
             retry = Retry(backoff_factor=0.5)
@@ -43,14 +40,14 @@ class SVGLogo:
             while True:
                 try:
                     r = session.get(url, allow_redirects=True)
+                    if r.status_code == 200:
+                        self.__contents = r.content.decode('utf-8')
                     break
                 except requests.exceptions.ChunkedEncodingError:
                     pass
-            if r.status_code == 200:
-                try:
-                    self.__contents = r.content.decode('utf-8')
                 except UnicodeDecodeError:
                     logging.getLogger().warning("UnicodeDecodeError with '{}'".format(url))
+                    break
         elif name:
            width = len(name) * 40
            height = len(name.split(" ")) * 80 

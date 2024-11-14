@@ -1459,12 +1459,16 @@ class TestSVGLogo(unittest.TestCase):
 
     def testHostLogoLogoisNone(self):
         self.assertEqual(str(SVGLogo()),'')
-    
 
     @responses.activate
     def testHostLogoUnicodeError(self):
-        filename = os.path.join(os.path.dirname(__file__), 'testdata/test.jpg')
-        self.assertEqual(str(SVGLogo(filename=filename)),"")
+        responses.add(
+            method=responses.GET,
+            url='https://someurl.com/boom.jpg',
+            body=UnicodeDecodeError('funnycodec', b'\x00\x00', 1, 2, 'This is just a fake reason!')
+            )
+        
+        self.assertEqual(str(SVGLogo(url="https://someurl.com/boom.jpg")),"")
 
     @responses.activate
     def testHostLogo404(self):
