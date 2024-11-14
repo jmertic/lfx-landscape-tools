@@ -1205,6 +1205,69 @@ class TestLandscapeOutput(unittest.TestCase):
         items: []
 """)
 
+    def testNewLandscapeCategory(self):
+        testlandscape = """
+landscape:
+- category:
+  name: no test me
+  subcategories:
+  - subcategory:
+    name: Good
+    items:
+    - item:
+      crunchbase: https://www.crunchbase.com/organization/here-technologies
+      homepage_url: https://here.com/
+      logo: https://raw.githubusercontent.com/ucfoundation/ucf-landscape/master/hosted_logos/here.svg
+      name: HERE Global B.V.
+      twitter: https://twitter.com/here
+"""
+        with tempfile.NamedTemporaryFile(mode='w') as tmpfilename:
+            tmpfilename.write(testlandscape)
+            tmpfilename.flush()
+
+            config = Config()
+            config.landscapeMembersCategory = 'test me'
+            config.landscapeMembersSubcategories = [
+                {"name": "Good Membership", "category": "Good"},
+                {"name": "Bad Membership", "category": "Bad"}
+                ]
+            config.landscapefile = tmpfilename.name
+
+            landscape = LandscapeOutput(config=config)
+
+            self.assertEqual(landscape.landscape['landscape'][0]['name'],'no test me')
+            self.assertEqual(landscape.landscape['landscape'][0]['subcategories'][0]['name'],"Good")
+            self.assertEqual(landscape.landscape['landscape'][0]['subcategories'][0]['items'][0]['name'],"HERE Global B.V.")
+            self.assertEqual(landscape.landscapeItems[0]['name'],"Good")
+
+        landscape.save()
+
+        with open(tmpfilename.name) as fp:
+            self.maxDiff = None
+            self.assertEqual(fp.read(),"""landscape:
+  - category:
+    name: no test me
+    subcategories:
+      - subcategory:
+        name: Good
+        items:
+          - item:
+            crunchbase: https://www.crunchbase.com/organization/here-technologies
+            homepage_url: https://here.com/
+            logo: https://raw.githubusercontent.com/ucfoundation/ucf-landscape/master/hosted_logos/here.svg
+            name: HERE Global B.V.
+            twitter: https://twitter.com/here
+  - category:
+    name: test me
+    subcategories:
+      - subcategory:
+        name: Good
+        items: []
+      - subcategory:
+        name: Bad
+        items: []
+""")
+    
     def testLoadLandscape(self):
         testlandscape = """
 landscape:
