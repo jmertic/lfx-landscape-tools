@@ -36,7 +36,7 @@ runs:
     - name: Build members from LFX
       working-directory: ./landscape-tools
       shell: bash
-      run: poetry run landscape build_members -c ../landscape/config.yml
+      run: poetry run lfx_landscape build_members -c ../landscape/config.yml
       env:
         GITHUB_TOKEN: ${{ env.token }}
         GH_TOKEN: ${{ env.token }}
@@ -44,7 +44,7 @@ runs:
       if: ${{ inputs.project_processing == 'rebuild' }}
       working-directory: ./landscape-tools
       shell: bash
-      run: poetry run landscape build_projects -c ../landscape/config.yml
+      run: poetry run lfx_landscape build_projects -c ../landscape/config.yml
       env:
         GITHUB_TOKEN: ${{ env.token }}
         GH_TOKEN: ${{ env.token }}
@@ -52,7 +52,7 @@ runs:
       if: ${{ inputs.project_processing == 'sync' }}
       working-directory: ./landscape-tools
       shell: bash
-      run: poetry run landscape sync_projects -c ../landscape/config.yml
+      run: poetry run lfx_landscape sync_projects -c ../landscape/config.yml
       env:
         GITHUB_TOKEN: ${{ env.token }}
         GH_TOKEN: ${{ env.token }}
