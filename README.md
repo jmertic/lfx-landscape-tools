@@ -1,7 +1,7 @@
 # LFX Landscape Tools
 
 [![License](https://img.shields.io/github/license/jmertic/lfx-landscape-tools)](LICENSE)
-[![CI](https://github.com/jmertic/lfx-landscape-tools/workflows/CI/badge.svg)](https://github.com/jmertic/lfx-landscape-tools/actions?query=workflow%3ACI)
+[![CI](https://github.com/jmertic/lfx-landscape-tools/workflows/CI/badge.svg)](https://github.com/jmertic/lfx-landscape-tools/actions?query=workflow%3ACI+branch%3Amain)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=jmertic_lfx-landscape-tools&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=jmertic_lfx-landscape-tools)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=jmertic_lfx-landscape-tools&metric=coverage)](https://sonarcloud.io/summary/new_code?id=jmertic_lfx-landscape-tools)
 
