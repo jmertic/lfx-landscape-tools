@@ -35,7 +35,7 @@ jobs:
         uses: step-security/harden-runner@91182cccc01eb5e619899d80e4e971d6181294a7 # v2.10.1
         with:
           egress-policy: audit
-      - uses: jmertic/lfx-landscape-tools@main
+      - uses: jmertic/lfx-landscape-tools@e9e2ce77a3152780ec98fe30b8d5d832953a95c3 # 20241114
         with:
           project_processing: skip # see options in action.yml
         env:
