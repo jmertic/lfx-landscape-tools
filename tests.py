@@ -1296,6 +1296,7 @@ landscape:
         member.membership = 'Premier Membership'
         member.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society'
         member.repo_url = "https://github.com/foo/bar"
+        member.second_path = ['Dog / Dog','Cat / Cat']
         member.extra['slug'] = 'testme'
         member.extra['artwork_url'] = 'https://google.com/art'
         members.members.append(member)
@@ -1311,9 +1312,6 @@ landscape:
     - item:
       crunchbase: https://www.crunchbase.com/organization/here-technologies
       homepage_url: https://foo.com/
-      second_path:
-        - Dog / Dog
-        - Cat / Cat
       logo: https://raw.githubusercontent.com/ucfoundation/ucf-landscape/master/hosted_logos/here.svg
       name: HERE Global B.V.
       twitter: https://twitter.com/here

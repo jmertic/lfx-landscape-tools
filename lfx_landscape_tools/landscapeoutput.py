@@ -140,8 +140,8 @@ class LandscapeOutput:
                                             logger.info("Setting '{}.{}' for '{}' from '{}' to '{}'".format(key,subkey,landscapeItem.get('name'),landscapeItem.get(key,{}).get(subkey,''),subvalue))
                                             landscapeItem[key][subkey] = subvalue
                             elif isinstance(value,list) and value != landscapeItem.get(key):
-                                logger.info("Setting '{}' for '{}' from '{}' to '{}'".format(key,landscapeItem.get('name'),landscapeItem.get(key,''),list(set(value + landscapeItem.get(key,'')))))
-                                landscapeItem[key] = list(set(value + landscapeItem.get(key)))
+                                logger.info("Setting '{}' for '{}' from '{}' to '{}'".format(key,landscapeItem.get('name'),landscapeItem.get(key,[]),list(set(value + landscapeItem.get(key,[])))))
+                                landscapeItem[key] = list(set(value + landscapeItem.get(key,[])))
                             elif value != None and value != landscapeItem.get(key):
                                 logger.info("Setting '{}' for '{}' from '{}' to '{}'".format(key,landscapeItem.get('name'),landscapeItem.get(key,''),value))
                                 landscapeItem[key] = value
