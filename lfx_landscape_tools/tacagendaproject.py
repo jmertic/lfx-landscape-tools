@@ -57,7 +57,7 @@ class TACAgendaProject(Members):
             logger.error("Invalid response from gh client: '{}'".format(command.stderr))
             return None
 
-        for item in projectData.get('items',{}):
+        for item in projectData.get('items',[]):
             if '2-annual-review' not in item.get('labels',{}):
                 continue
 
