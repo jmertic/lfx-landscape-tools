@@ -106,7 +106,7 @@ class Config:
             with session.get(singleSlugEndpointURL.format(slug)) as endpointResponse:
                 parentProject = endpointResponse.json()
                 if len(parentProject.get('Data')) > 0: 
-                    return parentProject.get('Data')[0]["ProjectID"]
+                    return parentProject.get('Data')[0].get("ProjectID")
         
         logging.getLogger().warning("Couldn't find project for slug '{}'".format(slug)) 
         
@@ -119,7 +119,7 @@ class Config:
             with session.get(singleProjectEndpointURL.format(project)) as endpointResponse:
                 parentProject = endpointResponse.json()
                 if len(parentProject.get('Data')) > 0: 
-                    return parentProject.get('Data')[0]["Slug"]
+                    return parentProject.get('Data',[])[0].get("Slug")
         
         logging.getLogger().warning("Couldn't find slug for project '{}'".format(project)) 
         

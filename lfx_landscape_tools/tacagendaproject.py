@@ -50,7 +50,6 @@ class TACAgendaProject(Members):
 
         command = subprocess.run(self.gh_cli_call.format(gh_project_id=self.gh_project_id,gh_org=self.gh_org), shell=True, capture_output=True)
         jsonProjectData = command.stdout
-
         csvRows = []
         try:
             projectData = json.loads(jsonProjectData)
