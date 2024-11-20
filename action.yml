@@ -8,8 +8,10 @@ runs:
   using: composite
   steps:
     - name: Install cairo
-      shell: bash
-      run: sudo apt install libcairo2-dev
+      uses: awalsh128/cache-apt-pkgs-action@a6c3917cc929dd0345bfb2d3feaf9101823370ad # v1.4.2
+      with:
+        packages: libcairo2-dev
+        version: 1.0
     - name: Checkout landscape
       uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.1.7@v4
       with:
