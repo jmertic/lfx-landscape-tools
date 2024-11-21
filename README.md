@@ -13,6 +13,23 @@ It is an evolution of the former [landscape-tools](https://github.com/jmertic/la
 - Pull review data from a TAC repo using a specific project format, if used.
 - More verbose error messages that improve debugging.
 
+## Configuration
+
+The default configuration for the build is located in the `config.yml` file, which you should put in the top directory in your landscape repo ( i.e. the same place you would have the `landscape.yml` file ). All options are defined at [lfx_landscape_tools/config.py](lfx_landscape_tools/config.py). See the below example for a simple `config.yml` file for building a members-only landscape.
+
+```yaml
+# Membership levels; name is the membership level name in LFX; category is the matching subcategory name in the landscape
+landscapeMemberClasses: 
+   - name: Steering Membership
+     category: Steering
+   - name: General Membership
+     category: General
+# Slug for the project from LFX
+slug: alliance-for-open-usd-fund-aousdf
+# Category name for members
+landscapeMemberCategory: AOUSD Members
+```
+
 ## Setting up the GitHub Action
 
 1) Add [secrets](https://docs.github.com/en/actions/reference/encrypted-secrets) for `PAT`, which is a [GitHub Personal Authorization Token](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) set for the `repo` scope.
