@@ -95,6 +95,7 @@ jobs:
           MERGE_RETRY_SLEEP: 300000
           MERGE_METHOD: "squash"
 ```
+5) Run the `Build Landscape from LFX` GitHub Action following the instructions for [manually running a GitHub Action](https://docs.github.com/en/actions/managing-workflow-runs-and-deployments/managing-workflow-runs/manually-running-a-workflow) to test that it all works.
 
 ## Local install
 
