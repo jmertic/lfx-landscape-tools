@@ -50,7 +50,8 @@ class Config:
     projectsFilterByParentSlug = True
     tacAgendaProjectUrl = None
     artworkRepoUrl = None
-
+    addOtherProjectMemberships = False
+    
     def __init__(self, config_file: io.TextIOWrapper = None, view = None):
         if config_file:
             data_loaded = ruamel.yaml.YAML(typ='safe', pure=True).load(config_file)
@@ -81,6 +82,7 @@ class Config:
             self.projectsFilterByParentSlug = data_loaded.get('projectsFilterByParentSlug',Config.projectsFilterByParentSlug)
             self.tacAgendaProjectUrl = data_loaded.get('tacAgendaProjectUrl',Config.tacAgendaProjectUrl)
             self.artworkRepoUrl = data_loaded.get('artworkRepoUrl',Config.artworkRepoUrl)
+            self.addOtherProjectMemberships = data_loaded.get('addOtherProjectMemberships',Config.addOtherProjectMemberships)
 
     def _isValidViewOption(self,view):
         return view in ['projects','members'] 
