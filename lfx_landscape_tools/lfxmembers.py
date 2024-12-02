@@ -41,6 +41,7 @@ class LFXMembers(Members):
                 member.membership = record.get('Membership',{}).get('Name')
                 member.website = record.get('Website')
                 member.logo = record.get('Logo')
+                member.description = record.get('OrganizationDescription')
                 if not member.logo:
                     logger.info("Trying to create text logo")
                     member.logo = SVGLogo(name=member.orgname)
