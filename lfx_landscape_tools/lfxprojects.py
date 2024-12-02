@@ -103,6 +103,10 @@ class LFXProjects(Members):
                 member.crunchbase = record.get('CrunchBaseUrl',self.defaultCrunchbase)
                 member.linkedin = record.get('LinkedIn')
                 member.twitter = record.get('Twitter')
+                extra['facebook_url'] = record.get('Facebook')
+                extra['reddit_url'] = record.get('Reddit')
+                extra['pinterest_url'] = record.get('Pinterest')
+                extra['youtube_url'] = record.get('YouTube')
                 if self.addPMOManagedStatus and record.get('HasProgramManager'):
                     second_path.append('PMO Managed / All')
                 if self.addIndustrySector and record.get('IndustrySector') != '':
