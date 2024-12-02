@@ -285,6 +285,12 @@ class Member:
             if returnentry.get('crunchbase'):
                 del returnentry['crunchbase']
 
+        if self.linkedin:
+            logging.getLogger().info("Setting 'extra.linkedin_url' to '{}' for '{}'".format(self.linkedin,self.orgname))
+            if not returnentry['extra']:
+                returnentry['extra'] = {}
+            returnentry['extra']['linkedin_url'] = self.linkedin
+
         return returnentry
         
     def isValidLandscapeItem(self):

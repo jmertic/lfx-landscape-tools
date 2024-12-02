@@ -225,11 +225,13 @@ class TestMember(unittest.TestCase):
         member.orgname = 'test'
         member.website = 'https://foo.com'
         member.membership = 'Gold'
+        member.linkedin = 'https://www.linkedin.com/company/208777'
         dict = member.toLandscapeItemAttributes()
 
         self.assertEqual(dict.get('name'),member.orgname)
         self.assertEqual(dict.get('homepage_url'),member.website)
         self.assertEqual(dict.get('organization',{}).get('name'),member.orgname)
+        self.assertEqual(dict.get('organization',{}).get('linkedin'),member.linkedin)
         self.assertIsNone(dict.get('logo'))
         self.assertIsNone(dict.get('item'))
         self.assertNotIn('crunchbase',dict)
@@ -241,11 +243,13 @@ class TestMember(unittest.TestCase):
         member.website = 'https://foo.com'
         member.membership = 'Gold'
         member.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society'
+        member.linkedin = 'https://www.linkedin.com/company/208777'
         dict = member.toLandscapeItemAttributes()
 
         self.assertEqual(dict.get('name'),member.orgname+" (testme)")
         self.assertEqual(dict.get('homepage_url'),member.website)
         self.assertEqual(dict.get('crunchbase'),member.crunchbase)
+        self.assertEqual(dict.get('extra',{}).get('linkedin_url'),member.linkedin)
         self.assertIsNone(dict.get('logo'))
         self.assertIsNone(dict.get('item'))
         self.assertNotIn('membership',dict)

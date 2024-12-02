@@ -145,6 +145,11 @@ class TestLFXProjects(unittest.TestCase):
                             "Motion Pictures"
                         ],
                         "IndustrySector": "Motion Pictures",
+                        "Facebook": "https://www.facebook.com/TheLinuxFoundation",
+                        "LinkedIn": "https://www.linkedin.com/company/208777",
+                        "Reddit": "https://www.reddit.com/r/vfx/",
+                        "Pinterest": "https://www.pinterest.com/linuxfoundation/",
+                        "YouTube": "https://www.youtube.com/user/TheLinuxFoundation",
                         "Name": "OpenCue",
                         "ParentID": "a09410000182dD2AAI",
                         "ParentSlug": "aswf",
@@ -780,6 +785,11 @@ class TestLFXProjects(unittest.TestCase):
             members.loadData()
         self.assertEqual(members.members[0].orgname,"OpenCue")
         self.assertEqual(members.members[0].crunchbase,"https://www.crunchbase.com/organization/linux-foundation")
+        self.assertEqual(members.members[0].extra["facebook_url"],"https://www.facebook.com/TheLinuxFoundation")
+        self.assertEqual(members.members[0].linkedin,"https://www.linkedin.com/company/208777")
+        self.assertEqual(members.members[0].extra["reddit_url"],"https://www.reddit.com/r/vfx/")
+        self.assertEqual(members.members[0].extra["pinterest_url"],"https://www.pinterest.com/linuxfoundation/")
+        self.assertEqual(members.members[0].extra["youtube_url"],"https://www.youtube.com/user/TheLinuxFoundation")
         self.assertEqual(members.members[0].logo,"opencue.svg")
         self.assertEqual(members.members[0].membership,"All")
         self.assertEqual(members.members[0].website,"https://opencue.io/")
