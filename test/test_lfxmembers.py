@@ -58,7 +58,7 @@ class TestLFXMembers(unittest.TestCase):
         responses.add(
             method=responses.GET,
             url=LFXMembers.endpointURL.format('tlf2'),
-            body="""[{"ID":"0014100000Te1TUAAZ","Name":"ConsenSys AG","CNCFLevel":"","LinkedInURL":"dog.com","CrunchBaseURL":"https://crunchbase.com/organization/consensus-systems--consensys-","Logo":"https://lf-master-organization-logos-prod.s3.us-east-2.amazonaws.com/consensys_ag.svg","Membership":{"Family":"Membership","ID":"01t41000002735aAAA","Name":"Premier Membership","Status":"Active"},"Slug":"hyp","StockTicker":"","Twitter":"","Website":"consensys.net"},{"ID":"0014100000Te04HAAR","Name":"Hitachi, Ltd.","CNCFLevel":"","LinkedInURL":"www.linkedin.com/company/hitachi-data-systems","Logo":"https://lf-master-organization-logos-prod.s3.us-east-2.amazonaws.com/hitachi-ltd.svg","Membership":{"Family":"Membership","ID":"01t41000002735aAAA","Name":"Premier Membership","Status":"Active"},"Slug":"hyp","StockTicker":"","Twitter":"https://yahoo.com","Website":"hitachi-systems.com"}]"""
+            body="""[{"ID":"0014100000Te1TUAAZ","Name":"ConsenSys AG","CNCFLevel":"","OrganizationDescription":"this org is cool","LinkedInURL":"dog.com","CrunchBaseURL":"https://crunchbase.com/organization/consensus-systems--consensys-","Logo":"https://lf-master-organization-logos-prod.s3.us-east-2.amazonaws.com/consensys_ag.svg","Membership":{"Family":"Membership","ID":"01t41000002735aAAA","Name":"Premier Membership","Status":"Active"},"Slug":"hyp","StockTicker":"","Twitter":"","Website":"consensys.net"},{"ID":"0014100000Te04HAAR","Name":"Hitachi, Ltd.","CNCFLevel":"","LinkedInURL":"www.linkedin.com/company/hitachi-data-systems","Logo":"https://lf-master-organization-logos-prod.s3.us-east-2.amazonaws.com/hitachi-ltd.svg","Membership":{"Family":"Membership","ID":"01t41000002735aAAA","Name":"Premier Membership","Status":"Active"},"Slug":"hyp","StockTicker":"","Twitter":"https://yahoo.com","Website":"hitachi-systems.com"}]"""
             )
         responses.add(
             method=responses.GET,
@@ -77,6 +77,7 @@ class TestLFXMembers(unittest.TestCase):
         self.assertEqual(members.members[0].crunchbase,"https://www.crunchbase.com/organization/consensus-systems--consensys-")
         self.assertEqual(members.members[0].logo,"consensys_ag.svg")
         self.assertEqual(members.members[0].membership,"Premier Membership")
+        self.assertEqual(members.members[0].description,"this org is cool")
         self.assertEqual(members.members[0].website,"https://consensys.net/")
         self.assertIsNone(members.members[0].linkedin)
         self.assertIsNone(members.members[0].twitter)
