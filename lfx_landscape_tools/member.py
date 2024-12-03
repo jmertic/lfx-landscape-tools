@@ -64,30 +64,30 @@ class Member:
         elif repo_url is not None:
             repo_url = url_normalize(repo_url.rstrip("/"), default_scheme='https')
             if self._isGitHubOrg(repo_url):
-                logging.info("{} is determined to be a GitHub Org for '{}' - finding related GitHub Repo".format(repo_url,self.orgname))
+                logging.debug("{} is determined to be a GitHub Org for '{}' - finding related GitHub Repo".format(repo_url,self.orgname))
                 try:
                     found_repo_url = self._getPrimaryGitHubRepoFromGitHubOrg(repo_url)
                     if found_repo_url:
                         self.project_org = "https://github.com/{}".format(urlparse(found_repo_url).path.split("/")[1])
                         self.__repo_url = found_repo_url 
-                        logging.info("{} is determined to be the associated GitHub Repo for GitHub Org {} for '{}'".format(self.__repo_url,self.project_org,self.orgname))
+                        logging.debug("{} is determined to be the associated GitHub Repo for GitHub Org {} for '{}'".format(self.__repo_url,self.project_org,self.orgname))
                     else:
                         self.project_org = None
                         self.__repo_url = None
-                        logging.info("No public repositories found in GitHub Org {} - not setting repo_url for '{}'".format(self.project_org,self.orgname))
+                        logging.warn("No public repositories found in GitHub Org {} - not setting repo_url for '{}'".format(self.project_org,self.orgname))
                 except ValueError as e:
                     logging.warn(e)
                     self.project_org = None
                     self.__repo_url = None
-                    logging.info("No public repositories found in GitHub Org {} - not setting repo_url for '{}'".format(self.project_org,self.orgname))
+                    logging.warn("No public repositories found in GitHub Org {} - not setting repo_url for '{}'".format(self.project_org,self.orgname))
             elif self._isGitHubRepo(repo_url) or self._isGitHubURL(repo_url):
                 # clean up to ensure it's a valid github repo url
                 x = urlparse(repo_url)
                 parts = x.path.split("/")
                 self.__repo_url = "https://github.com/{}/{}".format(parts[1],parts[2])
-                logging.info("{} is determined to be a GitHub Repo for '{}'".format(self.__repo_url,self.orgname))
+                logging.debug("{} is determined to be a GitHub Repo for '{}'".format(self.__repo_url,self.orgname))
             else:
-                logging.info("{} is determined to be something else".format(repo_url))
+                logging.debug("{} is determined to be something else".format(repo_url))
                 self.__repo_url = repo_url
 
     def _isGitHubURL(self, url):
@@ -115,14 +115,14 @@ class Member:
                 time.sleep(g.rate_limiting_resettime-now())
             except GithubException as e:
                 if e.status == 502:
-                    logging.info("Server error - retrying...")
+                    logging.debug("Server error - retrying...")
                 if e.status == 404:
                     return False
                 else:
                     logging.getLogger().warning(e.data)
                     return
             except socket.timeout:
-                logging.info("Server error - retrying...")
+                logging.debug("Server error - retrying...")
 
         apiEndPoint = 'https://api.github.com/orgs{}/repos'.format(urlparse(url).path)
         session = requests_cache.CachedSession('githubapi')
@@ -241,7 +241,7 @@ class Member:
         endextra = {}
         for key, value in extra.items():
             if not value or value == 'nil':
-                logging.getLogger().warning("Removing Member.extra.{key} for '{orgname}' since it's set to '{value}'".format(key=key,value=value,orgname=self.orgname))
+                logging.getLogger().debug("Removing Member.extra.{key} for '{orgname}' since it's set to '{value}'".format(key=key,value=value,orgname=self.orgname))
                 continue
             endextra[key] = value
 
@@ -295,7 +295,7 @@ class Member:
                 returnentry[i] = getattr(self,i)
 
         if not self.crunchbase:
-            logging.getLogger().info("No Crunchbase entry for '{}' - specifying orgname instead".format(self.orgname))
+            logging.getLogger().debug("No Crunchbase entry for '{}' - specifying orgname instead".format(self.orgname))
             returnentry['organization'] = {}
             returnentry['organization']['name'] = self.orgname
             if self.linkedin:
@@ -304,7 +304,7 @@ class Member:
                 del returnentry['crunchbase']
 
         if self.linkedin:
-            logging.getLogger().info("Setting 'extra.linkedin_url' to '{}' for '{}'".format(self.linkedin,self.orgname))
+            logging.getLogger().debug("Setting 'extra.linkedin_url' to '{}' for '{}'".format(self.linkedin,self.orgname))
             if not returnentry.get('extra'):
                 returnentry['extra'] = {}
             returnentry['extra']['linkedin_url'] = self.linkedin
@@ -341,8 +341,8 @@ class Member:
             if key == "homepage_url":
                 key = "website"
             if (not hasattr(membertooverlay,key) or not getattr(membertooverlay,key)): 
-                logging.getLogger().info("...Overlay "+key)
-                logging.getLogger().info(".....Old Value - '{}'".format(getattr(membertooverlay,key) if hasattr(membertooverlay,key) else'empty'))
-                logging.getLogger().info(".....New Value - '{}'".format(value if value else 'empty'))
+                logging.getLogger().debug("...Overlay "+key)
+                logging.getLogger().debug(".....Old Value - '{}'".format(getattr(membertooverlay,key) if hasattr(membertooverlay,key) else'empty'))
+                logging.getLogger().debug(".....New Value - '{}'".format(value if value else 'empty'))
                 setattr(membertooverlay, key, value)
 

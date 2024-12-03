@@ -79,7 +79,7 @@ class TACAgendaProject(Members):
                         memberList = endpointResponse.json()
                         for record in memberList.get('Data',[]):
                             if record.get('Role') in ['Chair','Vice Chair']:
-                                logger.info("Found '{} {}' for the role '{}".format(record.get('FirstName').title(),record.get('LastName').title(),record.get('Role')))
+                                logger.debug("Found '{} {}' for the role '{}".format(record.get('FirstName').title(),record.get('LastName').title(),record.get('Role')))
                                 chair.append('{} {}'.format(record.get('FirstName').title(),record.get('LastName').title()))
                     except Exception as e:
                         logger.error("Couldn't load TSC Committee data for '{project}' - {error}".format(project=member.orgname,error=e))

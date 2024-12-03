@@ -43,7 +43,7 @@ class LFXMembers(Members):
                 member.logo = record.get('Logo')
                 member.description = record.get('OrganizationDescription')
                 if not member.logo:
-                    logger.info("Trying to create text logo")
+                    logger.debug("Trying to create text logo")
                     member.logo = SVGLogo(name=member.orgname)
                 member.crunchbase = record.get('CrunchBaseURL')
                 member.twitter = record.get('Twitter')

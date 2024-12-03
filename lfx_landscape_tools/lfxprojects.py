@@ -86,11 +86,11 @@ class LFXProjects(Members):
                     for projectLevel in self.landscapeProjectsLevels:
                         if projectLevel.get('name') == record.get('Category'):
                             member.project = projectLevel.get('level')
-                            logger.info("Project level is {}".format(member.project))
+                            logger.debug("Project level is {}".format(member.project))
                             break
                 member.website = record.get('Website')
                 if not member.website:
-                    logger.info("Trying to use 'RepositoryURL' for 'website' instead")
+                    logger.debug("Trying to use 'RepositoryURL' for 'website' instead")
                     member.website = record.get('RepositoryURL')
                 if self.addParentProject:
                     parentName = self.lookupParentProjectNameBySlug(record.get('ParentSlug',self.project))
@@ -98,7 +98,7 @@ class LFXProjects(Members):
                         second_path.append('Project Group / {}'.format(parentName.replace("/",":")))
                 member.logo = record.get('ProjectLogo')
                 if not member.logo:
-                    logger.info("Trying to create text logo")
+                    logger.debug("Trying to create text logo")
                     member.logo = SVGLogo(name=member.orgname)
                 member.crunchbase = record.get('CrunchBaseUrl',self.defaultCrunchbase)
                 member.linkedin = record.get('LinkedIn')

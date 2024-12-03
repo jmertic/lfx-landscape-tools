@@ -111,17 +111,17 @@ class LandscapeOutput:
             for landscapeItem in landscapeItemSubcategory.get('items',[]):
                 foundmembers = []
                 if hasattr(members,'findBySlug'):
-                    logger.info("Looking for slug '{}'".format(landscapeItem.get('extra',{}).get('annotations',{}).get('slug')))
+                    logger.debug("Looking for slug '{}'".format(landscapeItem.get('extra',{}).get('annotations',{}).get('slug')))
                     x = members.findBySlug(landscapeItem.get('extra',{}).get('annotations',{}).get('slug'))
                     if x:
-                        logger.info("Found slug '{}'".format(x.extra.get('annotations',{}).get('slug')))
+                        logger.debug("Found slug '{}'".format(x.extra.get('annotations',{}).get('slug')))
                         foundmembers.append(x)
                 if foundmembers == []:
-                    logger.info("Looking for '{}' and 'homepage_url' set to '{}'".format(landscapeItem.get('name'), landscapeItem.get('homepage_url')))
+                    logger.debug("Looking for '{}' and 'homepage_url' set to '{}'".format(landscapeItem.get('name'), landscapeItem.get('homepage_url')))
                     foundmembers = members.find(landscapeItem.get('name'), landscapeItem.get('homepage_url'))
                 for foundmember in foundmembers:
-                    logger.info("Found '{}' - slug {}".format(foundmember.orgname,foundmember.extra.get('annotations',{}).get('slug')))
-                    logger.info("Adding to foundSlugs '{}'".format(foundmember.extra.get('annotations',{}).get('slug')))
+                    logger.debug("Found '{}' - slug {}".format(foundmember.orgname,foundmember.extra.get('annotations',{}).get('slug')))
+                    logger.debug("Adding to foundSlugs '{}'".format(foundmember.extra.get('annotations',{}).get('slug')))
                     foundSlugs.append(foundmember.extra.get('annotations',{}).get('slug'))
                     self._itemsUpdated += 1
                     for key, value in foundmember.toLandscapeItemAttributes().items():
@@ -133,17 +133,17 @@ class LandscapeOutput:
                                         landscapeItem[key].setdefault(subkey,{})
                                         for subsubkey, subsubvalue in subvalue.items():
                                             if subsubvalue != None and landscapeItem.get(key,{}).get(subkey,{}).get(subsubkey) != subsubvalue:
-                                                logger.info("Setting '{}.{}.{}' for '{}' from '{}' to '{}'".format(key,subkey,subsubkey,landscapeItem.get('name'),landscapeItem.get(key,{}).get(subkey,{}).get(subsubkey),subsubvalue))
+                                                logger.debug("Setting '{}.{}.{}' for '{}' from '{}' to '{}'".format(key,subkey,subsubkey,landscapeItem.get('name'),landscapeItem.get(key,{}).get(subkey,{}).get(subsubkey),subsubvalue))
                                                 landscapeItem[key][subkey][subsubkey] = subsubvalue
                                     else:
                                         if subvalue != None and landscapeItem.get(key,{}).get(subkey) != subvalue:
-                                            logger.info("Setting '{}.{}' for '{}' from '{}' to '{}'".format(key,subkey,landscapeItem.get('name'),landscapeItem.get(key,{}).get(subkey,''),subvalue))
+                                            logger.debug("Setting '{}.{}' for '{}' from '{}' to '{}'".format(key,subkey,landscapeItem.get('name'),landscapeItem.get(key,{}).get(subkey,''),subvalue))
                                             landscapeItem[key][subkey] = subvalue
                             elif isinstance(value,list) and value != landscapeItem.get(key):
-                                logger.info("Setting '{}' for '{}' from '{}' to '{}'".format(key,landscapeItem.get('name'),landscapeItem.get(key,[]),list(set(value + landscapeItem.get(key,[])))))
+                                logger.debug("Setting '{}' for '{}' from '{}' to '{}'".format(key,landscapeItem.get('name'),landscapeItem.get(key,[]),list(set(value + landscapeItem.get(key,[])))))
                                 landscapeItem[key] = list(set(value + landscapeItem.get(key,[])))
                             elif value != None and value != landscapeItem.get(key):
-                                logger.info("Setting '{}' for '{}' from '{}' to '{}'".format(key,landscapeItem.get('name'),landscapeItem.get(key,''),value))
+                                logger.debug("Setting '{}' for '{}' from '{}' to '{}'".format(key,landscapeItem.get('name'),landscapeItem.get(key,''),value))
                                 landscapeItem[key] = value
                         if foundmember.logo:
                             foundmember.hostLogo(self.hostedLogosDir)
@@ -156,7 +156,7 @@ class LandscapeOutput:
         logger.info("Adding '{}' items".format(self.landscapeCategory))
         for member in members.members:
             if member.extra.get('annotations',{}).get('slug') in skipSlugs:
-                logger.info("Not adding '{}' to Landscape - Slug '{}' already exists".format(member.orgname,member.extra.get('annotations',{}).get('slug')))
+                logger.warning("Not adding '{}' to Landscape - Slug '{}' already exists".format(member.orgname,member.extra.get('annotations',{}).get('slug')))
                 continue
             logger.info("Found '{}'".format(member.orgname))
             foundCategory = False
