@@ -88,7 +88,7 @@ jobs:
           target_kind: data
           target_path: ./landscape.yml
       - uses: pascalgn/automerge-action@7961b8b5eec56cc088c140b56d864285eabd3f67 # v0.16.4
-        if: success()
+        if: success() && ${{ github.secret_source == 'Actions' }}
         env:
           GITHUB_TOKEN: "${{ secrets.PAT }}"
           MERGE_LABELS: "automated-build"
