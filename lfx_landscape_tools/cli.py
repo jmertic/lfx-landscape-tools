@@ -67,9 +67,9 @@ class Cli:
             'debug': logging.DEBUG          # messages to help debug things misbehaving ;-)
         }
         if args.verbose:
-            args.log = 'info'
+            args.loglevel = 'info'
         logging.basicConfig(
-            level=levels.get(args.log.lower()),
+            level=levels.get(args.loglevel.lower()),
             format="%(asctime)s [%(levelname)s] %(message)s",
             handlers=[
                 logging.FileHandler("debug.log"),
