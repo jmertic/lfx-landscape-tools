@@ -209,7 +209,7 @@ class TestMember(unittest.TestCase):
         member.website = 'https://foo.com'
         member.membership = 'Gold'
         member.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society'
-        member.extra = []
+        member.extra = {}
         dict = member.toLandscapeItemAttributes()
 
         self.assertEqual(dict.get('name'),member.orgname)
@@ -391,6 +391,18 @@ class TestMember(unittest.TestCase):
             member.logo = SVGLogo(name='dog')
             member.hostLogo(tempdir)
             self.assertTrue(os.path.exists(os.path.join(tempdir,'dog.svg')))
+
+    def testExtra(self):
+        member = Member()
+        member.extra = {
+            "facebook_url": "https://facebook.com",
+            "reddit_url": None,
+            "youtube_url": "nil",
+        }
+
+        self.assertEqual(member.extra.get("facebook_url"),"https://facebook.com")
+        self.assertIsNone(member.extra.get("reddit_url"))
+        self.assertIsNone(member.extra.get("youtube_url"))
 
 if __name__ == '__main__':
     logging.basicConfig(
