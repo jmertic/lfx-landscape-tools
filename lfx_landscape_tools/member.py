@@ -29,7 +29,7 @@ class Member:
     entrysuffix = ''
     second_path = []
     organization = {}
-    extra = {}
+    __extra = {}
     project = None
     project_org = None
     __orgname = None
@@ -228,6 +228,24 @@ class Member:
                 logging.getLogger().warning("Member.twitter for '{orgname}' must be either a Twitter handle, or the URL to a twitter handle - '{twitter}' provided".format(twitter=twitter,orgname=self.orgname))
         else:
             self.__twitter = twitter
+
+    @property
+    def extra(self):
+        return self.__extra
+
+    @extra.setter
+    def extra(self, extra):
+        if not isinstance(extra,dict):
+            logging.getLogger().warning("Member.extra for '{orgname}' must be a list - '{extra}' provided".format(extra=extra,orgname=self.orgname))
+            self.__extra = None
+        endextra = {}
+        for key, value in extra.items():
+            if not value or value == 'nil':
+                logging.getLogger().warning("Removing Member.extra.{key} for '{orgname}' since it's set to '{value}'".format(key=key,value=value,orgname=self.orgname))
+                continue
+            endextra[key] = value
+
+        self.__extra = endextra
 
     def toLandscapeItemAttributes(self):
         allowedKeys = [
