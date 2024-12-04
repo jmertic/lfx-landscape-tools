@@ -49,8 +49,11 @@ class LandscapeOutput:
         if not newLandscape:
             try:
                 with open(self.landscapefile, 'r', encoding="utf8", errors='ignore') as fileobject: 
+                    logging.getLogger().info("Successfully opened landscape file '{}'".format(self.landscapefile))
                     self.landscape = ruamel.yaml.YAML().load(fileobject)
-            except:
+                    logging.getLogger().info("Successfully parsed yaml output in landscape file '{}'".format(self.landscapefile))
+            except Exception as e:
+                logging.getLogger().error("Error opening landscape file '{}' - will reset file - '{}'".format(self.landscapefile,e))
                 newLandscape = True
         found = False
         if self.landscape:
@@ -208,7 +211,7 @@ class LandscapeOutput:
             ryaml.dump(self.landscape, fileobject, transform=self._removeNulls)
 
     def _removeNulls(self,yamlout):
-        return yamlout.replace('- item: null','- item:').replace('- category: null','- category:').replace('- subcategory: null','- subcategory:')
+        return yamlout.replace('- item: null','- item:').replace('- category: null','- category:').replace('- subcategory: null','- subcategory:').replace('\u2028',' ')
 
     def _str_presenter(self, dumper, data):
         if '\n' in data:
