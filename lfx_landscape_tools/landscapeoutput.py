@@ -211,7 +211,7 @@ class LandscapeOutput:
             ryaml.dump(self.landscape, fileobject, transform=self._removeNulls)
 
     def _removeNulls(self,yamlout):
-        return yamlout.replace('- item: null','- item:').replace('- category: null','- category:').replace('- subcategory: null','- subcategory:').replace('\u2028',' ')
+        return yamlout.replace('- item: null','- item:').replace('- category: null','- category:').replace('- subcategory: null','- subcategory:').replace('\u2028',' ').replace('\x95','')
 
     def _str_presenter(self, dumper, data):
         if '\n' in data:
