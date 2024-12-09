@@ -70,14 +70,17 @@ runs:
         target_path: ./landscape/landscape.yml
     - name: Checkout landscapeapp
       uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.1.7@v4
+      if: ${{ hashFiles('./landscape/settings.yml') != '' }}
       with:
         repository: cncf/landscapeapp
         path: landscapeapp
     - name: Setup node
       uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+      if: ${{ hashFiles('./landscape/settings.yml') != '' }}
       with:
         node-version: '18'
     - name: Cleanup YAML files
+      if: ${{ hashFiles('./landscape/settings.yml') != '' }}
       working-directory: ./landscapeapp
       shell: bash
       run: |

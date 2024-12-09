@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "lfx-landscape-tools"
-version = "20241204"
+version = "20241209"
 description = "Collection of tools for automating the data management of a landscape from LFX"
 authors = ["John Mertic <jmertic@linuxfoundation.org>"]
 readme = "README.md"
@@ -20,7 +20,7 @@ validators = "^0.34.0"
 click = "^8.1.7"
 
 [tool.poetry.group.test.dependencies]
-coverage = "^7.6.8"
+coverage = "^7.6.9"
 responses = "^0.25.3"
 
 [tool.poetry.group.dev.dependencies]
