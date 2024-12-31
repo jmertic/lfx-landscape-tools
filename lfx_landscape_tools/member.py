@@ -324,7 +324,7 @@ class Member:
 
         return invalidAttributes
 
-    def overlay(self, membertooverlay: type[Self], onlykeys: list = []):
+    def overlay(self, membertooverlay: Self, onlykeys: list = []):
         '''
         Overlay another Member data onto this Member, overriding this Member's values with those 
         from the other Member, and setting other Member's value in this Member if they aren't set

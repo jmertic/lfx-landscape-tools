@@ -34,7 +34,7 @@ class LandscapeOutput:
     _itemsProcessed = 0
     _itemsErrors = 0
 
-    def __init__(self, config: type[Config]):
+    def __init__(self, config: Config):
         self.landscapeItems = []
         self.landscapeCategory = config.landscapeCategory
         self.landscapeSubcategories = config.landscapeSubcategories
@@ -57,7 +57,7 @@ class LandscapeOutput:
     def itemsErrors(self):
         return self._itemsErrors
 
-    def load(self, members: type[Members]):
+    def load(self, members: Members):
         '''
         Load Members into landscapeItems
 

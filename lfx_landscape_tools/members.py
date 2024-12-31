@@ -71,7 +71,7 @@ class Members(ABC):
                 
         return members
     
-    def overlay(self, memberstooverlay: type[Self]):
+    def overlay(self, memberstooverlay: Self):
         '''
         Overlay another Members data onto this Members; if something is in the other
         Member that is in this member, it will NOT be added
