@@ -85,29 +85,32 @@ class Cli:
     
     def buildmembers(self,args):
         config = Config(args.configfile,view='members')
-        landscapeoutput = LandscapeOutput(config, resetCategory=True)
+        landscapeoutput = LandscapeOutput(config=config)
         logging.getLogger().info("Adding LFX Members data")
-        landscapeoutput.addItems(LFXMembers(config=config))
+        landscapeoutput.load(LFXMembers(config=config))
         landscapeoutput.save()
         
         logging.getLogger().info("Successfully processed {} members and skipped {} members".format(landscapeoutput.itemsProcessed,landscapeoutput.itemsErrors))
 
     def buildprojects(self,args):
         config = Config(args.configfile,view='projects')
-        landscapeoutput = LandscapeOutput(config, resetCategory=True)
+        landscapeoutput = LandscapeOutput(config=config)
         logging.getLogger().info("Adding LFX Projects data")
-        landscapeoutput.addItems(LFXProjects(config=config))
+        landscapeoutput.load(LFXProjects(config=config))
         landscapeoutput.save()
         
         logging.getLogger().info("Successfully processed {} projects and skipped {} projects".format(landscapeoutput.itemsProcessed,landscapeoutput.itemsErrors))
 
     def syncprojects(self,args):
         config = Config(args.configfile,view='projects')
-        landscapeoutput = LandscapeOutput(config=config, resetCategory=False)
-        logging.getLogger().info("Syncing TAC Agenda Project data")
-        landscapeoutput.overlayItems(TACAgendaProject(config=config))
-        logging.getLogger().info("Syncing LFX Projects data")
-        landscapeoutput.overlayItems(LFXProjects(config=config)) 
+        logging.getLogger().info("Getting TAC Agenda Project data")
+        items = TACAgendaProject(config=config)
+        logging.getLogger().info("Overlaying LFX Projects data")
+        items.overlay(LFXProjects(config=config)
+        logging.getLogger().info("Overlaying current Landscape data")
+        items.overlay(LandscapeMembers(config=config)
+        landscapeoutput = LandscapeOutput(config=config)
+        landscapeoutput.load(members=items)
         landscapeoutput.save()
         
         logging.getLogger().info("Successfully processed {} projects, updated {} projects, and skipped {} projects".format(landscapeoutput.itemsProcessed,landscapeoutput.itemsUpdated,landscapeoutput.itemsErrors))
