@@ -71,7 +71,7 @@ class LandscapeOutput:
             foundCategory = False
             for landscapeItemSubcategory in self.landscapeItems:
                 landscapeSubcategory = next((item for item in self.landscapeSubcategories if item["name"] == member.membership), None)
-                if ( ( not landscapeSubcategory is None )
+                if ( ( landscapeSubcategory is not None )
                         and ( landscapeSubcategory['name'] == member.membership ) 
                         and ( landscapeItemSubcategory['name'] == landscapeSubcategory['category'] ) ):
                     foundCategory = True
@@ -103,7 +103,7 @@ class LandscapeOutput:
                 landscape = ruamel.yaml.YAML().load(fileobject)
                 if not isinstance(landscape,dict) or landscape is None:
                     landscape = {}
-                    raise Exception('Landscape file is empty')
+                    raise RuntimeError('Landscape file is empty')
                 logging.getLogger().debug("Successfully parsed yaml output in landscape file '{}'".format(self.landscapefile))
         except Exception as e:
             logging.getLogger().error("Error opening landscape file '{}'; will reset file - error message is '{}'".format(self.landscapefile,e))

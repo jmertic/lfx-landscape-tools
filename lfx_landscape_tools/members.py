@@ -66,7 +66,7 @@ class Members(ABC):
                     members.append(member)
             else:
                 if ( self.normalizeName(member.name) == normalizedname or member.homepage_url == normalizedhomepage_url ):
-                    logger.debug("Found '{}' by homepage_url '{}'".format(member.name,member.repo_url,member.homepage_url))
+                    logger.debug("Found '{}' by homepage_url '{}'".format(member.name,member.homepage_url))
                     members.append(member)
                 
         return members

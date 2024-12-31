@@ -103,7 +103,7 @@ class Member:
                 except ValueError as e:
                     self.project_org = None
                     self.__repo_url = None
-                    logging.warning("No public repositories found in GitHub Org {} - not setting repo_url for '{}'".format(self.project_org,self.name))
+                    logging.warning("No public repositories found in GitHub Org {} - not setting repo_url for '{}' - error message '{}'".format(self.project_org,self.name,e))
             elif self._isGitHubRepo(repo_url) or self._isGitHubURL(repo_url):
                 # clean up to ensure it's a valid github repo url
                 x = urlparse(repo_url)
