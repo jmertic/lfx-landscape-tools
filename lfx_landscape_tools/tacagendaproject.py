@@ -63,7 +63,7 @@ class TACAgendaProject(Members):
 
             logger.info("Processing {}...".format(item.get('content',{}).get('title')))
             member = Member()
-            member.orgname = item.get('content',{}).get('title').strip()
+            member.name = item.get('content',{}).get('title').strip()
             member.crunchbase = self.defaultCrunchbase
             extra = {} 
             annotations = {}
@@ -82,7 +82,7 @@ class TACAgendaProject(Members):
                                 logger.info("Found '{} {}' for the role '{}".format(record.get('FirstName').title(),record.get('LastName').title(),record.get('Role')))
                                 chair.append('{} {}'.format(record.get('FirstName').title(),record.get('LastName').title()))
                     except Exception as e:
-                        logger.error("Couldn't load TSC Committee data for '{project}' - {error}".format(project=member.orgname,error=e))
+                        logger.error("Couldn't load TSC Committee data for '{project}' - {error}".format(project=member.name,error=e))
             annotations['chair'] = ", ".join(chair)
             extra['annotations'] = annotations
             member.extra = extra

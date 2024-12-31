@@ -23,6 +23,17 @@ from lfx_landscape_tools.lfxprojects import LFXProjects
 from lfx_landscape_tools.tacagendaproject import TACAgendaProject
 
 class TestMember(unittest.TestCase):
+    
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format="%(asctime)s [%(levelname)s] %(message)s",
+        handlers=[
+            logging.FileHandler("debug.log",mode="w"),
+        ]
+    )
+    
+    def setUp(self):
+        logging.getLogger().debug("Running {}".format(unittest.TestCase.id(self)))
 
     def testLinkedInValid(self):
         validLinkedInURLs = [
@@ -39,7 +50,7 @@ class TestMember(unittest.TestCase):
 
     def testSetLinkedInNotValidOnEmpty(self):
         member = Member()
-        member.orgname = 'test'
+        member.name = 'test'
         member.linkedin = ''
         self.assertIsNone(member.linkedin)
 
@@ -51,7 +62,7 @@ class TestMember(unittest.TestCase):
 
         for invalidLinkedInURL in invalidLinkedInURLs:
             member = Member()
-            member.orgname = 'test'
+            member.name = 'test'
             with self.assertLogs() as cm:
                 member.linkedin = invalidLinkedInURL
                 self.assertEqual(["WARNING:root:Member.linkedin for 'test' must be set to a valid LinkedIn URL - '{}' provided".format(invalidLinkedInURL)], cm.output)
@@ -69,19 +80,19 @@ class TestMember(unittest.TestCase):
 
     def testSetCrunchbaseNotValidOnEmpty(self):
         member = Member()
-        member.orgname = 'test'
+        member.name = 'test'
         member.crunchbase = ''
         self.assertIsNone(member.crunchbase)
 
     def testSetRepoNotValidOnEmpty(self):
         member = Member()
-        member.orgname = 'test'
+        member.name = 'test'
         member.repo_url = ''
         self.assertIsNone(member.repo_url)
     
     def testSetRepoGitlab(self):
         member = Member()
-        member.orgname = 'test'
+        member.name = 'test'
         member.repo_url = 'https://gitlab.com/foo/bar'
         self.assertEqual(member.repo_url,'https://gitlab.com/foo/bar')
 
@@ -93,45 +104,45 @@ class TestMember(unittest.TestCase):
 
         for invalidCrunchbaseURL in invalidCrunchbaseURLs:
             member = Member()
-            member.orgname = 'test'
+            member.name = 'test'
             with self.assertLogs() as cm:
                 member.crunchbase = invalidCrunchbaseURL
-                self.assertEqual(["WARNING:root:Member.crunchbase for '{orgname}' must be set to a valid Crunchbase URL - '{crunchbase}' provided".format(crunchbase=invalidCrunchbaseURL,orgname=member.orgname)], cm.output)
+                self.assertEqual(["WARNING:root:Member.crunchbase for '{name}' must be set to a valid Crunchbase URL - '{crunchbase}' provided".format(crunchbase=invalidCrunchbaseURL,name=member.name)], cm.output)
             self.assertIsNone(member.crunchbase)
 
-    def testSetWebsiteValid(self):
-        validWebsiteURLs = [
+    def testSethomepage_urlValid(self):
+        validhomepage_urlURLs = [
             {'before':'https://crunchbase.com/','after':'https://crunchbase.com/'},
             {'before':'sony.com/en','after':'https://sony.com/en'}
         ]
 
-        for validWebsiteURL in validWebsiteURLs:
+        for validhomepage_urlURL in validhomepage_urlURLs:
             member = Member()
-            member.website = validWebsiteURL['before']
-            self.assertEqual(member.website,validWebsiteURL['after'])
+            member.homepage_url = validhomepage_urlURL['before']
+            self.assertEqual(member.homepage_url,validhomepage_urlURL['after'])
 
-    def testSetWebsiteNotValidOnEmpty(self):
+    def testSethomepage_urlNotValidOnEmpty(self):
         member = Member()
-        member.orgname = 'test'
+        member.name = 'test'
         with self.assertLogs() as cm:
-            member.website = ''
-            self.assertEqual(["WARNING:root:Member.website must be not be blank for 'test'"], cm.output)
-        self.assertIsNone(member.website)
+            member.homepage_url = ''
+            self.assertEqual(["WARNING:root:Member.homepage_url must be not be blank for 'test'"], cm.output)
+        self.assertIsNone(member.homepage_url)
 
-    def testSetWebsiteNotValid(self):
-        invalidWebsiteURLs = [
+    def testSethomepage_urlNotValid(self):
+        invalidhomepage_urlURLs = [
             'htps:/yahoo.com',
             '/dog/'
         ]
 
-        for invalidWebsiteURL in invalidWebsiteURLs:
+        for invalidhomepage_urlURL in invalidhomepage_urlURLs:
             member = Member()
-            member.orgname = 'test'
+            member.name = 'test'
             with self.assertLogs() as cm:
-                member.website = invalidWebsiteURL
-                self.assertEqual(["WARNING:root:Member.website for 'test' must be set to a valid website - '{website}' provided".format(website=invalidWebsiteURL)], cm.output)
+                member.homepage_url = invalidhomepage_urlURL
+                self.assertEqual(["WARNING:root:Member.homepage_url for 'test' must be set to a valid homepage_url - '{homepage_url}' provided".format(homepage_url=invalidhomepage_urlURL)], cm.output)
 
-            self.assertIsNone(member.website)
+            self.assertIsNone(member.homepage_url)
 
     def testSetLogoValid(self):
         validLogos = [
@@ -141,13 +152,13 @@ class TestMember(unittest.TestCase):
         for validLogo in validLogos:
             with unittest.mock.patch("builtins.open", unittest.mock.mock_open(read_data="data")) as mock_file:
                 member = Member()
-                member.orgname = 'dog'
+                member.name = 'dog'
                 member.logo = validLogo
                 self.assertEqual(member.logo,validLogo)
 
     def testSetLogoNotValidOnEmpty(self):
         member = Member()
-        member.orgname = 'test'
+        member.name = 'test'
         with self.assertLogs() as cm:
             member.logo = ''
             self.assertEqual(["WARNING:root:Member.logo must be not be blank for 'test'"], cm.output)
@@ -162,10 +173,10 @@ class TestMember(unittest.TestCase):
         for invalidLogo in invalidLogos:
             with unittest.mock.patch("builtins.open", unittest.mock.mock_open(read_data="<text")) as mock_file:
                 member = Member()
-                member.orgname = 'test'
+                member.name = 'test'
                 with self.assertLogs() as cm:
                     member.logo = invalidLogo
-                    self.assertEqual(["WARNING:root:Member.logo for '{orgname}' invalid format".format(orgname=member.orgname)], cm.output)
+                    self.assertEqual(["WARNING:root:Member.logo for '{name}' invalid format".format(name=member.name)], cm.output)
                 self.assertIsNone(member.logo)
 
     def testTwitterValid(self):
@@ -179,7 +190,7 @@ class TestMember(unittest.TestCase):
 
         for validTwitter in validTwitters:
             member = Member()
-            member.orgname = 'test'
+            member.name = 'test'
             member.twitter = validTwitter
             self.assertEqual(member.twitter,'https://twitter.com/dog')
 
@@ -191,7 +202,7 @@ class TestMember(unittest.TestCase):
 
         for invalidTwitter in invalidTwitters:
             member = Member()
-            member.orgname = 'test'
+            member.name = 'test'
             with self.assertLogs() as cm:
                 member.twitter = invalidTwitter
                 self.assertEqual(["WARNING:root:Member.twitter for 'test' must be either a Twitter handle, or the URL to a twitter handle - '{twitter}' provided".format(twitter=invalidTwitter)], cm.output)
@@ -199,55 +210,66 @@ class TestMember(unittest.TestCase):
 
     def testSetTwitterNull(self):
         member = Member()
-        member.orgname = 'test'
+        member.name = 'test'
         member.twitter = None
         self.assertIsNone(member.twitter)
 
     def testToLandscapeItemAttributes(self):
         member = Member()
-        member.orgname = 'test'
-        member.website = 'https://foo.com'
+        member.name = 'test'
+        member.homepage_url = 'https://foo.com'
         member.membership = 'Gold'
         member.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society'
         member.extra = {}
+        member.foo = 'foo'
         dict = member.toLandscapeItemAttributes()
 
-        self.assertEqual(dict.get('name'),member.orgname)
-        self.assertEqual(dict.get('homepage_url'),member.website)
+        self.assertEqual(dict.get('name'),member.name)
+        self.assertEqual(dict.get('homepage_url'),member.homepage_url)
         self.assertEqual(dict.get('crunchbase'),member.crunchbase)
         self.assertNotIn('extra',dict)
         self.assertNotIn('membership',dict)
         self.assertIsNone(dict.get('logo'))
         self.assertIsNone(dict.get('item'))
+        self.assertIsNone(dict.get('foo'))
 
     def testToLandscapeItemAttributesEmptyCrunchbase(self):
         member = Member()
-        member.orgname = 'test'
-        member.website = 'https://foo.com'
+        member.name = 'test'
+        member.homepage_url = 'https://foo.com'
         member.membership = 'Gold'
         member.linkedin = 'https://www.linkedin.com/company/208777'
+        member.extra = {'foo': 'foo', 'accepted': "2023-05-14", 'annotations': {'foo':'foo'}}
+        member.second_path = ['list2','list3']
         dict = member.toLandscapeItemAttributes()
 
-        self.assertEqual(dict.get('name'),member.orgname)
-        self.assertEqual(dict.get('homepage_url'),member.website)
-        self.assertEqual(dict.get('organization',{}).get('name'),member.orgname)
+        self.assertEqual(dict.get('name'),member.name)
+        self.assertEqual(dict.get('homepage_url'),member.homepage_url)
+        self.assertEqual(dict.get('organization',{}).get('name'),member.name)
         self.assertEqual(dict.get('organization',{}).get('linkedin'),member.linkedin)
         self.assertIsNone(dict.get('logo'))
         self.assertIsNone(dict.get('item'))
         self.assertNotIn('crunchbase',dict)
+        self.assertEqual(dict.get('extra').get('linkedin_url'),member.linkedin)
+        self.assertEqual(member.extra['accepted'],"2023-05-14")
+        self.assertEqual(member.extra['annotations']['foo'],'foo')
+        self.assertEqual(member.extra['foo'],'foo')
+        self.assertIn('list2',member.second_path)
+        self.assertIn('list3',member.second_path)
+
     
     def testToLandscapeItemAttributesWithSuffix(self):
         member = Member()
         member.entrysuffix = ' (testme)'
-        member.orgname = 'test'
-        member.website = 'https://foo.com'
+        member.name = 'test'
+        member.homepage_url = 'https://foo.com'
         member.membership = 'Gold'
         member.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society'
         member.linkedin = 'https://www.linkedin.com/company/208777'
         dict = member.toLandscapeItemAttributes()
 
-        self.assertEqual(dict.get('name'),member.orgname+" (testme)")
-        self.assertEqual(dict.get('homepage_url'),member.website)
+        self.assertEqual(dict.get('name'),member.name+" (testme)")
+        self.assertEqual(dict.get('homepage_url'),member.homepage_url)
         self.assertEqual(dict.get('crunchbase'),member.crunchbase)
         self.assertEqual(dict.get('extra',{}).get('linkedin_url'),member.linkedin)
         self.assertIsNone(dict.get('logo'))
@@ -256,8 +278,8 @@ class TestMember(unittest.TestCase):
 
     def testIsValidLandscapeItem(self):
         member = Member()
-        member.orgname = 'test'
-        member.website = 'https://foo.com'
+        member.name = 'test'
+        member.homepage_url = 'https://foo.com'
         with unittest.mock.patch("builtins.open", unittest.mock.mock_open(read_data="data")) as mock_file:
             member.logo = 'Gold.svg'
         member.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society'
@@ -266,69 +288,80 @@ class TestMember(unittest.TestCase):
 
     def testIsValidLandscapeItemEmptyCrunchbase(self):
         member = Member()
-        member.orgname = 'test3'
-        member.website = 'https://foo.com'
+        member.name = 'test3'
+        member.homepage_url = 'https://foo.com'
         with unittest.mock.patch("builtins.open", unittest.mock.mock_open(read_data="data")) as mock_file:
             member.logo = 'Gold.svg'
 
         self.assertTrue(member.isValidLandscapeItem())
     
-    def testIsValidLandscapeItemEmptyOrgname(self):
+    def testIsValidLandscapeItemEmptyname(self):
         member = Member()
-        member.orgname = ''
-        member.website = 'https://foo.com'
+        member.name = ''
+        member.homepage_url = 'https://foo.com'
         with unittest.mock.patch("builtins.open", unittest.mock.mock_open(read_data="data")) as mock_file:
             member.logo = 'Gold.svg'
         member.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society'
 
         self.assertFalse(member.isValidLandscapeItem())
-        self.assertIn('orgname',member.invalidLandscapeItemAttributes())
+        self.assertIn('name',member.invalidLandscapeItemAttributes())
     
-    def testIsValidLandscapeItemEmptyWebsiteLogo(self):
+    def testIsValidLandscapeItemEmptyhomepage_urlLogo(self):
         member = Member()
-        member.orgname = 'foo'
-        member.website = ''
+        member.name = 'foo'
+        member.homepage_url = ''
         with unittest.mock.patch("builtins.open", unittest.mock.mock_open(read_data="data")) as mock_file:
             member.logo = ''
         member.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society'
 
         self.assertFalse(member.isValidLandscapeItem())
         self.assertIn('logo',member.invalidLandscapeItemAttributes())
-        self.assertIn('website',member.invalidLandscapeItemAttributes())
+        self.assertIn('homepage_url',member.invalidLandscapeItemAttributes())
 
     def testOverlay(self):
         membertooverlay = Member()
         membertooverlay.name = 'test2'
-        membertooverlay.website = 'https://foo.com'
+        membertooverlay.homepage_url = 'https://foo.com'
         with unittest.mock.patch("builtins.open", unittest.mock.mock_open(read_data="data")) as mock_file:
             membertooverlay.logo = 'gold.svg'
         membertooverlay.membership = 'Gold'
         membertooverlay.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society-bad'
-        membertooverlay.organization = {'name':'foo'} 
+        membertooverlay.organization = {'name':'foo'}
+        membertooverlay.extra = {'foo': 'foo', 'accepted': "2023-05-14", 'annotations': {'foo':'foo'}}
+        membertooverlay.second_path = ['list1','list3']
 
         member = Member()
-        member.orgname = 'test'
-        member.website = 'https://foo.org'
+        member.name = 'test'
+        member.homepage_url = 'https://foo.org'
         member.membership = 'Silver'
         member.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society'
         member.twitter = 'https://twitter.com/mytwitter'
         member.stock_ticker = None
+        member.extra = {'accepted': "2024-05-14", 'annotations': {'bar': 'bar'}}
+        member.second_path = ['list2','list3']
 
         with unittest.mock.patch("builtins.open", unittest.mock.mock_open(read_data="data")) as mock_file:
-            membertooverlay.overlay(member)
+            member.overlay(membertooverlay)
 
-        self.assertEqual(member.orgname,'test')
-        self.assertEqual(member.website,'https://foo.org/')
+        self.assertEqual(member.name,'test2')
+        self.assertEqual(member.homepage_url,'https://foo.com/')
         self.assertEqual(member.logo,'gold.svg')
-        self.assertEqual(member.membership,'Silver')
-        self.assertEqual(member.crunchbase, 'https://www.crunchbase.com/organization/visual-effects-society')
+        self.assertEqual(member.membership,'Gold')
+        self.assertEqual(member.crunchbase, 'https://www.crunchbase.com/organization/visual-effects-society-bad')
         self.assertEqual(member.twitter,'https://twitter.com/mytwitter')
         self.assertIsNone(member.stock_ticker)
         self.assertEqual(member.organization,{})
+        self.assertEqual(member.extra['accepted'],"2023-05-14")
+        self.assertEqual(member.extra['annotations']['bar'],'bar')
+        self.assertEqual(member.extra['annotations']['foo'],'foo')
+        self.assertEqual(member.extra['foo'],'foo')
+        self.assertIn('list1',member.second_path)
+        self.assertIn('list2',member.second_path)
+        self.assertIn('list3',member.second_path)
 
     def testOverlayOnlyKeys(self):
         membertooverlay = Member()
-        membertooverlay.orgname = 'test'
+        membertooverlay.name = 'test'
         membertooverlay.homepage_url = 'https://foo.com'
         with unittest.mock.patch("builtins.open", unittest.mock.mock_open(read_data="data")) as mock_file:
             membertooverlay.logo = 'gold.svg'
@@ -337,8 +370,8 @@ class TestMember(unittest.TestCase):
         membertooverlay.organization = {'name':'foo'} 
 
         member = Member()
-        member.orgname = 'test'
-        member.website = 'https://foo.org'
+        member.name = 'test'
+        member.homepage_url = 'https://foo.org'
         with unittest.mock.patch("builtins.open", unittest.mock.mock_open(read_data="data")) as mock_file:
             member.logo = 'silver.svg'
         member.membership = 'Silver'
@@ -346,10 +379,11 @@ class TestMember(unittest.TestCase):
         member.twitter = 'https://twitter.com/mytwitter'
         member.stock_ticker = None
 
-        membertooverlay.overlay(member,['website'])
+        with unittest.mock.patch("builtins.open", unittest.mock.mock_open(read_data="data")) as mock_file:
+            membertooverlay.overlay(member,['homepage_url'])
 
-        self.assertEqual(member.orgname,'test')
-        self.assertEqual(member.website,'https://foo.org/')
+        self.assertEqual(member.name,'test')
+        self.assertEqual(member.homepage_url,'https://foo.org/')
         self.assertEqual(member.logo,'silver.svg')
         self.assertEqual(member.membership,'Silver')
         self.assertEqual(member.crunchbase, 'https://www.crunchbase.com/organization/visual-effects-society')
@@ -360,7 +394,7 @@ class TestMember(unittest.TestCase):
     def testOverlayItemThrowsException(self):
         membertooverlay = Member()
         membertooverlay.name = 'test2'
-        membertooverlay.website = 'https://foo.com'
+        membertooverlay.homepage_url = 'https://foo.com'
         with unittest.mock.patch("builtins.open", unittest.mock.mock_open(read_data="data")) as mock_file:
             membertooverlay.logo = 'gold.svg'
         membertooverlay.membership = 'Gold'
@@ -369,8 +403,8 @@ class TestMember(unittest.TestCase):
         membertooverlay.organization = {'name':'foo'} 
 
         member = Member()
-        member.orgname = 'test'
-        member.website = 'https://foo.org'
+        member.name = 'test'
+        member.homepage_url = 'https://foo.org'
         member.membership = 'Silver'
         member.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society'
         member.twitter = 'https://twitter.com/mytwitter'
@@ -387,7 +421,7 @@ class TestMember(unittest.TestCase):
             tmpfilename.close()
 
             member = Member()
-            member.orgname = 'dog'
+            member.name = 'dog'
             member.logo = SVGLogo(name='dog')
             member.hostLogo(tempdir)
             self.assertTrue(os.path.exists(os.path.join(tempdir,'dog.svg')))
@@ -405,12 +439,4 @@ class TestMember(unittest.TestCase):
         self.assertIsNone(member.extra.get("youtube_url"))
 
 if __name__ == '__main__':
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s [%(levelname)s] %(message)s",
-        handlers=[
-            logging.FileHandler("debug.log"),
-        ]
-    )
-    
     unittest.main()

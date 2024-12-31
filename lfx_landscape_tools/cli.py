@@ -50,7 +50,7 @@ class Cli:
         synclandscapeprojects_parser.set_defaults(func=self.syncprojects)
         
         maketextlogo_parser = subparsers.add_parser("maketextlogo", help="Create a text pure SVG logo")
-        maketextlogo_parser.add_argument("-n", "--name", dest="orgname", required=True, help="Name to appear in logo")
+        maketextlogo_parser.add_argument("-n", "--name", dest="name", required=True, help="Name to appear in logo")
         maketextlogo_parser.add_argument("--autocrop", dest="autocrop", action='store_true', help="Process logo with autocrop")
         maketextlogo_parser.add_argument("-o", "--output", dest="filename", help="Filename to save created logo to")
         maketextlogo_parser.set_defaults(func=self.maketextlogo)
@@ -90,7 +90,7 @@ class Cli:
         landscapeoutput.addItems(LFXMembers(config=config))
         landscapeoutput.save()
         
-        logging.getLogger().info("Successfully added {} members and skipped {} members".format(landscapeoutput.itemsAdded,landscapeoutput.itemsErrors))
+        logging.getLogger().info("Successfully processed {} members and skipped {} members".format(landscapeoutput.itemsProcessed,landscapeoutput.itemsErrors))
 
     def buildprojects(self,args):
         config = Config(args.configfile,view='projects')
@@ -99,21 +99,21 @@ class Cli:
         landscapeoutput.addItems(LFXProjects(config=config))
         landscapeoutput.save()
         
-        logging.getLogger().info("Successfully added {} projects and skipped {} projects".format(landscapeoutput.itemsAdded,landscapeoutput.itemsErrors))
+        logging.getLogger().info("Successfully processed {} projects and skipped {} projects".format(landscapeoutput.itemsProcessed,landscapeoutput.itemsErrors))
 
     def syncprojects(self,args):
         config = Config(args.configfile,view='projects')
         landscapeoutput = LandscapeOutput(config=config, resetCategory=False)
         logging.getLogger().info("Syncing TAC Agenda Project data")
-        landscapeoutput.syncItems(TACAgendaProject(config=config))
+        landscapeoutput.overlayItems(TACAgendaProject(config=config))
         logging.getLogger().info("Syncing LFX Projects data")
-        landscapeoutput.syncItems(LFXProjects(config=config)) 
+        landscapeoutput.overlayItems(LFXProjects(config=config)) 
         landscapeoutput.save()
         
-        logging.getLogger().info("Successfully added {} projects, updated {} projects, and skipped {} projects".format(landscapeoutput.itemsAdded,landscapeoutput.itemsUpdated,landscapeoutput.itemsErrors))
+        logging.getLogger().info("Successfully processed {} projects, updated {} projects, and skipped {} projects".format(landscapeoutput.itemsProcessed,landscapeoutput.itemsUpdated,landscapeoutput.itemsErrors))
 
     def maketextlogo(self,args):
-        svglogo = SVGLogo(name=args.orgname)
+        svglogo = SVGLogo(name=args.name)
 
         if args.autocrop:
             svglogo.autocrop()

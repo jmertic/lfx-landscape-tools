@@ -22,6 +22,17 @@ from lfx_landscape_tools.lfxprojects import LFXProjects
 from lfx_landscape_tools.tacagendaproject import TACAgendaProject
 
 class TestTACAgendaProjects(unittest.TestCase):
+    
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format="%(asctime)s [%(levelname)s] %(message)s",
+        handlers=[
+            logging.FileHandler("debug.log",mode="w"),
+        ]
+    )
+    
+    def setUp(self):
+        logging.getLogger().debug("Running {}".format(unittest.TestCase.id(self)))
 
     @unittest.mock.patch('subprocess.run')
     def testLoadData(self, mock_run):
@@ -41,7 +52,7 @@ class TestTACAgendaProjects(unittest.TestCase):
        
         with unittest.mock.patch('requests_cache.CachedSession', requests.Session):
             members.loadData()
-        self.assertEqual(members.members[0].orgname,"D&I Working Group")
+        self.assertEqual(members.members[0].name,"D&I Working Group")
         self.assertEqual(len(members.members),1)
     
     @unittest.mock.patch('subprocess.run')
@@ -91,12 +102,4 @@ class TestTACAgendaProjects(unittest.TestCase):
         self.assertEqual(members.members,[])
 
 if __name__ == '__main__':
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s [%(levelname)s] %(message)s",
-        handlers=[
-            logging.FileHandler("debug.log"),
-        ]
-    )
-    
     unittest.main()
