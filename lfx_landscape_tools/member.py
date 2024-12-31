@@ -55,9 +55,9 @@ class Member:
             endpointResponse.raise_for_status() 
             dataschema = ruamel.yaml.YAML().load(endpointResponse.text)
         except requests.exceptions.RequestException as e:
-            logging.getLogger().error("Cannot load data file schema at {} - error message '{}'",schemaURL,e)
+            logging.getLogger().error("Cannot load data file schema at {} - error message '{}'".format(schemaURL,e))
         except ruamel.yaml.YAMLError as e: 
-            logging.getLogger().error("Data file at {} is not valid YAML - error message '{}'",schemaURL,e)
+            logging.getLogger().error("Data file at {} is not valid YAML - error message '{}'".format(schemaURL,e))
         else:
             self.itemschema = dataschema.get('categories',{})[0].get('subcategories',{})[0].get('items',{})[0]
 
@@ -330,6 +330,8 @@ class Member:
         from the other Member, and setting other Member's value in this Member if they aren't set
         '''
         for key in dir(membertooverlay):
+            if onlykeys and key not in onlykeys:
+                continue
             value = getattr(membertooverlay,key,None)
             logging.getLogger().debug("Checking for overlay '{}' - current value '{}' - overlay value '{}'".format(key,value,getattr(self,key,None)))
             if isinstance(value,dict):
