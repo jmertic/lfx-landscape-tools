@@ -59,7 +59,7 @@ runs:
         GITHUB_TOKEN: ${{ env.token }}
         GH_TOKEN: ${{ env.token }}
     - name: Save missing.csv file
-      uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+      uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4.5.0
       with:
         name: missing-members 
         path: ./landscape/missing.csv
@@ -94,7 +94,7 @@ runs:
       with:
         format: "YYYY-MM-DD"
     - name: Create Pull Request
-      uses: peter-evans/create-pull-request@5e914681df9dc83aa4e4905692ca88beb2f9e91f # v7.0.5
+      uses: peter-evans/create-pull-request@67ccf781d68cd99b580ae25a5c18a1cc84ffff1f # v7.0.6
       with:
         token: ${{ env.token }}
         branch-suffix: timestamp
