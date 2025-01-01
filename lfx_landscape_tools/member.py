@@ -333,14 +333,14 @@ class Member:
             if onlykeys and key not in onlykeys:
                 continue
             value = getattr(membertooverlay,key,None)
-            logging.getLogger().debug("Checking for overlay '{}' - current value '{}' - overlay value '{}'".format(key,value,getattr(self,key,None)))
+            logging.getLogger().debug("Checking for overlay '{}' - current value '{}' - overlay value '{}'".format(key,getattr(self,key,None),value))
             if isinstance(value,dict):
                 for subkey, subvalue in value.items():
-                    logging.getLogger().debug("Checking for overlay '{}.{}' - current value '{}' - overlay value '{}'".format(key,subkey,subvalue,getattr(self,key,{}).get(subkey,'empty')))
+                    logging.getLogger().debug("Checking for overlay '{}.{}' - current value '{}' - overlay value '{}'".format(key,subkey,getattr(self,key,{}).get(subkey,'empty'),subvalue))
                     if isinstance(subvalue,dict):
                         for subsubkey, subsubvalue in subvalue.items():
                             logging.getLogger().debug("Checking for overlay '{}.{}.{}' - current value '{}' - overlay value '{}'"
-                                    .format(key,subkey,subsubkey,subsubvalue,getattr(self,key,{}).get(subkey,{}).get(subsubkey,'empty')))
+                                    .format(key,subkey,subsubkey,getattr(self,key,{}).get(subkey,{}).get(subsubkey,'empty'),subsubvalue))
                             if subsubvalue != None and getattr(self,key,{}).get(subkey,{}).get(subsubkey,None) != subsubvalue:
                                 logging.getLogger().debug("...Overlay '{}.{}.{}'".format(key,subkey,subsubkey))
                                 logging.getLogger().debug(".....Old Value - '{}'".format(getattr(self,key,{}).get(subkey,{}).get(subsubkey,'empty')))
@@ -359,10 +359,11 @@ class Member:
                             else:
                                 setattr(self,key,{subkey:subvalue})
             elif isinstance(value,list) and sorted(value) != sorted(getattr(self,key,[])):
-                logging.getLogger().debug("...Overlay '{}'".format(key))
-                logging.getLogger().debug(".....Old Value - '{}'".format(sorted(getattr(self,key,None))))
-                logging.getLogger().debug(".....New Value - '{}'".format(sorted(list(set(value + getattr(self,key,[]))))))
-                setattr(self,key,list(set(value + sorted(getattr(self,key,[])))))
+                if value != []:
+                    logging.getLogger().debug("...Overlay '{}'".format(key))
+                    logging.getLogger().debug(".....Old Value - '{}'".format(sorted(getattr(self,key,None))))
+                    logging.getLogger().debug(".....New Value - '{}'".format(sorted(list(set(value + getattr(self,key,[]))))))
+                    setattr(self,key,list(set(value + sorted(getattr(self,key,[])))))
             elif value != None and value != getattr(self,key,None):
                 logging.getLogger().debug("...Overlay '{}'".format(key))
                 logging.getLogger().debug(".....Old Value - '{}'".format(getattr(self,key,None)))
