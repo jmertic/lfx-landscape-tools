@@ -59,13 +59,17 @@ class LFXProjects(Members):
         with session.get(self.endpointURL.format(self.project if self.projectsFilterByParentSlug else '')) as endpointResponse:
             memberList = endpointResponse.json()
             for record in memberList['Data']:
-                if self.find(record.get('Name'),record.get('homepage_url')):
+                if self.find(name=record.get('Name'),homepage_url=record.get('Website'),slug=record.get('Slug')):
+                    logger.debug("Skipping '{}'".format(record.get('Name')))
                     continue
                 if self.activeOnly and record['Status'] != 'Active':
+                    logger.debug("Skipping '{}'".format(record.get('Name')))
                     continue
-                if not record.get('DisplayOnhomepage_url'):
+                if not record.get('DisplayOnWebsite'):
+                    logger.debug("Skipping '{}'".format(record.get('Name')))
                     continue
                 if record.get('TestRecord'):
+                    logger.debug("Skipping '{}'".format(record.get('Name')))
                     continue
 
                 second_path = []
@@ -89,8 +93,8 @@ class LFXProjects(Members):
                             member.membership = projectLevel.get('name')
                             logger.debug("Project level is {} - {}".format(member.project,member.membership))
                             break
-                member.homepage_url = record.get('homepage_url')
-                if not member.homepage_url:
+                member.homepage_url = record.get('Website')
+                if not member.homepage_url and record.get('RepositoryURL'):
                     logger.debug("Trying to use 'RepositoryURL' for 'homepage_url' instead")
                     member.homepage_url = record.get('RepositoryURL')
                 if self.addParentProject:

@@ -41,6 +41,7 @@ class Members(ABC):
 
         Matches in this order - slug, membership+name+homepage_url, repo_url+name+homepage_url, name+homepage_url
         '''
+        
         normalizedname = self.normalizeName(name)
         normalizedhomepage_url = self.normalizeURL(homepage_url)
         normalizedrepo_url = self.normalizeURL(homepage_url)
@@ -50,24 +51,27 @@ class Members(ABC):
 
         members = []
         for member in self.members:
-            logger.debug(member.name)
-            logger.debug(member.extra.get('annotations',{}).get('slug'))
             if slug:
                 if member.extra.get('annotations',{}).get('slug') and member.extra.get('annotations',{}).get('slug') == slug:
                     logger.debug("Found '{}' by slug '{}'".format(member.name,member.extra.get('annotations',{}).get('slug')))
                     members.append(member)
-            elif membership:
+            elif membership and normalizedname and normalizedhomepage_url:
                 if ( self.normalizeName(member.name) == normalizedname or member.homepage_url == normalizedhomepage_url ) and member.membership == membership:
                     logger.debug("Found '{}' by membership '{}' and homepage_url '{}'".format(member.name,member.membership,member.homepage_url))
                     members.append(member)
-            elif repo_url:
+            elif normalizedrepo_url and normalizedname and normalizedhomepage_url:
                 if ( self.normalizeName(member.name) == normalizedname or member.homepage_url == normalizedhomepage_url or member.repo_url == normalizedrepo_url):
                     logger.debug("Found '{}' by repo_url '{}' and homepage_url '{}'".format(member.name,member.repo_url,member.homepage_url))
                     members.append(member)
-            else:
+            elif normalizedname and normalizedhomepage_url:
                 if ( self.normalizeName(member.name) == normalizedname or member.homepage_url == normalizedhomepage_url ):
                     logger.debug("Found '{}' by homepage_url '{}'".format(member.name,member.homepage_url))
                     members.append(member)
+            elif normalizedname:
+                if ( self.normalizeName(member.name) == normalizedname ):
+                    logger.debug("Found '{}' by name".format(member.name))
+                    members.append(member)
+
                 
         return members
     

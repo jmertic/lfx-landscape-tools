@@ -31,15 +31,17 @@ class LFXMembers(Members):
 
         with requests.get(self.endpointURL.format(self.project)) as endpointResponse:
             memberList = endpointResponse.json()
+            logger.info('Found {} records'.format(len(memberList)))
             for record in memberList:
-                if self.find(name=record.get('Name'),homepage_url=record.get('homepage_url'),membership=record.get('Membership',{}).get('Name')) or self._isTestRecord(record):
+                if self.find(name=record.get('Name'),homepage_url=record.get('Website'),membership=record.get('Membership',{}).get('Name')) or self._isTestRecord(record):
+                    logger.debug("Skipping '{}'".format(record.get('Name')))
                     continue
 
                 member = Member()
                 member.name = record.get('Name')
                 logger.info("Found LFX Member '{}'".format(member.name))
                 member.membership = record.get('Membership',{}).get('Name')
-                member.homepage_url = record.get('homepage_url')
+                member.homepage_url = record.get('Website')
                 member.description = record.get('OrganizationDescription')
                 member.logo = record.get('Logo')
                 if not member.logo:

@@ -67,7 +67,7 @@ class TestLFXProjects(unittest.TestCase):
                     {
                         "AutoJoinEnabled": True,
                         "Description": "The mission of the Academy Software Foundation (ASWF) is to increase the quality and quantity of contributions to the content creation industry’s open source software base; to provide a neutral forum to coordinate cross-project efforts; to provide a common build and test infrastructure; and to provide individuals and organizations a clear path to participation in advancing our open source ecosystem.",
-                        "DisplayOnhomepage_url": True,
+                        "DisplayOnWebsite": True,
                         "HasProgramManager": True,
                         "Industry": [
                             "Motion Pictures"
@@ -86,7 +86,7 @@ class TestLFXProjects(unittest.TestCase):
                         "Status": "Active",
                         "TechnologySector": "Visual Effects",
                         "TestRecord": False,
-                        "homepage_url": "https://www.aswf.io/"
+                        "Website": "https://www.aswf.io/"
                     }
                 ],
                 "Metadata": {
@@ -104,7 +104,7 @@ class TestLFXProjects(unittest.TestCase):
                         "AutoJoinEnabled": False,
                         "Description": "OpenCue is an open source render management system. You can use OpenCue in visual effects and animation production to break down complex jobs into individual tasks. You can submit jobs to a configurable dispatch queue that allocates the necessary computational resources.",
                         "Category": "Adopted",
-                        "DisplayOnhomepage_url": True,
+                        "DisplayOnWebsite": True,
                         "HasProgramManager": False,
                         "Industry": [
                             "Motion Pictures"
@@ -127,12 +127,12 @@ class TestLFXProjects(unittest.TestCase):
                         "Status": "Active",
                         "TechnologySector": "DevOps, CI/CD & Site Reliability;Web & Application Development;Visual Effects",
                         "TestRecord": False,
-                        "homepage_url": "https://opencue.io"
+                        "Website": "https://opencue.io"
                     },
                     {
                         "AutoJoinEnabled": False,
                         "Description": "OpenTimelineIO (OTIO) is an API and interchange format for editorial cut information. You can think of it as a modern Edit Decision List (EDL) that also includes an API for reading, writing, and manipulating editorial data. It also includes a plugin system for translating to/from existing editorial formats as well as a plugin system for linking to proprietary media storage schemas.",
-                        "DisplayOnhomepage_url": True,
+                        "DisplayOnWebsite": True,
                         "Category": "Incubating",
                         "HasProgramManager": True,
                         "Industry": [
@@ -155,7 +155,7 @@ class TestLFXProjects(unittest.TestCase):
                     {
                         "AutoJoinEnabled": False,
                         "Description": "The goal of the OpenEXR project is to keep the format reliable and modern and to maintain its place as the preferred image format for entertainment content creation.",
-                        "DisplayOnhomepage_url": True,
+                        "DisplayOnWebsite": True,
                         "Category": "Adopted",
                         "HasProgramManager": False,
                         "Industry": [
@@ -176,7 +176,7 @@ class TestLFXProjects(unittest.TestCase):
                     {
                         "AutoJoinEnabled": False,
                         "Description": "The mission of the Project is to develop an open-source interoperability standard for tools and content management systems used in media production.",
-                        "DisplayOnhomepage_url": True,
+                        "DisplayOnWebsite": True,
                         "Category": "Sandbox",
                         "HasProgramManager": False,
                         "Industry": [
@@ -195,12 +195,12 @@ class TestLFXProjects(unittest.TestCase):
                         "TechnologySector": "Visual Effects",
                         "TestRecord": False,
                         "Twitter": "https://yahoo.com",
-                        "homepage_url": "openassetio.org"
+                        "Website": "openassetio.org"
                     },
                     {
                         "AutoJoinEnabled": False,
                         "Description": "The mission of the Project is to develop an open-source interoperability standard for tools and content management systems used in media production.",
-                        "DisplayOnhomepage_url": True,
+                        "DisplayOnWebsite": True,
                         "HasProgramManager": False,
                         "Industry": [
                             "Motion Pictures"
@@ -217,12 +217,12 @@ class TestLFXProjects(unittest.TestCase):
                         "Status": "Active",
                         "TechnologySector": "Visual Effects",
                         "TestRecord": False,
-                        "homepage_url": "openassetio.org"
+                        "Website": "openassetio.org"
                     },
                     {
                         "AutoJoinEnabled": True,
                         "Description": "The mission of the Academy Software Foundation (ASWF) is to increase the quality and quantity of contributions to the content creation industry’s open source software base; to provide a neutral forum to coordinate cross-project efforts; to provide a common build and test infrastructure; and to provide individuals and organizations a clear path to participation in advancing our open source ecosystem.",
-                        "DisplayOnhomepage_url": True,
+                        "DisplayOnWebsite": True,
                         "HasProgramManager": True,
                         "Industry": [
                             "Motion Pictures"
@@ -241,7 +241,7 @@ class TestLFXProjects(unittest.TestCase):
                         "Status": "Active",
                         "TechnologySector": "Visual Effects",
                         "TestRecord": False,
-                        "homepage_url": "https://www.aswf.io/"
+                        "Website": "https://www.aswf.io/"
                     }
                 ],
                 "Metadata": {
@@ -716,7 +716,7 @@ class TestLFXProjects(unittest.TestCase):
                     {
                       "AutoJoinEnabled": True,
                       "Description": "The mission of the Academy Software Foundation (ASWF) is to increase the quality and quantity of contributions to the content creation industry’s open source software base; to provide a neutral forum to coordinate cross-project efforts; to provide a common build and test infrastructure; and to provide individuals and organizations a clear path to participation in advancing our open source ecosystem.",
-                      "DisplayOnhomepage_url": True,
+                      "DisplayOnWebsite": True,
                       "HasProgramManager": True,
                       "Industry": [
                         "Motion Pictures"
@@ -735,7 +735,7 @@ class TestLFXProjects(unittest.TestCase):
                       "Status": "Active",
                       "TechnologySector": "Visual Effects",
                       "TestRecord": False,
-                      "homepage_url": "https://www.aswf.io/"
+                      "Website": "https://www.aswf.io/"
                     }
                   ],
                   "Metadata": {
@@ -793,7 +793,7 @@ class TestLFXProjects(unittest.TestCase):
                     {
                         "AutoJoinEnabled": False,
                         "Description": "OpenCue is an open source render management system. You can use OpenCue in visual effects and animation production to break down complex jobs into individual tasks. You can submit jobs to a configurable dispatch queue that allocates the necessary computational resources.",
-                        "DisplayOnhomepage_url": False,
+                        "DisplayOnWebsite": False,
                         "HasProgramManager": False,
                         "Industry": [
                             "Motion Pictures"
@@ -811,12 +811,12 @@ class TestLFXProjects(unittest.TestCase):
                         "Status": "Active",
                         "TechnologySector": "DevOps, CI/CD & Site Reliability;Web & Application Development;Visual Effects",
                         "TestRecord": False,
-                        "homepage_url": "https://opencue.io"
+                        "Website": "https://opencue.io"
                     },
                     {
                         "AutoJoinEnabled": False,
                         "Description": "OpenCue is an open source render management system. You can use OpenCue in visual effects and animation production to break down complex jobs into individual tasks. You can submit jobs to a configurable dispatch queue that allocates the necessary computational resources.",
-                        "DisplayOnhomepage_url": True,
+                        "DisplayOnWebsite": True,
                         "HasProgramManager": False,
                         "Industry": [
                             "Motion Pictures"
@@ -834,12 +834,12 @@ class TestLFXProjects(unittest.TestCase):
                         "Status": "Formation - Exploratory",
                         "TechnologySector": "DevOps, CI/CD & Site Reliability;Web & Application Development;Visual Effects",
                         "TestRecord": False,
-                        "homepage_url": "https://opencue.io"
+                        "Website": "https://opencue.io"
                     },
                     {
                         "AutoJoinEnabled": False,
                         "Description": "OpenTimelineIO (OTIO) is an API and interchange format for editorial cut information. You can think of it as a modern Edit Decision List (EDL) that also includes an API for reading, writing, and manipulating editorial data. It also includes a plugin system for translating to/from existing editorial formats as well as a plugin system for linking to proprietary media storage schemas.",
-                        "DisplayOnhomepage_url": True,
+                        "DisplayOnWebsite": True,
                         "HasProgramManager": False,
                         "Industry": [
                             "Motion Pictures"
@@ -857,7 +857,7 @@ class TestLFXProjects(unittest.TestCase):
                         "Status": "Active",
                         "TechnologySector": "Web & Application Development;Visual Effects",
                         "TestRecord": True,
-                        "homepage_url": "http://opentimeline.io/"
+                        "Website": "http://opentimeline.io/"
                     },
                 ],
                 "Metadata": {

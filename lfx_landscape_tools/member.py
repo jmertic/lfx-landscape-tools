@@ -124,35 +124,40 @@ class Member:
         return self._isGitHubURL(url) and len(urlparse(url).path.split("/")) == 2
 
     def _getPrimaryGitHubRepoFromGitHubOrg(self, url):
+        repos = self._getAllGithubReposFromGithubOrg(url)
+        if not repos or not isinstance(repos,list):
+            return None
         return self._getAllGithubReposFromGithubOrg(url)[0]
 
     def _getAllGithubReposFromGithubOrg(self, url):
         if not self._isGitHubOrg(url):
             return list(url)
         
-        while True:
-            try:
-                if 'GITHUB_TOKEN' in os.environ:
-                    g = Github(auth=Auth.Token(os.environ['GITHUB_TOKEN']), per_page=1000)
-                else:
-                    g = Github(per_page=1000)
-                repos = []
-                for repo in g.get_organization(urlparse(url).path.split("/")[1]).get_repos():
-                    repos.append(repo.html_url)
-                return repos
-            except RateLimitExceededException:
-                logging.info("Sleeping until we get past the API rate limit....")
-                time.sleep(g.rate_limiting_resettime-now())
-            except GithubException as e:
-                if e.status == 502:
-                    logging.info("Server error - retrying...")
-                if e.status == 404:
-                    return False
-                else:
-                    logging.getLogger().warning(e.data)
-                    return
-            except socket.timeout:
-                logging.info("Server error - retrying...")
+        with requests_cache.enabled():
+            while True:
+                try:
+                    if 'GITHUB_TOKEN' in os.environ:
+                        g = Github(auth=Auth.Token(os.environ['GITHUB_TOKEN']), per_page=1000)
+                    else:
+                        g = Github(per_page=1000)
+                    repos = []
+                    for repo in g.get_organization(urlparse(url).path.split("/")[1]).get_repos():
+                        if not repo.fork:
+                            repos.append(repo.html_url)
+                    return repos
+                except RateLimitExceededException:
+                    logging.info("Sleeping until we get past the API rate limit....")
+                    time.sleep(g.rate_limiting_resettime-now())
+                except GithubException as e:
+                    if e.status == 502:
+                        logging.debug("Server error - retrying...")
+                    if e.status == 404:
+                        return False
+                    else:
+                        logging.getLogger().warning(e.data)
+                        return
+                except socket.timeout:
+                    logging.debug("Server error - retrying...")
 
     @property
     def linkedin(self):
@@ -258,12 +263,12 @@ class Member:
     @extra.setter
     def extra(self, extra):
         if not isinstance(extra,dict):
-            logging.getLogger().warning("Member.extra for '{name}' must be a list - '{extra}' provided".format(extra=extra,name=self.name))
+            logging.getLogger().debug("Member.extra for '{name}' must be a list - '{extra}' provided".format(extra=extra,name=self.name))
             self.__extra = {}
         endextra = {}
         for key, value in extra.items():
             if not value or value == 'nil':
-                logging.getLogger().warning("Removing Member.extra.{key} for '{name}' since it's set to '{value}'".format(key=key,value=value,name=self.name))
+                logging.getLogger().debug("Removing Member.extra.{key} for '{name}' since it's set to '{value}'".format(key=key,value=value,name=self.name))
                 continue
             endextra[key] = value
 
@@ -292,6 +297,11 @@ class Member:
             else:
                 returnentry[key] = getattr(self,key)
             logging.getLogger().debug("Setting '{}' to '{}'".format(key,returnentry[key]))
+
+        if self.project_org:
+            returnentry['additional_repos'] = sorted(list(set(returnentry.get('additional_repos',[] + self._getAllGithubReposFromGithubOrg(self.project_org)))))
+            returnentry['additional_repos'].remove(returnentry.get('repo_url'))
+            logging.getLogger().debug("Setting 'additional_repos' to '{}' for '{}'".format(returnentry.get('additional_repos'),self.name))
 
         if not self.crunchbase:
             logging.getLogger().debug("No Crunchbase entry for '{}' - specifying name instead".format(self.name))

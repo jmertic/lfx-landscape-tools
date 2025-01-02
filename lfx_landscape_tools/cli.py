@@ -31,7 +31,8 @@ class Cli:
         parser = ArgumentParser("Collection of tools for working with a landscape")
         group = parser.add_mutually_exclusive_group()
         group.add_argument("-s", "--silent", dest="silent", action="store_true", help="Suppress all messages")
-        group.add_argument("-v", "--verbose", dest="verbose", action='store_true', help="Verbose output ( i.e. show all INFO level messages in addition to WARN and above )")
+        group.add_argument("-l", "--log", dest="loglevel", default="error", choices=['debug', 'info', 'warning', 'error', 'critical'], help="logging level")
+        group.add_argument("-v", "--verbose", dest="verbose", action='store_true', deprecated=True, help="Verbose output (i.e. show all INFO level messages in addition to WARN and above - equivalent to `--log info`)")
         subparsers = parser.add_subparsers(help='sub-command help')
         
         buildlandscapemembers_parser = subparsers.add_parser("build_members", help="Replace current items with latest from LFX")
@@ -57,11 +58,21 @@ class Cli:
 
         args = parser.parse_args()
 
+        levels = {
+            'critical': logging.CRITICAL,   # errors that mean an immediate stop
+            'error': logging.ERROR,         # general errors that will effect the output
+            'warn': logging.WARNING,        # errors that can be caught and corrected
+            'warning': logging.WARNING,
+            'info': logging.INFO,           # infomational messages
+            'debug': logging.DEBUG          # messages to help debug things misbehaving ;-)
+        }
+        if args.verbose:
+            args.loglevel = 'info'
         logging.basicConfig(
-            level=logging.INFO if args.verbose else logging.WARN,
+            level=levels.get(args.loglevel.lower()),
             format="%(asctime)s [%(levelname)s] %(message)s",
             handlers=[
-                logging.FileHandler("debug.log"),
+                logging.FileHandler("debug.log",mode="w"),
                 logging.StreamHandler(sys.stdout) if not args.silent else None
             ]
         )
@@ -86,8 +97,7 @@ class Cli:
     def buildmembers(self,args):
         config = Config(args.configfile,view='members')
         landscapeoutput = LandscapeOutput(config=config)
-        logging.getLogger().info("Adding LFX Members data")
-        landscapeoutput.load(LFXMembers(config=config))
+        landscapeoutput.load(members=LFXMembers(config=config))
         landscapeoutput.save()
         
         logging.getLogger().info("Successfully processed {} members and skipped {} members".format(landscapeoutput.itemsProcessed,landscapeoutput.itemsErrors))
@@ -95,8 +105,7 @@ class Cli:
     def buildprojects(self,args):
         config = Config(args.configfile,view='projects')
         landscapeoutput = LandscapeOutput(config=config)
-        logging.getLogger().info("Adding LFX Projects data")
-        landscapeoutput.load(LFXProjects(config=config))
+        landscapeoutput.load(members=LFXProjects(config=config))
         landscapeoutput.save()
         
         logging.getLogger().info("Successfully processed {} projects and skipped {} projects".format(landscapeoutput.itemsProcessed,landscapeoutput.itemsErrors))
@@ -106,9 +115,9 @@ class Cli:
         logging.getLogger().info("Getting TAC Agenda Project data")
         items = TACAgendaProject(config=config)
         logging.getLogger().info("Overlaying LFX Projects data")
-        items.overlay(LFXProjects(config=config))
+        items.overlay(memberstooverlay=LFXProjects(config=config))
         logging.getLogger().info("Overlaying current Landscape data")
-        items.overlay(LandscapeMembers(config=config))
+        items.overlay(memberstooverlay=LandscapeMembers(config=config))
         landscapeoutput = LandscapeOutput(config=config)
         landscapeoutput.load(members=items)
         landscapeoutput.save()

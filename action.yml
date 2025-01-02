@@ -58,11 +58,11 @@ runs:
       env:
         GITHUB_TOKEN: ${{ env.token }}
         GH_TOKEN: ${{ env.token }}
-    - name: Save missing.csv file
+    - name: Save debug.log file
       uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4.5.0
       with:
-        name: missing-members 
-        path: ./landscape/missing.csv
+        name: debug.log 
+        path: ./landscape/debug.log
     - name: Validate landscape2 data
       uses: cncf/landscape2-validate-action@7f299c46e9b03b4e8bc2896882734fb0b0756b37 # v2.0.0
       with:
