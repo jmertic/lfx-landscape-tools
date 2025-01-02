@@ -83,6 +83,7 @@ class SVGLogo:
             os.makedirs(path)
 
         with open(filenamepath, 'w') as fp:
+            logging.getLogger().debug("Saving hosted_logos '{}'".format(filenamepath))
             fp.write(self.__contents)
 
         return filename
