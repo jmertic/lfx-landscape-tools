@@ -163,7 +163,9 @@ landscape:
             landscapemembers = LandscapeMembers(config=config,loadData=False)
             with unittest.mock.patch('requests_cache.CachedSession', requests.Session):
                 landscapemembers.loadData()    
-            landscape.load(members=landscapemembers)
+            with unittest.mock.patch('lfx_landscape_tools.svglogo.SVGLogo.save') as mock_svglogo_save:
+                mock_svglogo_save.return_value = 'here_global_b_v.svg'
+                landscape.load(members=landscapemembers)
             landscape.save()
             
             with open(tmpfilename.name) as fp:
@@ -219,7 +221,8 @@ landscape:
         members.members.append(member)
         
         landscape = LandscapeOutput(config=Config())
-        with unittest.mock.patch("builtins.open", unittest.mock.mock_open(read_data="data")) as mock_file:
+        with unittest.mock.patch('lfx_landscape_tools.svglogo.SVGLogo.save') as mock_svglogo_save:
+            mock_svglogo_save.return_value = 'Gold.svg'
             landscape.load(members)
 
         self.assertEqual(landscape.landscapeItems[0]['name'],'Premier')
@@ -274,6 +277,8 @@ landscape:
             landscape = LandscapeOutput(config=config)
             with unittest.mock.patch("builtins.open", unittest.mock.mock_open(read_data="data")) as mock_file:
                 members.members[0].logo = 'Gold.svg'
+            with unittest.mock.patch('lfx_landscape_tools.svglogo.SVGLogo.save') as mock_svglogo_save:
+                mock_svglogo_save.return_value = 'Gold.svg'
                 landscape.load(members)
             landscape.save()
             with open(tmpfilename.name) as fp:
