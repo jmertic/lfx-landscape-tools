@@ -28,9 +28,12 @@ class SVGLogo:
         if contents:
             self.__contents = contents
         elif filename:
-            with open(filename,'r') as f:
-                self.__contents = f.read()
-                self.__filename = filename
+            try:
+                with open(filename,'r') as f:
+                    self.__contents = f.read()
+                    self.__filename = filename
+            except FileNotFoundError:
+                logging.getLogger().warning("Logo '{}' not found".format(filename))
         elif url:
             session = requests.Session()
             retry = Retry(backoff_factor=0.5)

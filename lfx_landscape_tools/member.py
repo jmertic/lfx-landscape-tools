@@ -213,7 +213,8 @@ class Member:
 
     @property
     def logo(self):
-        return self.__logo.filename(self.name) if type(self.__logo) is SVGLogo else None
+        return self.__logo
+        #return self.__logo.filename(self.name) if type(self.__logo) is SVGLogo else None
 
     @logo.setter
     def logo(self, logo):
@@ -281,6 +282,8 @@ class Member:
         for key,value in self.itemschema.items():
             if key == 'name':
                 returnentry['name'] = "{}{}".format(self.name,self.entrysuffix)
+            elif key == 'logo' and isinstance(self.__logo,SVGLogo):
+                returnentry['logo'] = self.__logo.filename(self.name)
             elif not getattr(self,key,None):
                 continue
             elif isinstance(value,dict):
@@ -334,13 +337,13 @@ class Member:
 
         return invalidAttributes
 
-    def overlay(self, membertooverlay: Self, onlykeys: list = []):
+    def overlay(self, membertooverlay: Self, onlykeys: list = [], skipkeys: list = []):
         '''
         Overlay another Member data onto this Member, overriding this Member's values with those 
         from the other Member, and setting other Member's value in this Member if they aren't set
         '''
         for key in dir(membertooverlay):
-            if onlykeys and key not in onlykeys:
+            if ( onlykeys and key not in onlykeys) or (skipkeys and key in skipkeys):
                 continue
             value = getattr(membertooverlay,key,None)
             logging.getLogger().debug("Checking for overlay '{}' - current value '{}' - overlay value '{}'".format(key,getattr(self,key,None),value))

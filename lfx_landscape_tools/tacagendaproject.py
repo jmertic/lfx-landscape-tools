@@ -57,8 +57,16 @@ class TACAgendaProject(Members):
             logger.error("Invalid response from gh client: '{}'".format(command.stderr))
             return None
 
+        logger.info('Found {} records'.format(len(projectData.get('items',[]))))
+
         for item in projectData.get('items',[]):
-            if '2-annual-review' not in item.get('labels',{}):
+            found = False
+            for label in item.get('labels',{}):
+                if label.startswith('2-annual-review'):
+                    found = True
+                    continue;
+            if not found:
+                logger.debug("Skipping '{}'".format(item.get('content',{}).get('title').strip()))
                 continue
 
             logger.info("Processing {}...".format(item.get('content',{}).get('title')))

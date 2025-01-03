@@ -154,7 +154,7 @@ class TestMember(unittest.TestCase):
                 member = Member()
                 member.name = 'dog'
                 member.logo = validLogo
-                self.assertEqual(member.logo,validLogo)
+                self.assertEqual(member.logo.filename(member.name),validLogo)
 
     def testSetLogoNotValidOnEmpty(self):
         member = Member()
@@ -345,7 +345,7 @@ class TestMember(unittest.TestCase):
 
         self.assertEqual(member.name,'test2')
         self.assertEqual(member.homepage_url,'https://foo.com/')
-        self.assertEqual(member.logo,'gold.svg')
+        self.assertEqual(member.logo.filename(member.name),'gold.svg')
         self.assertEqual(member.membership,'Gold')
         self.assertEqual(member.crunchbase, 'https://www.crunchbase.com/organization/visual-effects-society-bad')
         self.assertEqual(member.twitter,'https://twitter.com/mytwitter')
@@ -384,7 +384,7 @@ class TestMember(unittest.TestCase):
 
         self.assertEqual(member.name,'test')
         self.assertEqual(member.homepage_url,'https://foo.org/')
-        self.assertEqual(member.logo,'silver.svg')
+        self.assertEqual(member.logo.filename(member.name),'silver.svg')
         self.assertEqual(member.membership,'Silver')
         self.assertEqual(member.crunchbase, 'https://www.crunchbase.com/organization/visual-effects-society')
         self.assertEqual(member.twitter,'https://twitter.com/mytwitter')

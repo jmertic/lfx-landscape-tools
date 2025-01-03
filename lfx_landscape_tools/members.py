@@ -75,7 +75,7 @@ class Members(ABC):
                 
         return members
     
-    def overlay(self, memberstooverlay: Self):
+    def overlay(self, memberstooverlay: Self, onlykeys: list = [], skipkeys: list = []):
         '''
         Overlay another Members data onto this Members; if something is in the other
         Member that is in this member, it will NOT be added
@@ -90,7 +90,7 @@ class Members(ABC):
             foundmembers = memberstooverlay.find(name=member.name,homepage_url=member.homepage_url,slug=member.extra.get('annotations',{}).get('slug'))
             for foundmember in foundmembers:
                 logging.getLogger().debug("Found item to check for overlay '{}'".format(foundmember.name)) 
-                member.overlay(foundmember)
+                member.overlay(membertooverlay=foundmember,onlykeys=onlykeys,skipkeys=skipkeys)
 
     def normalizeName(self, name):
         if name is None:

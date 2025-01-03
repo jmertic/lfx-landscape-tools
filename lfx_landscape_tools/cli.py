@@ -112,12 +112,11 @@ class Cli:
 
     def syncprojects(self,args):
         config = Config(args.configfile,view='projects')
-        logging.getLogger().info("Getting TAC Agenda Project data")
         items = TACAgendaProject(config=config)
         logging.getLogger().info("Overlaying LFX Projects data")
         items.overlay(memberstooverlay=LFXProjects(config=config))
         logging.getLogger().info("Overlaying current Landscape data")
-        items.overlay(memberstooverlay=LandscapeMembers(config=config))
+        items.overlay(memberstooverlay=LandscapeMembers(config=config),skipkeys=['membership','project'])
         landscapeoutput = LandscapeOutput(config=config)
         landscapeoutput.load(members=items)
         landscapeoutput.save()

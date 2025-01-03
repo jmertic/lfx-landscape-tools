@@ -9,6 +9,7 @@ import logging
 from contextlib import suppress
 import os
 import re
+from urllib.parse import urlparse
 
 ## third party modules
 import ruamel.yaml
@@ -34,6 +35,7 @@ class LandscapeMembers(Members):
         self.landscapeSubcategories = config.landscapeSubcategories
         self.landscapefile = os.path.join(config.basedir,config.landscapefile)
         self.memberSuffix = config.memberSuffix if config.view == 'members' else self.memberSuffix
+        self.hostedLogosDir = os.path.join(config.basedir,config.hostedLogosDir)
 
     def loadData(self):
         logger = logging.getLogger()
@@ -55,9 +57,15 @@ class LandscapeMembers(Members):
                         for item in subcategory['items']:
                             member = Member()
                             member.name = re.sub('{}$'.format(re.escape(self.memberSuffix)),'',item.get('name'))
+                            if item.get('logo'):
+                                if urlparse(item.get('logo')).scheme == '':
+                                    member.logo = os.path.normpath("{}/{}".format(self.hostedLogosDir,item.get('logo')))
+                                else:
+                                    member.logo = item.get('logo')
                             logger.info("Found Landscape Member '{}'".format(member.name))
                             for key, value in item.items():
-                                if key not in ['item','name','homepage_url']:
+                                if key not in ['item','name','homepage_url','logo']:
+                                    logger.debug("Setting '{}' to '{}' for '{}'".format(key,value,member.name))
                                     setattr(member, key, value)
                             for landscapeSubcategory in self.landscapeSubcategories:
                                 if subcategory.get('name') == landscapeSubcategory.get('category'):
