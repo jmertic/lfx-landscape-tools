@@ -31,7 +31,8 @@ class Cli:
         parser = ArgumentParser("Collection of tools for working with a landscape")
         group = parser.add_mutually_exclusive_group()
         group.add_argument("-s", "--silent", dest="silent", action="store_true", help="Suppress all messages")
-        group.add_argument("-v", "--verbose", dest="verbose", action='store_true', help="Verbose output ( i.e. show all INFO level messages in addition to WARN and above )")
+        group.add_argument("-l", "--log", dest="loglevel", default="error", choices=['debug', 'info', 'warning', 'error', 'critical'], help="logging level")
+        group.add_argument("-v", "--verbose", dest="verbose", action='store_true', deprecated=True, help="Verbose output (i.e. show all INFO level messages in addition to WARN and above - equivalent to `--log info`)")
         subparsers = parser.add_subparsers(help='sub-command help')
         
         buildlandscapemembers_parser = subparsers.add_parser("build_members", help="Replace current items with latest from LFX")
@@ -50,18 +51,28 @@ class Cli:
         synclandscapeprojects_parser.set_defaults(func=self.syncprojects)
         
         maketextlogo_parser = subparsers.add_parser("maketextlogo", help="Create a text pure SVG logo")
-        maketextlogo_parser.add_argument("-n", "--name", dest="orgname", required=True, help="Name to appear in logo")
+        maketextlogo_parser.add_argument("-n", "--name", dest="name", required=True, help="Name to appear in logo")
         maketextlogo_parser.add_argument("--autocrop", dest="autocrop", action='store_true', help="Process logo with autocrop")
         maketextlogo_parser.add_argument("-o", "--output", dest="filename", help="Filename to save created logo to")
         maketextlogo_parser.set_defaults(func=self.maketextlogo)
 
         args = parser.parse_args()
 
+        levels = {
+            'critical': logging.CRITICAL,   # errors that mean an immediate stop
+            'error': logging.ERROR,         # general errors that will effect the output
+            'warn': logging.WARNING,        # errors that can be caught and corrected
+            'warning': logging.WARNING,
+            'info': logging.INFO,           # infomational messages
+            'debug': logging.DEBUG          # messages to help debug things misbehaving ;-)
+        }
+        if args.verbose:
+            args.loglevel = 'info'
         logging.basicConfig(
-            level=logging.INFO if args.verbose else logging.WARN,
+            level=levels.get(args.loglevel.lower()),
             format="%(asctime)s [%(levelname)s] %(message)s",
             handlers=[
-                logging.FileHandler("debug.log"),
+                logging.FileHandler("debug.log",mode="w"),
                 logging.StreamHandler(sys.stdout) if not args.silent else None
             ]
         )
@@ -85,35 +96,35 @@ class Cli:
     
     def buildmembers(self,args):
         config = Config(args.configfile,view='members')
-        landscapeoutput = LandscapeOutput(config, resetCategory=True)
-        logging.getLogger().info("Adding LFX Members data")
-        landscapeoutput.addItems(LFXMembers(config=config))
+        landscapeoutput = LandscapeOutput(config=config)
+        landscapeoutput.load(members=LFXMembers(config=config))
         landscapeoutput.save()
         
-        logging.getLogger().info("Successfully added {} members and skipped {} members".format(landscapeoutput.itemsAdded,landscapeoutput.itemsErrors))
+        logging.getLogger().info("Successfully processed {} members and skipped {} members".format(landscapeoutput.itemsProcessed,landscapeoutput.itemsErrors))
 
     def buildprojects(self,args):
         config = Config(args.configfile,view='projects')
-        landscapeoutput = LandscapeOutput(config, resetCategory=True)
-        logging.getLogger().info("Adding LFX Projects data")
-        landscapeoutput.addItems(LFXProjects(config=config))
+        landscapeoutput = LandscapeOutput(config=config)
+        landscapeoutput.load(members=LFXProjects(config=config))
         landscapeoutput.save()
         
-        logging.getLogger().info("Successfully added {} projects and skipped {} projects".format(landscapeoutput.itemsAdded,landscapeoutput.itemsErrors))
+        logging.getLogger().info("Successfully processed {} projects and skipped {} projects".format(landscapeoutput.itemsProcessed,landscapeoutput.itemsErrors))
 
     def syncprojects(self,args):
         config = Config(args.configfile,view='projects')
-        landscapeoutput = LandscapeOutput(config=config, resetCategory=False)
-        logging.getLogger().info("Syncing TAC Agenda Project data")
-        landscapeoutput.syncItems(TACAgendaProject(config=config))
-        logging.getLogger().info("Syncing LFX Projects data")
-        landscapeoutput.syncItems(LFXProjects(config=config)) 
+        items = TACAgendaProject(config=config)
+        logging.getLogger().info("Overlaying LFX Projects data")
+        items.overlay(memberstooverlay=LFXProjects(config=config))
+        logging.getLogger().info("Overlaying current Landscape data")
+        items.overlay(memberstooverlay=LandscapeMembers(config=config),skipkeys=['membership','project'])
+        landscapeoutput = LandscapeOutput(config=config)
+        landscapeoutput.load(members=items)
         landscapeoutput.save()
         
-        logging.getLogger().info("Successfully added {} projects, updated {} projects, and skipped {} projects".format(landscapeoutput.itemsAdded,landscapeoutput.itemsUpdated,landscapeoutput.itemsErrors))
+        logging.getLogger().info("Successfully processed {} projects, updated {} projects, and skipped {} projects".format(landscapeoutput.itemsProcessed,landscapeoutput.itemsUpdated,landscapeoutput.itemsErrors))
 
     def maketextlogo(self,args):
-        svglogo = SVGLogo(name=args.orgname)
+        svglogo = SVGLogo(name=args.name)
 
         if args.autocrop:
             svglogo.autocrop()

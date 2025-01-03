@@ -39,7 +39,7 @@ class Config:
     landscapefile = 'landscape.yml'
     missingcsvfile = 'missing.csv'
     hostedLogosDir = 'hosted_logos'
-    memberSuffix = None
+    memberSuffix = ''
     memberUsePublicMembershipLogo = False
     projectsAddTechnologySector = False
     projectsAddIndustrySector = False
