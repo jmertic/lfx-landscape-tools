@@ -33,6 +33,7 @@ class Member:
     __extra = {}
     project = None
     project_org = None
+    additional_repos = []
     __name = None
     __homepage_url = None
     __logo = None
@@ -302,8 +303,11 @@ class Member:
             logging.getLogger().debug("Setting '{}' to '{}'".format(key,returnentry[key]))
 
         if self.project_org:
-            returnentry['additional_repos'] = sorted(list(set(returnentry.get('additional_repos',[] + self._getAllGithubReposFromGithubOrg(self.project_org)))))
-            returnentry['additional_repos'].remove(returnentry.get('repo_url'))
+            additional_repos = returnentry.get('additional_repos',[])
+            for repo_url in self._getAllGithubReposFromGithubOrg(self.project_org):
+                if repo_url != returnentry.get('repo_url'):
+                    additional_repos.append({'repo_url':repo_url})
+            returnentry['additional_repos'] = sorted(additional_repos)
             logging.getLogger().debug("Setting 'additional_repos' to '{}' for '{}'".format(returnentry.get('additional_repos'),self.name))
 
         if not self.crunchbase:
@@ -371,14 +375,37 @@ class Member:
                                 getattr(self,key)[subkey] = subvalue
                             else:
                                 setattr(self,key,{subkey:subvalue})
-            elif isinstance(value,list) and sorted(value) != sorted(getattr(self,key,[])):
+            elif isinstance(value,list):
                 if value != []:
+                    logging.getLogger().debug(type(value[0]))
                     logging.getLogger().debug("...Overlay '{}'".format(key))
-                    logging.getLogger().debug(".....Old Value - '{}'".format(sorted(getattr(self,key,None))))
-                    logging.getLogger().debug(".....New Value - '{}'".format(sorted(list(set(value + getattr(self,key,[]))))))
-                    setattr(self,key,list(set(value + sorted(getattr(self,key,[])))))
+                    logging.getLogger().debug(".....Old Value - '{}'".format(sorted(getattr(self,key,[]))))
+                    logging.getLogger().debug(".....New Value - '{}'".format(self._combine_and_deduplicate(value,getattr(self,key,[]))))
+                    setattr(self,key,self._combine_and_deduplicate(value,getattr(self,key,[])))
             elif value != None and value != getattr(self,key,None):
                 logging.getLogger().debug("...Overlay '{}'".format(key))
                 logging.getLogger().debug(".....Old Value - '{}'".format(getattr(self,key,None)))
                 logging.getLogger().debug(".....New Value - '{}'".format(value))
                 setattr(self,key,value)
+
+
+    def _combine_and_deduplicate(self, list1, list2):
+        """Combines two lists (potentially containing dictionaries) and removes duplicates."""
+
+        # Convert dictionaries to tuples for hashing
+        def to_hashable(item):
+            if isinstance(item, dict):
+                return tuple(sorted(item.items()))
+            return item
+
+        # Combine lists and remove duplicates
+        combined = list1 + list2
+        seen = set()
+        result = []
+        for item in combined:
+            hashable_item = to_hashable(item)
+            if hashable_item not in seen:
+                seen.add(hashable_item)
+                result.append(item)
+
+        return result

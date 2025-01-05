@@ -72,8 +72,6 @@ class LandscapeMembers(Members):
                                     logger.debug("Parsing subcategory '{}' to landscapeSubcategory '{}'".format(subcategory.get('name'),landscapeSubcategory.get('name')))
                                     member.membership = landscapeSubcategory.get('name')
                                     break
-
                             member.homepage_url = item.get('homepage_url')
                             member.linkedin = item.get('extra',{}).get('linkedin_url')
                             self.members.append(member)
-                            break

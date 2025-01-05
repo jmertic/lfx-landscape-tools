@@ -79,7 +79,8 @@ class Cli:
 
         try:
             args.func(args)
-        except AttributeError:
+        except AttributeError as e:
+            logging.getLogger().debug(e)
             parser.print_help()
         
         logging.getLogger().info("This took {} seconds".format(datetime.now() - self._starttime))
@@ -121,7 +122,7 @@ class Cli:
         landscapeoutput.load(members=items)
         landscapeoutput.save()
         
-        logging.getLogger().info("Successfully processed {} projects, updated {} projects, and skipped {} projects".format(landscapeoutput.itemsProcessed,landscapeoutput.itemsUpdated,landscapeoutput.itemsErrors))
+        logging.getLogger().info("Successfully processed {} projects and skipped {} projects".format(landscapeoutput.itemsProcessed,landscapeoutput.itemsErrors))
 
     def maketextlogo(self,args):
         svglogo = SVGLogo(name=args.name)
