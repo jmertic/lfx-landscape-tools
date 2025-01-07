@@ -32,7 +32,7 @@ class Cli:
         group = parser.add_mutually_exclusive_group()
         group.add_argument("-s", "--silent", dest="silent", action="store_true", help="Suppress all messages")
         group.add_argument("-l", "--log", dest="loglevel", default="error", choices=['debug', 'info', 'warning', 'error', 'critical'], help="logging level")
-        group.add_argument("-v", "--verbose", dest="verbose", action='store_true', deprecated=True, help="Verbose output (i.e. show all INFO level messages in addition to WARN and above - equivalent to `--log info`)")
+        group.add_argument("-v", "--verbose", dest="verbose", action='store_true', help="Verbose output (i.e. show all INFO level messages in addition to WARN and above - equivalent to `--log info`)")
         subparsers = parser.add_subparsers(help='sub-command help')
         
         buildlandscapemembers_parser = subparsers.add_parser("build_members", help="Replace current items with latest from LFX")
