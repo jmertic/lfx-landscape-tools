@@ -61,8 +61,8 @@ class Config:
             if not self.slug or not self.project:
                 raise ValueError("Invalid project specification in config file")
             self.landscapeProjectsCategory = data_loaded.get('landscapeProjectsCategory',Config.landscapeProjectsCategory)
-            self.landscapeProjectsSubcategories = data_loaded.get('landscapeProjectsSubcategories',Config.landscapeProjectsSubcategories)
             self.landscapeProjectsLevels = data_loaded.get('landscapeProjectsLevels',Config.landscapeProjectsLevels)
+            self.landscapeProjectsSubcategories = data_loaded.get('landscapeProjectsSubcategories',self._getlandscapeProjectsSubcategoriesFromLevels())
             self.landscapeMembersCategory = data_loaded.get('landscapeMembersCategory',Config.landscapeMembersCategory)
             self.landscapeMembersCategory = data_loaded.get('landscapeMemberCategory',Config.landscapeMembersCategory)
             self.landscapeMembersSubcategories = data_loaded.get('landscapeMembersSubcategories',Config.landscapeMembersSubcategories)
@@ -125,4 +125,6 @@ class Config:
         
         return None
 
-
+    def _getlandscapeProjectsSubcategoriesFromLevels(self):
+        for level in self.landscapeProjectsLevels:
+            self.landscapeProjectsSubcategories.append({'name':level['name'],'category':level['name']})

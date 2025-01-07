@@ -215,7 +215,6 @@ class Member:
     @property
     def logo(self):
         return self.__logo
-        #return self.__logo.filename(self.name) if type(self.__logo) is SVGLogo else None
 
     @logo.setter
     def logo(self, logo):
@@ -268,12 +267,17 @@ class Member:
             logging.getLogger().debug("Member.extra for '{name}' must be a list - '{extra}' provided".format(extra=extra,name=self.name))
             self.__extra = {}
         endextra = {}
+        endannotations = {}
         for key, value in extra.items():
             if not value or value == 'nil':
                 logging.getLogger().debug("Removing Member.extra.{key} for '{name}' since it's set to '{value}'".format(key=key,value=value,name=self.name))
-                continue
-            endextra[key] = value
+            elif key not in self.itemschema['extra']:
+                logging.getLogger().debug("Moving Member.extra.{key} for '{name}' under 'annotations'".format(key=key,name=self.name))
+                endannotations[key] = value
+            else:
+                endextra[key] = value
 
+        endextra['annotations'] = endextra.get('annotations',{}) | endannotations
         self.__extra = endextra
 
     def toLandscapeItemAttributes(self):
