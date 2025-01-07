@@ -66,6 +66,7 @@ class Member:
         returnvalue = list(self.itemschema.keys())
         returnvalue.append('linkedin')
         returnvalue.append('membership')
+        returnvalue.append('project_org')
         return returnvalue
 
     @property
@@ -302,16 +303,18 @@ class Member:
                                     returnentry[key][subkey][subsubkey] = getattr(self,key,[]).get(subkey).get(subsubkey)
                         else:    
                             returnentry[key][subkey] = getattr(self,key,[]).get(subkey)
+                if returnentry[key] == {}:
+                    del returnentry[key]
             else:
                 returnentry[key] = getattr(self,key)
-            logging.getLogger().debug("Setting '{}' to '{}'".format(key,returnentry[key]))
+            logging.getLogger().debug("Setting '{}' to '{}'".format(key,returnentry.get(key)))
 
         if self.project_org:
             additional_repos = returnentry.get('additional_repos',[])
             for repo_url in self._getAllGithubReposFromGithubOrg(self.project_org):
                 if repo_url != returnentry.get('repo_url'):
                     additional_repos.append({'repo_url':repo_url})
-            returnentry['additional_repos'] = sorted(additional_repos)
+            returnentry['additional_repos'] = sorted(additional_repos, key=lambda x: x['repo_url'])
             logging.getLogger().debug("Setting 'additional_repos' to '{}' for '{}'".format(returnentry.get('additional_repos'),self.name))
 
         if not self.crunchbase:
