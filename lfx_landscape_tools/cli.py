@@ -113,11 +113,14 @@ class Cli:
 
     def syncprojects(self,args):
         config = Config(args.configfile,view='projects')
-        items = TACAgendaProject(config=config)
+        items = LFXProjects(config=config)
+        logging.getLogger().info("Overlaying current Landscape data")
+        items.overlay(memberstooverlay=LandscapeMembers(config=config))
+        logging.getLogger().info("Overlaying TAC Agenda Project data")
+        items.overlay(memberstooverlay=TACAgendaProject(config=config))
+        # yes, this is intentional :). This ensures the LFX data is the predominate source of truth
         logging.getLogger().info("Overlaying LFX Projects data")
         items.overlay(memberstooverlay=LFXProjects(config=config))
-        logging.getLogger().info("Overlaying current Landscape data")
-        items.overlay(memberstooverlay=LandscapeMembers(config=config),skipkeys=['membership','project'])
         landscapeoutput = LandscapeOutput(config=config)
         landscapeoutput.load(members=items)
         landscapeoutput.save()

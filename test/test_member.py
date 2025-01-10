@@ -359,6 +359,24 @@ class TestMember(unittest.TestCase):
         self.assertIn('list2',member.second_path)
         self.assertIn('list3',member.second_path)
 
+    def testOverlayLogo(self):
+        membertooverlay = Member()
+        membertooverlay.name = 'test'
+        membertooverlay.homepage_url = 'https://foo.com'
+        membertooverlay.logo = SVGLogo(contents='<svg>gold.svg</svg>')
+
+        member = Member()
+        member.name = 'test'
+        member.homepage_url = 'https://foo.com'
+        member.logo = SVGLogo(contents='<svg>silver.svg</svg>')
+
+        member.overlay(membertooverlay)
+
+        self.assertEqual(member.name,'test')
+        self.assertEqual(member.homepage_url,'https://foo.com/')
+        self.assertEqual(str(member.logo),'<svg>gold.svg</svg>')
+
+
     def testOverlayOnlyKeys(self):
         membertooverlay = Member()
         membertooverlay.name = 'test'
