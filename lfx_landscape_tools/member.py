@@ -144,7 +144,7 @@ class Member:
                         g = Github(per_page=1000)
                     repos = []
                     for repo in g.get_organization(urlparse(url).path.split("/")[1]).get_repos():
-                        if not repo.fork:
+                        if not repo.fork and not repo.private:
                             repos.append(repo.html_url)
                     return repos
                 except RateLimitExceededException:
