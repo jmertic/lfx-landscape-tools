@@ -121,7 +121,7 @@ class Cli:
         # yes, this is intentional :). This ensures the LFX data is the predominate source of truth
         logging.getLogger().info("Overlaying LFX Projects data")
         items.overlay(memberstooverlay=LFXProjects(config=config))
-        # also intentional, to overlay extra field dates
+        # also intentional, to overlay extra field dates where the TAC Agenda is the source of truth
         logging.getLogger().info("Overlaying TAC Agenda Project data 'extra' field")
         items.overlay(memberstooverlay=TACAgendaProject(config=config),onlykeys=['extra'])
         landscapeoutput = LandscapeOutput(config=config)
