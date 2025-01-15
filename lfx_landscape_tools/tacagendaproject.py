@@ -76,13 +76,21 @@ class TACAgendaProject(Members):
             extra = {} 
             annotations = {}
             extra['annual_review_date'] = item.get('last Review Date')
-            annotations['slug'] = item.get('slug',self._lookupSlugByProjectID(item.get('pCC Project ID')))
+            extra['accepted'] = item.get('accepted')
+            extra['incubating'] = item.get('incubating')
+            extra['graduated'] = item.get('graduated')
+            extra['archived'] = item.get('archived')
             extra['annual_review_url'] = item.get('content',{}).get('url')
             annotations['next_annual_review_date'] = item.get('scheduled Date')
+            projectdetailsfromlfxcommittee = self._lookupProjectAndCommitteeDetailsByLFXURL(item.get('pCC TSC Committee URL',''))
+            annotations['slug'] = projectdetailsfromlfxcommittee.get('slug')
             session = requests_cache.CachedSession()
             chair = []
-            if item.get('pCC Project ID') and item.get('pCC TSC Committee ID'):
-                with session.get(self.pcc_committee_url.format(project_id=item.get('pCC Project ID'),committee_id=item.get('pCC TSC Committee ID'))) as endpointResponse:
+            if projectdetailsfromlfxcommittee.get('project_id') and projectdetailsfromlfxcommittee.get('committee_id'):
+                with session.get(self.pcc_committee_url.format(
+                        project_id=projectdetailsfromlfxcommittee.get('project_id'), \
+                        committee_id=projectdetailsfromlfxcommittee.get('committee_id'))) \
+                        as endpointResponse:
                     try:
                         memberList = endpointResponse.json()
                         for record in memberList.get('Data',[]):
@@ -96,15 +104,16 @@ class TACAgendaProject(Members):
             member.extra = extra
             self.members.append(member)
 
-    def _lookupSlugByProjectID(self,project):
-        singleProjectEndpointURL = 'https://api-gw.platform.linuxfoundation.org/project-service/v1/public/projects?$filter=projectId%20eq%20{}'
-        session = requests_cache.CachedSession()
-        if project:
-            with session.get(singleProjectEndpointURL.format(project)) as endpointResponse:
+    def _lookupProjectAndCommitteeDetailsByLFXURL(self,url):
+        urlparts = urlparse(url).path.split('/')
+        if isinstance(urlparts,list) and len(urlparts) == 6 and urlparts[1] == 'project' and urlparts[3] == 'collaboration' and urlparts[4] == 'committees':
+            singleProjectEndpointURL = 'https://api-gw.platform.linuxfoundation.org/project-service/v1/public/projects?$filter=projectId%20eq%20{}'
+            session = requests_cache.CachedSession()
+            with session.get(singleProjectEndpointURL.format(urlparts[2])) as endpointResponse:
                 parentProject = endpointResponse.json()
                 if len(parentProject.get('Data')) > 0: 
-                    return parentProject.get('Data')[0]["Slug"]
+                    return {'project_id': urlparts[2],'committee_id': urlparts[5],'slug': parentProject.get('Data')[0]["Slug"]}
         
-        logging.getLogger().warning("Couldn't find slug for project '{}'".format(project)) 
-        
-        return None
+        logging.getLogger().warning("Couldn't find project information with LFX URL '{}'".format(url)) 
+
+        return {}
