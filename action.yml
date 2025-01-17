@@ -10,7 +10,7 @@ runs:
     - name: Install cairo
       uses: awalsh128/cache-apt-pkgs-action@5902b33ae29014e6ca012c5d8025d4346556bd40 # v1.4.3
       with:
-        packages: libcairo2-dev
+        packages: libcairo2-dev pkg-config python3-dev
         version: 1.0
     - name: Checkout landscape
       uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.1.7@v4
