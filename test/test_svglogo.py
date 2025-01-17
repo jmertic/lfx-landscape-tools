@@ -24,6 +24,18 @@ from lfx_landscape_tools.lfxprojects import LFXProjects
 from lfx_landscape_tools.tacagendaproject import TACAgendaProject
 
 class TestSVGLogo(unittest.TestCase):
+    
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format="%(asctime)s [%(levelname)s] %(message)s",
+        handlers=[
+            logging.FileHandler("debug.log",mode="w"),
+        ]
+    )
+    
+    def setUp(self):
+        logging.getLogger().debug("Running {}".format(unittest.TestCase.id(self)))
+   
     def testPassInContents(self):
         self.assertEqual(str(SVGLogo(contents="This is a test")),"This is a test")
 
@@ -167,12 +179,4 @@ class TestSVGLogo(unittest.TestCase):
         self.assertEqual(str(cm.exception),'Adding caption failed: this is a file')
 
 if __name__ == '__main__':
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s [%(levelname)s] %(message)s",
-        handlers=[
-            logging.FileHandler("debug.log"),
-        ]
-    )
-    
     unittest.main()
