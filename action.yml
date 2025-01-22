@@ -4,6 +4,9 @@ inputs:
   project_processing:
     description: "Indicate for project processing, if they should be 'rebuild' or 'sync' ( or 'skip' to not build projects )"
     default: "sync"
+  configfile:
+    description: "Filename for the config file ( defaults to config.yml )"
+    default: "config.yml"
 runs:
   using: composite
   steps:
@@ -39,26 +42,29 @@ runs:
     - name: Build members from LFX
       working-directory: ./landscape-tools
       shell: bash
-      run: poetry run lfx_landscape build_members -c ../landscape/config.yml
+      run: poetry run lfx_landscape build_members -c ../landscape/$CONFIGFILE
       env:
         GITHUB_TOKEN: ${{ env.token }}
         GH_TOKEN: ${{ env.token }}
+        CONFIGFILE: ${{ inputs.configfile }}
     - name: Rebuild projects from LFX and other sources
       if: ${{ inputs.project_processing == 'rebuild' }}
       working-directory: ./landscape-tools
       shell: bash
-      run: poetry run lfx_landscape build_projects -c ../landscape/config.yml
+      run: poetry run lfx_landscape build_projects -c ../landscape/$CONFIGFILE
       env:
         GITHUB_TOKEN: ${{ env.token }}
         GH_TOKEN: ${{ env.token }}
+        CONFIGFILE: ${{ inputs.configfile }}
     - name: Sync projects from LFX and other sources
       if: ${{ inputs.project_processing == 'sync' }}
       working-directory: ./landscape-tools
       shell: bash
-      run: poetry run lfx_landscape sync_projects -c ../landscape/config.yml
+      run: poetry run lfx_landscape sync_projects -c ../landscape/$CONFIGFILE
       env:
         GITHUB_TOKEN: ${{ env.token }}
         GH_TOKEN: ${{ env.token }}
+        CONFIGFILE: ${{ inputs.configfile }}
     - name: Save missing.csv file
       uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
       with:
