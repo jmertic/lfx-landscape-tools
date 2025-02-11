@@ -4,13 +4,16 @@ inputs:
   project_processing:
     description: "Indicate for project processing, if they should be 'rebuild' or 'sync' ( or 'skip' to not build projects )"
     default: "sync"
+  configfile:
+    description: "Filename for the config file ( defaults to config.yml )"
+    default: "config.yml"
 runs:
   using: composite
   steps:
     - name: Install cairo
-      uses: awalsh128/cache-apt-pkgs-action@a6c3917cc929dd0345bfb2d3feaf9101823370ad # v1.4.2
+      uses: awalsh128/cache-apt-pkgs-action@5902b33ae29014e6ca012c5d8025d4346556bd40 # v1.4.3
       with:
-        packages: libcairo2-dev
+        packages: libcairo2-dev pkg-config python3-dev
         version: 1.0
     - name: Checkout landscape
       uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.1.7@v4
@@ -25,12 +28,13 @@ runs:
         token: ${{ env.token }}
         repository: jmertic/lfx-landscape-tools
         path: landscape-tools
+        ref: landscapemembers
     - name: Set up Python 3.x
-      uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
+      uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38 # v5.4.0
       with:
         python-version: '3.x'
     - name: Install poetry
-      uses: abatilo/actions-poetry@e78f54a89cb052fff327414dd9ff010b5d2b4dbd # v3.0.1
+      uses: abatilo/actions-poetry@3765cf608f2d4a72178a9fc5b918668e542b89b1 # v4.0.0
     - name: Install dependencies
       shell: bash
       working-directory: ./landscape-tools
@@ -38,31 +42,34 @@ runs:
     - name: Build members from LFX
       working-directory: ./landscape-tools
       shell: bash
-      run: poetry run lfx_landscape build_members -c ../landscape/config.yml
+      run: poetry run lfx_landscape build_members -c ../landscape/$CONFIGFILE
       env:
         GITHUB_TOKEN: ${{ env.token }}
         GH_TOKEN: ${{ env.token }}
+        CONFIGFILE: ${{ inputs.configfile }}
     - name: Rebuild projects from LFX and other sources
       if: ${{ inputs.project_processing == 'rebuild' }}
       working-directory: ./landscape-tools
       shell: bash
-      run: poetry run lfx_landscape build_projects -c ../landscape/config.yml
+      run: poetry run lfx_landscape build_projects -c ../landscape/$CONFIGFILE
       env:
         GITHUB_TOKEN: ${{ env.token }}
         GH_TOKEN: ${{ env.token }}
+        CONFIGFILE: ${{ inputs.configfile }}
     - name: Sync projects from LFX and other sources
       if: ${{ inputs.project_processing == 'sync' }}
       working-directory: ./landscape-tools
       shell: bash
-      run: poetry run lfx_landscape sync_projects -c ../landscape/config.yml
+      run: poetry run lfx_landscape sync_projects -c ../landscape/$CONFIGFILE
       env:
         GITHUB_TOKEN: ${{ env.token }}
         GH_TOKEN: ${{ env.token }}
+        CONFIGFILE: ${{ inputs.configfile }}
     - name: Save missing.csv file
-      uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+      uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
       with:
-        name: missing-members 
-        path: ./landscape/missing.csv
+        name: debug.log 
+        path: ./landscape/debug.log
     - name: Validate landscape2 data
       uses: cncf/landscape2-validate-action@7f299c46e9b03b4e8bc2896882734fb0b0756b37 # v2.0.0
       with:
@@ -70,14 +77,17 @@ runs:
         target_path: ./landscape/landscape.yml
     - name: Checkout landscapeapp
       uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.1.7@v4
+      if: ${{ hashFiles('./landscape/settings.yml') != '' }}
       with:
         repository: cncf/landscapeapp
         path: landscapeapp
     - name: Setup node
-      uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+      uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
+      if: ${{ hashFiles('./landscape/settings.yml') != '' }}
       with:
         node-version: '18'
     - name: Cleanup YAML files
+      if: ${{ hashFiles('./landscape/settings.yml') != '' }}
       working-directory: ./landscapeapp
       shell: bash
       run: |
@@ -91,7 +101,7 @@ runs:
       with:
         format: "YYYY-MM-DD"
     - name: Create Pull Request
-      uses: peter-evans/create-pull-request@5e914681df9dc83aa4e4905692ca88beb2f9e91f # v7.0.5
+      uses: peter-evans/create-pull-request@67ccf781d68cd99b580ae25a5c18a1cc84ffff1f # v7.0.6
       with:
         token: ${{ env.token }}
         branch-suffix: timestamp

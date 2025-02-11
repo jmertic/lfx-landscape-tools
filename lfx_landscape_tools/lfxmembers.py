@@ -34,20 +34,23 @@ class LFXMembers(Members):
 
         with requests.get(self.endpointURL.format(self.project)) as endpointResponse:
             memberList = endpointResponse.json()
+            logger.info('Found {} records'.format(len(memberList)))
             for record in memberList:
-                if self.find(record.get('Name'),record.get('Website'),record.get('Membership',{}).get('Name')) or self._isTestRecord(record):
+                if self.find(name=record.get('Name'),homepage_url=record.get('Website'),membership=record.get('Membership',{}).get('Name')) or self._isTestRecord(record):
+                    logger.debug("Skipping '{}'".format(record.get('Name')))
                     continue
 
                 member = Member()
-                member.orgname = record.get('Name')
-                logger.info("Found LFX Member '{}'".format(member.orgname))
+                member.name = record.get('Name')
+                logger.info("Found LFX Member '{}'".format(member.name))
                 second_path = []
                 member.membership = record.get('Membership',{}).get('Name')
-                member.website = record.get('Website')
+                member.homepage_url = record.get('Website')
+                member.description = record.get('OrganizationDescription')
                 member.logo = record.get('Logo')
                 if not member.logo:
-                    logger.info("Trying to create text logo")
-                    member.logo = SVGLogo(name=member.orgname)
+                    logger.debug("Trying to create text logo")
+                    member.logo = SVGLogo(name=member.name)
                 member.crunchbase = record.get('CrunchBaseURL')
                 member.twitter = record.get('Twitter')
                 member.linkedin = record.get('LinkedInURL')
@@ -61,17 +64,6 @@ class LFXMembers(Members):
                                     second_path.append('Project Membership / {}'.format(membership.get("ProjectName")))
                 member.second_path = second_path
                 self.members.append(member)
-
-    def find(self, org, website, membership = None):
-        normalizedorg = self.normalizeCompany(org)
-        normalizedwebsite = self.normalizeURL(website)
-
-        members = []
-        for member in self.members:
-            if ( self.normalizeCompany(member.orgname) == normalizedorg or member.website == website) and member.membership == membership:
-                members.append(member)
-
-        return members
 
     @property
     def projectsOnAutojoin(self):

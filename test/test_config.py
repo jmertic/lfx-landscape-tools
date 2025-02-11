@@ -23,6 +23,17 @@ from lfx_landscape_tools.lfxprojects import LFXProjects
 from lfx_landscape_tools.tacagendaproject import TACAgendaProject
 
 class TestConfig(unittest.TestCase):
+    
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format="%(asctime)s [%(levelname)s] %(message)s",
+        handlers=[
+            logging.FileHandler("debug.log",mode="w"),
+        ]
+    )
+    
+    def setUp(self):
+        logging.getLogger().debug("Running {}".format(unittest.TestCase.id(self)))
 
     def testLoadConfig(self):
         testconfigfilecontents = """
@@ -95,7 +106,7 @@ slug: aswf
             self.assertEqual(config.landscapefile,'landscape.yml')
             self.assertEqual(config.missingcsvfile,'missing.csv')
             self.assertEqual(config.hostedLogosDir,'hosted_logos')
-            self.assertIsNone(config.memberSuffix)
+            self.assertEqual(config.memberSuffix,'')
             self.assertEqual(config.project,"a09410000182dD2AAI")
 
         os.unlink(tmpfilename.name)
@@ -198,7 +209,7 @@ missingcsvfile: missing.csv
                     {
                         "AutoJoinEnabled": True,
                         "Description": "The mission of the Academy Software Foundation (ASWF) is to increase the quality and quantity of contributions to the content creation industry’s open source software base; to provide a neutral forum to coordinate cross-project efforts; to provide a common build and test infrastructure; and to provide individuals and organizations a clear path to participation in advancing our open source ecosystem.",
-                        "DisplayOnWebsite": True,
+                        "DisplayOnhomepage_url": True,
                         "HasProgramManager": True,
                         "Industry": [
                             "Motion Pictures"
@@ -217,7 +228,7 @@ missingcsvfile: missing.csv
                         "Status": "Active",
                         "TechnologySector": "Visual Effects",
                         "TestRecord": False,
-                        "Website": "https://www.aswf.io/"
+                        "homepage_url": "https://www.aswf.io/"
                     }
                 ],
                 "Metadata": {
@@ -243,12 +254,4 @@ slug: aswf
         os.unlink(tmpfilename.name)
 
 if __name__ == '__main__':
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s [%(levelname)s] %(message)s",
-        handlers=[
-            logging.FileHandler("debug.log"),
-        ]
-    )
-    
     unittest.main()

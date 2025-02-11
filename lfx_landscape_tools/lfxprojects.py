@@ -59,13 +59,17 @@ class LFXProjects(Members):
         with session.get(self.endpointURL.format(self.project if self.projectsFilterByParentSlug else '')) as endpointResponse:
             memberList = endpointResponse.json()
             for record in memberList['Data']:
-                if self.find(record.get('Name'),record.get('Website')):
+                if self.find(name=record.get('Name'),homepage_url=record.get('Website'),slug=record.get('Slug')):
+                    logger.debug("Skipping '{}'".format(record.get('Name')))
                     continue
                 if self.activeOnly and record['Status'] != 'Active':
+                    logger.debug("Skipping '{}'".format(record.get('Name')))
                     continue
                 if not record.get('DisplayOnWebsite'):
+                    logger.debug("Skipping '{}'".format(record.get('Name')))
                     continue
                 if record.get('TestRecord'):
+                    logger.debug("Skipping '{}'".format(record.get('Name')))
                     continue
 
                 second_path = []
@@ -73,8 +77,8 @@ class LFXProjects(Members):
                 annotations = {}
                 member = Member()
                 member.membership = 'All'
-                member.orgname = record.get('Name')
-                logger.info("Found LFX Project '{}'".format(member.orgname))
+                member.name = record.get('Name')
+                logger.info("Found LFX Project '{}'".format(member.name))
                 annotations['slug'] = record.get('Slug')
                 # Let's not include the root project
                 if annotations.get('slug') == self.project:
@@ -86,23 +90,28 @@ class LFXProjects(Members):
                     for projectLevel in self.landscapeProjectsLevels:
                         if projectLevel.get('name') == record.get('Category'):
                             member.project = projectLevel.get('level')
-                            logger.info("Project level is {}".format(member.project))
+                            member.membership = projectLevel.get('name')
+                            logger.debug("Project level is {} - {}".format(member.project,member.membership))
                             break
-                member.website = record.get('Website')
-                if not member.website:
-                    logger.info("Trying to use 'RepositoryURL' for 'website' instead")
-                    member.website = record.get('RepositoryURL')
+                member.homepage_url = record.get('Website')
+                if not member.homepage_url and record.get('RepositoryURL'):
+                    logger.debug("Trying to use 'RepositoryURL' for 'homepage_url' instead")
+                    member.homepage_url = record.get('RepositoryURL')
                 if self.addParentProject:
                     parentName = self.lookupParentProjectNameBySlug(record.get('ParentSlug',self.project))
                     if parentName:
                         second_path.append('Project Group / {}'.format(parentName.replace("/",":")))
                 member.logo = record.get('ProjectLogo')
                 if not member.logo:
-                    logger.info("Trying to create text logo")
-                    member.logo = SVGLogo(name=member.orgname)
+                    logger.debug("Trying to create text logo")
+                    member.logo = SVGLogo(name=member.name)
                 member.crunchbase = record.get('CrunchBaseUrl',self.defaultCrunchbase)
                 member.linkedin = record.get('LinkedIn')
                 member.twitter = record.get('Twitter')
+                extra['facebook_url'] = record.get('Facebook')
+                extra['reddit_url'] = record.get('Reddit')
+                extra['pinterest_url'] = record.get('Pinterest')
+                extra['youtube_url'] = record.get('YouTube')
                 if self.addPMOManagedStatus and record.get('HasProgramManager'):
                     second_path.append('PMO Managed / All')
                 if self.addIndustrySector and record.get('IndustrySector') != '':
@@ -131,22 +140,3 @@ class LFXProjects(Members):
                 logging.getLogger().warning("Couldn't find project for slug '{}'".format(slug)) 
         
         return False
-
-    def find(self, org, website, membership = None, repo_url = None):
-        normalizedorg = self.normalizeCompany(org)
-        normalizedwebsite = self.normalizeURL(website)
-
-        members = []
-        for member in self.members:
-            if membership:
-                if ( self.normalizeCompany(member.orgname) == normalizedorg or member.website == normalizedwebsite ) and member.membership == membership:
-                    members.append(member)
-            elif repo_url:
-                if ( self.normalizeCompany(member.orgname) == normalizedorg or member.website == normalizedwebsite or member.repo_url == repo_url):
-                    members.append(member)
-            else:
-                if ( self.normalizeCompany(member.orgname) == normalizedorg or member.website == normalizedwebsite ):
-                    members.append(member)
-                
-        return members
-
