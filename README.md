@@ -48,11 +48,7 @@ jobs:
   build:
     runs-on: ubuntu-24.04
     steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@91182cccc01eb5e619899d80e4e971d6181294a7 # v2.10.1
-        with:
-          egress-policy: audit
-      - uses: jmertic/lfx-landscape-tools@e9e2ce77a3152780ec98fe30b8d5d832953a95c3 # 20241114
+      - uses: jmertic/lfx-landscape-tools@de81ee423ced59bdf7d03960cbfea905157e3ed4 # 20250211
         with:
           project_processing: skip # see options in action.yml
         env:
@@ -77,11 +73,6 @@ jobs:
     runs-on: ubuntu-latest
     name: "Validate landscape.yml file"
     steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@91182cccc01eb5e619899d80e4e971d6181294a7 # v2.10.1
-        with:
-          egress-policy: audit
-
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - uses: cncf/landscape2-validate-action@7f299c46e9b03b4e8bc2896882734fb0b0756b37 # v2.0.0
         with:
