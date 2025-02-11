@@ -28,9 +28,12 @@ class SVGLogo:
         if contents:
             self.__contents = contents
         elif filename:
-            with open(filename,'r') as f:
-                self.__contents = f.read()
-                self.__filename = filename
+            try:
+                with open(filename,'r') as f:
+                    self.__contents = f.read()
+                    self.__filename = os.path.basename(filename)
+            except FileNotFoundError:
+                logging.getLogger().warning("Logo '{}' not found".format(filename))
         elif url:
             session = requests.Session()
             retry = Retry(backoff_factor=0.5)
@@ -82,8 +85,12 @@ class SVGLogo:
         if not os.path.isdir(path):
             os.makedirs(path)
 
-        with open(filenamepath, 'w') as fp:
-            fp.write(self.__contents)
+        try:
+            with open(filenamepath, 'w') as fp:
+                logging.getLogger().debug("Saving hosted_logos '{}'".format(filenamepath))
+                fp.write(self.__contents)
+        except FileNotFoundError:
+            logging.getLogger().error("Cannot save '{}' in '{}'".format(filename,path))
 
         return filename
 
