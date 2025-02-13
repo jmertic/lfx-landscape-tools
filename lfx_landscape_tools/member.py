@@ -314,7 +314,8 @@ class Member:
             for repo_url in self._getAllGithubReposFromGithubOrg(self.project_org):
                 if repo_url != returnentry.get('repo_url'):
                     additional_repos.append({'repo_url':repo_url})
-            returnentry['additional_repos'] = sorted(additional_repos, key=lambda x: x['repo_url'])
+            # Temporarily return only 10 additional repos
+            returnentry['additional_repos'] = sorted(additional_repos, key=lambda x: x['repo_url'])[:10]
             logging.getLogger().debug("Setting 'additional_repos' to '{}' for '{}'".format(returnentry.get('additional_repos'),self.name))
 
         if not self.crunchbase:
