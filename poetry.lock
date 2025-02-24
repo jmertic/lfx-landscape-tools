@@ -501,13 +501,13 @@ files = [
 
 [[package]]
 name = "pygithub"
-version = "2.6.0"
+version = "2.6.1"
 description = "Use the full Github API v3"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "PyGithub-2.6.0-py3-none-any.whl", hash = "sha256:22635b245b885413c607bb86393603cadcfdcb67a9b81ce9a64634e64f308084"},
-    {file = "pygithub-2.6.0.tar.gz", hash = "sha256:04784fd6f4acfcaf91df5d3f08ef14153709395a34e706850f92337d9914548f"},
+    {file = "PyGithub-2.6.1-py3-none-any.whl", hash = "sha256:6f2fa6d076ccae475f9fc392cc6cdbd54db985d4f69b8833a28397de75ed6ca3"},
+    {file = "pygithub-2.6.1.tar.gz", hash = "sha256:b5c035392991cca63959e9453286b41b54d83bf2de2daa7d7ff7e4312cebf3bf"},
 ]
 
 [package.dependencies]
@@ -966,4 +966,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = ">= 3.12"
-content-hash = "c6fad9a037d1c8927d55a47f4534a06af6fe973ce6f3c56718812122d9738cd1"
+content-hash = "7057795632a927a0d7283bd313ff1797d4ecd5c53a534a5f38b0200769718ac8"
