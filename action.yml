@@ -65,7 +65,7 @@ runs:
         GH_TOKEN: ${{ env.token }}
         CONFIGFILE: ${{ inputs.configfile }}
     - name: Save missing.csv file
-      uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
+      uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
       with:
         name: debug.log 
         path: ./landscape/debug.log
@@ -100,7 +100,7 @@ runs:
       with:
         format: "YYYY-MM-DD"
     - name: Create Pull Request
-      uses: peter-evans/create-pull-request@67ccf781d68cd99b580ae25a5c18a1cc84ffff1f # v7.0.6
+      uses: peter-evans/create-pull-request@dd2324fc52d5d43c699a5636bcf19fceaa70c284 # v7.0.7
       with:
         token: ${{ env.token }}
         branch-suffix: timestamp
