@@ -50,7 +50,7 @@ jobs:
         name: debug-log 
         path: ./debug.log
     - name: SonarCloud Scan
-      uses: SonarSource/sonarcloud-github-action@02ef91109b2d589e757aefcfb2854c2783fd7b19 # master
+      uses: SonarSource/sonarcloud-github-action@ffc3010689be73b8e5ae0c57ce35968afd7909e8 # master
       continue-on-error: true # added since if it's a PR from a different user account, the credentials won't pass over
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
