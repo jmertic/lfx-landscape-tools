@@ -20,7 +20,7 @@ validators = "^0.34.0"
 click = "^8.1.8"
 
 [tool.poetry.group.test.dependencies]
-coverage = "^7.6.12"
+coverage = "^7.7.0"
 responses = "^0.25.7"
 
 [tool.poetry.group.dev.dependencies]
