@@ -11,7 +11,7 @@ runs:
   using: composite
   steps:
     - name: Install cairo
-      uses: awalsh128/cache-apt-pkgs-action@5902b33ae29014e6ca012c5d8025d4346556bd40 # v1.4.3
+      uses: awalsh128/cache-apt-pkgs-action@7ca5f46d061ad9aa95863cd9b214dd48edef361d # v1.5.0
       with:
         packages: libcairo2-dev pkg-config python3-dev
         version: 1.0
@@ -65,7 +65,7 @@ runs:
         GH_TOKEN: ${{ env.token }}
         CONFIGFILE: ${{ inputs.configfile }}
     - name: Save missing.csv file
-      uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
         name: debug.log 
         path: ./landscape/debug.log
