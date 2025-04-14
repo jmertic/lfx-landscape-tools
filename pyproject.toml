@@ -15,7 +15,7 @@ python-slugify = "^8.0.4"
 requests-cache = "^1.2.1"
 ruamel-yaml = "^0.18.10"
 url-normalize = "^2.2.0"
-urllib3 = "^2.3.0"
+urllib3 = "^2.4.0"
 validators = "^0.34.0"
 click = "^8.1.8"
 
