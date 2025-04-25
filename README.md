@@ -48,7 +48,7 @@ jobs:
   build:
     runs-on: ubuntu-24.04
     steps:
-      - uses: jmertic/lfx-landscape-tools@de81ee423ced59bdf7d03960cbfea905157e3ed4 # 20250211
+      - uses: jmertic/lfx-landscape-tools@4660b1ea154fbf93bfca32ef5acc146cc70b3325 # 20250425
         with:
           project_processing: skip # see options in action.yml
         env:
