@@ -48,6 +48,7 @@ class Config:
     projectsAddCategory = True
     projectsDefaultCrunchbase = 'https://www.crunchbase.com/organization/linux-foundation'
     projectsFilterByParentSlug = True
+    projectsAssignSIGs = False
     tacAgendaProjectUrl = None
     artworkRepoUrl = None
 
@@ -79,6 +80,7 @@ class Config:
             self.projectsAddCategory = data_loaded.get('projectsAddCategory',Config.projectsAddCategory)
             self.projectsDefaultCrunchbase = data_loaded.get('projectsDefaultCrunchbase',Config.projectsDefaultCrunchbase)
             self.projectsFilterByParentSlug = data_loaded.get('projectsFilterByParentSlug',Config.projectsFilterByParentSlug)
+            self.projectsAssignSIGs = data_loaded.get('projectsAssignSIGs',Config.projectsAssignSIGs)
             self.tacAgendaProjectUrl = data_loaded.get('tacAgendaProjectUrl',Config.tacAgendaProjectUrl)
             self.artworkRepoUrl = data_loaded.get('artworkRepoUrl',Config.artworkRepoUrl)
 

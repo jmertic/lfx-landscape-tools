@@ -36,6 +36,7 @@ class LandscapeMembers(Members):
         self.landscapefile = os.path.join(config.basedir,config.landscapefile)
         self.memberSuffix = config.memberSuffix if config.view == 'members' else self.memberSuffix
         self.hostedLogosDir = os.path.join(config.basedir,config.hostedLogosDir)
+        self.assignSIGs = config.projectsAssignSIGs
 
     def loadData(self):
         logger = logging.getLogger()
@@ -72,6 +73,9 @@ class LandscapeMembers(Members):
                                     logger.debug("Parsing subcategory '{}' to landscapeSubcategory '{}'".format(subcategory.get('name'),landscapeSubcategory.get('name')))
                                     member.membership = landscapeSubcategory.get('name')
                                     break
+                            if self.assignSIGs:
+                                member.second_path = [item for item in member.second_path if not item.startswith('SIG /')]
+
                             member.homepage_url = item.get('homepage_url')
                             member.linkedin = item.get('extra',{}).get('linkedin_url')
                             self.members.append(member)
