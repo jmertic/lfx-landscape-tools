@@ -32,6 +32,7 @@ class TACAgendaProject(Members):
     def processConfig(self, config: type[Config]):
         self.parent_slug = config.slug
         self.defaultCrunchbase = config.projectsDefaultCrunchbase
+        self.assignSIGs = config.projectsAssignSIGs
         if config.tacAgendaProjectUrl:
             urlparts = urlparse(config.tacAgendaProjectUrl).path.split('/')
             if urlparts and urlparts[1] == 'orgs' and urlparts[3] == 'projects':
@@ -83,6 +84,8 @@ class TACAgendaProject(Members):
             extra['annual_review_url'] = item.get('content',{}).get('url')
             annotations['next_annual_review_date'] = item.get('scheduled Date')
             projectdetailsfromlfxcommittee = self._lookupProjectAndCommitteeDetailsByLFXURL(item.get('pCC TSC Committee URL',''))
+            if self.assignSIGs and projectdetailsfromlfxcommittee.get('category') != 'SIG':
+                member.second_path = ['SIG / {}'.format(item.get('sIG','No SIG'))]
             annotations['slug'] = projectdetailsfromlfxcommittee.get('slug')
             session = requests_cache.CachedSession()
             chair = []
@@ -112,7 +115,7 @@ class TACAgendaProject(Members):
             with session.get(singleProjectEndpointURL.format(urlparts[2])) as endpointResponse:
                 parentProject = endpointResponse.json()
                 if len(parentProject.get('Data')) > 0: 
-                    return {'project_id': urlparts[2],'committee_id': urlparts[5],'slug': parentProject.get('Data')[0]["Slug"]}
+                    return {'project_id': urlparts[2],'committee_id': urlparts[5],'slug': parentProject.get('Data')[0]["Slug"],'category': parentProject.get('Data')[0].get('Category')}
         
         logging.getLogger().warning("Couldn't find project information with LFX URL '{}'".format(url)) 
 
