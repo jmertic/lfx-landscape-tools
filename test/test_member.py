@@ -239,6 +239,7 @@ class TestMember(unittest.TestCase):
         member.homepage_url = 'https://foo.com'
         member.membership = 'Gold'
         member.linkedin = 'https://www.linkedin.com/company/208777'
+        member.project_org = 'https://github.com/OpenAssetIO'
         member.extra = {'foo': 'foo', 'accepted': "2023-05-14", 'annotations': {'foo':'foo'}}
         member.second_path = ['list2','list3']
         dict = member.toLandscapeItemAttributes()
@@ -253,6 +254,7 @@ class TestMember(unittest.TestCase):
         self.assertEqual(dict.get('extra',{}).get('linkedin_url'),member.linkedin)
         self.assertEqual(dict.get('extra',{}).get('accepted'),"2023-05-14")
         self.assertEqual(dict.get('extra',{}).get('annotations',{}).get('foo'),'foo')
+        self.assertEqual(dict.get('extra',{}).get('annotations',{}).get('project_org'),'https://github.com/OpenAssetIO')
         self.assertIsNone(dict.get('extra',{}).get('foo'))
         self.assertIn('list2',member.second_path)
         self.assertIn('list3',member.second_path)
