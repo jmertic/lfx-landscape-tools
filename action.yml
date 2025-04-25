@@ -11,7 +11,7 @@ runs:
   using: composite
   steps:
     - name: Install cairo
-      uses: awalsh128/cache-apt-pkgs-action@5902b33ae29014e6ca012c5d8025d4346556bd40 # v1.4.3
+      uses: awalsh128/cache-apt-pkgs-action@7ca5f46d061ad9aa95863cd9b214dd48edef361d # v1.5.0
       with:
         packages: libcairo2-dev pkg-config python3-dev
         version: 1.0
@@ -29,7 +29,7 @@ runs:
         repository: jmertic/lfx-landscape-tools
         path: landscape-tools
     - name: Set up Python 3.x
-      uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38 # v5.4.0
+      uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55 # v5.5.0
       with:
         python-version: '3.x'
     - name: Install poetry
@@ -65,7 +65,7 @@ runs:
         GH_TOKEN: ${{ env.token }}
         CONFIGFILE: ${{ inputs.configfile }}
     - name: Save missing.csv file
-      uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
         name: debug.log 
         path: ./landscape/debug.log
@@ -81,7 +81,7 @@ runs:
         repository: cncf/landscapeapp
         path: landscapeapp
     - name: Setup node
-      uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
+      uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
       if: ${{ hashFiles('./landscape/settings.yml') != '' }}
       with:
         node-version: '18'
