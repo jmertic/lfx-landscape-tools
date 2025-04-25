@@ -9,19 +9,19 @@ license = "Apache-2.0"
 [tool.poetry.dependencies]
 python = ">= 3.12"
 requests = "^2.32.3"
-pycairo = "^1.27.0"
+pycairo = "^1.28.0"
 pygithub = "^2.6.1"
 python-slugify = "^8.0.4"
 requests-cache = "^1.2.1"
 ruamel-yaml = "^0.18.10"
-url-normalize = "^1.4.3"
-urllib3 = "^2.3.0"
+url-normalize = "^2.2.0"
+urllib3 = "^2.4.0"
 validators = "^0.34.0"
 click = "^8.1.8"
 
 [tool.poetry.group.test.dependencies]
-coverage = "^7.6.12"
-responses = "^0.25.5"
+coverage = "^7.8.0"
+responses = "^0.25.7"
 
 [tool.poetry.group.dev.dependencies]
 build = "^1.2.2"
