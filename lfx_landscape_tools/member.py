@@ -316,12 +316,6 @@ class Member:
                     additional_repos.append({'repo_url':repo_url})
             # Temporarily return only 3 additional repos
             returnentry['additional_repos'] = sorted(additional_repos, key=lambda x: x['repo_url'])[:3]
-            # Put the project_org in annotations
-            if not returnentry.get('extra'):
-                returnentry['extra'] = {}
-            if not returnentry['extra'].get('annotations'):
-                returnentry['extra']['annotations'] = {}
-            returnentry['extra']['annotations']['project_org'] = self.project_org
             logging.getLogger().debug("Setting 'additional_repos' to '{}' for '{}'".format(returnentry.get('additional_repos'),self.name))
             # Put the project_org in annotations
             if self.project_org:
