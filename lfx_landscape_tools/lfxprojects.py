@@ -98,9 +98,9 @@ class LFXProjects(Members):
                     logger.debug("Trying to use 'RepositoryURL' for 'homepage_url' instead")
                     member.homepage_url = record.get('RepositoryURL')
                 if self.addParentProject:
-                    parentName = self.lookupParentProjectNameBySlug(record.get('ParentSlug',self.project))
-                    if parentName:
-                        second_path.append('Project Group / {}'.format(parentName.replace("/",":")))
+                    parentProject = self.lookupParentProjectBySlug(record.get('ParentSlug',self.project))
+                    if parentProject and "Membership" in parentProject.get("Model",[]):
+                        second_path.append('Project Group / {}'.format(parentProject.get("Name").replace("/",":")))
                 member.logo = record.get('ProjectLogo')
                 if not member.logo:
                     logger.debug("Trying to create text logo")
@@ -130,13 +130,13 @@ class LFXProjects(Members):
                 member.second_path = second_path
                 self.members.append(member)
 
-    def lookupParentProjectNameBySlug(self, slug):
+    def lookupParentProjectBySlug(self, slug):
         session = requests_cache.CachedSession()
         if slug:
             with session.get(self.singleSlugEndpointUrl.format(slug=slug)) as endpointResponse:
                 parentProject = endpointResponse.json()
                 if len(parentProject.get('Data',[])) > 0: 
-                    return parentProject['Data'][0]["Name"]
+                    return parentProject['Data'][0]
                 logging.getLogger().warning("Couldn't find project for slug '{}'".format(slug)) 
         
         return False
