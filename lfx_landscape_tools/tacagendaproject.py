@@ -97,7 +97,7 @@ class TACAgendaProject(Members):
                     try:
                         memberList = endpointResponse.json()
                         for record in memberList.get('Data',[]):
-                                if record.get('Role') in ['Chair','Vice Chair']:
+                            if record.get('Role') in ['Chair','Vice Chair']:
                                 logger.info("Found '{} {}' for the role '{}".format(record.get('FirstName').title(),record.get('LastName').title(),record.get('Role')))
                                 chair.append('{} {}'.format(record.get('FirstName').title(),record.get('LastName').title()))
                     except Exception as e:
