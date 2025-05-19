@@ -26,7 +26,7 @@ class TACAgendaProject(Members):
     gh_org = None
     parent_slug = None
 
-    pcc_committee_url = 'https://api-gw.platform.linuxfoundation.org/project-service/v2/public/projects/{project_id}/committees/{committee_id}/members?$filter=role%20contains%20Chair&orderBy=Role'
+    pcc_committee_url = 'https://api-gw.platform.linuxfoundation.org/project-service/v2/public/projects/{project_id}/committees/{committee_id}/members?$filter=role%20ne%20None&orderBy=Role'
     gh_cli_call = "gh project item-list {gh_project_id} --owner {gh_org} --format json --limit 200"
 
     def processConfig(self, config: type[Config]):
@@ -100,6 +100,8 @@ class TACAgendaProject(Members):
                             if record.get('Role') in ['Chair','Vice Chair']:
                                 logger.info("Found '{} {}' for the role '{}".format(record.get('FirstName').title(),record.get('LastName').title(),record.get('Role')))
                                 chair.append('{} {}'.format(record.get('FirstName').title(),record.get('LastName').title()))
+                            elif record.get('Role') == 'TAC/TOC Representative':
+                                annotations["TAC_representative"] = '{} {}'.format(record.get('FirstName').title(),record.get('LastName').title()))
                     except Exception as e:
                         logger.error("Couldn't load TSC Committee data for '{project}' - {error}".format(project=member.name,error=e))
             annotations['chair'] = ", ".join(chair)
