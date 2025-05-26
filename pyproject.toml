@@ -13,11 +13,11 @@ pycairo = "^1.28.0"
 pygithub = "^2.6.1"
 python-slugify = "^8.0.4"
 requests-cache = "^1.2.1"
-ruamel-yaml = "^0.18.10"
+ruamel-yaml = "^0.18.11"
 url-normalize = "^2.2.1"
 urllib3 = "^2.4.0"
 validators = "^0.35.0"
-click = "^8.2.0"
+click = "^8.2.1"
 
 [tool.poetry.group.test.dependencies]
 coverage = "^7.8.0"
