@@ -25,7 +25,7 @@ class LFXProjects(Members):
     singleSlugEndpointUrl = 'https://api-gw.platform.linuxfoundation.org/project-service/v1/public/projects?slug={slug}' 
     calendarUrl = 'https://zoom-lfx.platform.linuxfoundation.org/meetings/{slug}'
     icalUrl = 'https://webcal.prod.itx.linuxfoundation.org/lfx/{project_id}'
-    lfxinsightsUrl = "https://insights.lfx.linuxfoundation.org/foundation/{parent_slug}/overview?project={slug}"
+    lfxinsightsUrl = "https://insights.linuxfoundation.org/project/{slug}"
     artworkRepoUrl = None
 
     defaultCategory = ''
