@@ -32,8 +32,9 @@ landscapeMemberCategory: AOUSD Members
 
 ## Setting up the GitHub Action
 
-1) [Add a new label](https://docs.github.com/en/github/managing-your-work-on-github/managing-labels#creating-a-label) - `automated-build`. This is for this workflow to work and shouldn't be used for anything else.
-2) Add the following code to a `build.yml` file in your landscape repo's `.github/workflows/` directory.
+1) Review the permissions for the `GITHUB_TOKEN` for your repository ( more details [here](https://docs.github.com/en/actions/security-for-github-actions/security-guides/automatic-token-authentication#permissions-for-the-github_token) ). Note that you need to ensure `GITHUB_TOKEN` has the permission to merge PRs ( more [here](https://docs.github.com/en/organizations/managing-organization-settings/disabling-or-limiting-github-actions-for-your-organization#preventing-github-actions-from-creating-or-approving-pull-requests).
+2) [Add a new label](https://docs.github.com/en/github/managing-your-work-on-github/managing-labels#creating-a-label) - `automated-build`. This is for this workflow to work and shouldn't be used for anything else.
+3) Add the following code to a `build.yml` file in your landscape repo's `.github/workflows/` directory.
 
 ```yaml
 name: Build Landscape from LFX
@@ -55,7 +56,7 @@ jobs:
           repository: ${{ github.repository }}
           ref: ${{ github.ref }}
 ```
-3) Add the following code to a `validate.yml` file in your landscape repo's `.github/workflows/` directory.
+4) Add the following code to a `validate.yml` file in your landscape repo's `.github/workflows/` directory.
 ```yaml
 name: Validate Landscape
 
@@ -84,7 +85,7 @@ jobs:
           MERGE_RETRY_SLEEP: 300000
           MERGE_METHOD: "squash"
 ```
-4) Run the `Build Landscape from LFX` GitHub Action following the instructions for [manually running a GitHub Action](https://docs.github.com/en/actions/managing-workflow-runs-and-deployments/managing-workflow-runs/manually-running-a-workflow) to test that it all works.
+5) Run the `Build Landscape from LFX` GitHub Action following the instructions for [manually running a GitHub Action](https://docs.github.com/en/actions/managing-workflow-runs-and-deployments/managing-workflow-runs/manually-running-a-workflow) to test that it all works.
 
 ## Local install
 
