@@ -103,7 +103,7 @@ class LFXProjects(Members):
                         second_path.append('Project Group / {}'.format(parentProject.get("Name").replace("/",":")))
                 member.logo = record.get('ProjectLogo')
                 if not member.logo:
-                    logger.debug("Trying to create text logo")
+                    logger.info("Creating text logo for '{}'".format(member.name))
                     member.logo = SVGLogo(name=member.name)
                 member.crunchbase = record.get('CrunchBaseUrl',self.defaultCrunchbase)
                 member.linkedin = record.get('LinkedIn')
