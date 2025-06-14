@@ -16,6 +16,7 @@ from lfx_landscape_tools.tacagendaproject import TACAgendaProject
 from datetime import datetime
 from argparse import ArgumentParser,FileType
 import os
+import subprocess
 from os import path
 import logging
 import sys
@@ -55,6 +56,10 @@ class Cli:
         maketextlogo_parser.add_argument("--autocrop", dest="autocrop", action='store_true', help="Process logo with autocrop")
         maketextlogo_parser.add_argument("-o", "--output", dest="filename", help="Filename to save created logo to")
         maketextlogo_parser.set_defaults(func=self.maketextlogo)
+
+        validate_parser = subparsers.add_parser("validatedata", help="Validate landscape data file")
+        validate_parser.add_argument("filename", help="Landscape data file name", default="landscape.yml")
+        validate_parser.set_defaults(func=self.validatedata)
 
         args = parser.parse_args()
 
@@ -142,3 +147,8 @@ class Cli:
             print(svglogo)
 
         return True
+
+    def validatedata(self,args):
+        schema = "https://raw.githubusercontent.com/cncf/landscape2/refs/heads/main/docs/config/schema/data.schema.json"
+        filename = args.filename
+        subprocess.run("check-jsonschema --schemafile {schema} {filename}".format(schema=schema,filename=filename), shell=True)
