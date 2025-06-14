@@ -123,6 +123,7 @@ class LFXProjects(Members):
                 extra['dev_stats_url'] = self.lfxinsightsUrl.format(parent_slug=record.get('ParentSlug',self.project),slug=annotations.get('slug'))
                 annotations['calendar_url'] = self.calendarUrl.format(slug=annotations.get('slug'))
                 annotations['ical_url'] = self.icalUrl.format(project_id=record.get('ProjectID'))
+                annotations['charter_url'] = record.get('CharterURL')
                 if self.artworkRepoUrl:
                     extra['artwork_url'] = self.artworkRepoUrl.format(slug=annotations.get('slug'))
                 extra['annotations'] = annotations
