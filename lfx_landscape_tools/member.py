@@ -19,6 +19,7 @@ import requests
 import requests_cache
 from github import Github, GithubException, RateLimitExceededException, Auth
 import ruamel.yaml
+from bs4 import BeautifulSoup
 
 from lfx_landscape_tools.svglogo import SVGLogo
 
@@ -126,10 +127,37 @@ class Member:
         return self._isGitHubURL(url) and len(urlparse(url).path.split("/")) == 2
 
     def _getPrimaryGitHubRepoFromGitHubOrg(self, url):
-        repos = self._getAllGithubReposFromGithubOrg(url)
-        if not repos or not isinstance(repos,list):
-            return None
-        return self._getAllGithubReposFromGithubOrg(url)[0]
+        if not self._isGitHubOrg(url):
+            return list(url)
+
+        if len(self._getPinnedGithubReposFromGithubOrg(url)) > 0:
+            return self._getPinnedGithubReposFromGithubOrg(url)[0]
+
+        with requests_cache.enabled():
+            while True:
+                try:
+                    if 'GITHUB_TOKEN' in os.environ:
+                        g = Github(auth=Auth.Token(os.environ['GITHUB_TOKEN']), per_page=1000)
+                    else:
+                        g = Github(per_page=1000)
+                    repos = g.search_repositories(query="org:{}".format(urlparse(url).path.split("/")[1]),sort="stars",order="desc")
+                    if len(list(repos)) > 0:
+                        return repos[0].html_url
+                    else:
+                        return ''
+                except RateLimitExceededException:
+                    logging.info("Sleeping until we get past the API rate limit....")
+                    time.sleep(g.rate_limiting_resettime-now())
+                except GithubException as e:
+                    if e.status == 502:
+                        logging.debug("Server error - retrying...")
+                    if e.status == 404:
+                        return False
+                    else:
+                        logging.getLogger().warning(e.data)
+                        return
+                except socket.timeout:
+                    logging.debug("Server error - retrying...")
 
     def _getAllGithubReposFromGithubOrg(self, url):
         if not self._isGitHubOrg(url):
@@ -160,6 +188,24 @@ class Member:
                         return
                 except socket.timeout:
                     logging.debug("Server error - retrying...")
+
+    def _getPinnedGithubReposFromGithubOrg(self, url):
+        if not self._isGitHubOrg(url):
+            return list(url)
+
+        repos = []
+
+        try:
+            orgPageResponse = requests_cache.CachedSession().get(url)
+            orgPageResponse.raise_for_status()
+        except requests.exceptions.RequestException as e:
+            logging.getLogger().error("Cannot load {} - error message '{}'".format(url,e))
+        else:
+            soup = BeautifulSoup(orgPageResponse.text, 'html.parser')
+            for item in soup.find_all("li",{"class": "js-pinned-item-list-item"}):
+                repos.append("https://github.com{}".format(item.find("a").attrs['href']))
+
+        return repos
 
     @property
     def linkedin(self):
@@ -310,12 +356,11 @@ class Member:
             logging.getLogger().debug("Setting '{}' to '{}'".format(key,returnentry.get(key)))
 
         if self.project_org:
-            additional_repos = returnentry.get('additional_repos',[])
-            for repo_url in self._getAllGithubReposFromGithubOrg(self.project_org):
-                if repo_url != returnentry.get('repo_url'):
+            additional_repos = [] #returnentry.get('additional_repos',[])
+            for repo_url in self._getPinnedGithubReposFromGithubOrg(self.project_org):
+                if repo_url != self.repo_url:
                     additional_repos.append({'repo_url':repo_url})
-            # Temporarily return only 3 additional repos
-            returnentry['additional_repos'] = sorted(additional_repos, key=lambda x: x['repo_url'])[:3]
+            returnentry['additional_repos'] = additional_repos
             logging.getLogger().debug("Setting 'additional_repos' to '{}' for '{}'".format(returnentry.get('additional_repos'),self.name))
             # Put the project_org in annotations
             if self.project_org:
