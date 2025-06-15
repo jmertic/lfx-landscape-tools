@@ -47,7 +47,13 @@ class TestLFXProjects(unittest.TestCase):
         config.projectsAddParentProject = True
         config.artworkRepoUrl = "https://artwork.aswf.io/projects/{slug}"
         members = LFXProjects(config=config,loadData=False)
-       
+
+        responses.add(
+            method=responses.GET,
+            url="https://api.github.com:443/search/repositories?sort=stars&order=desc&q=org%3AOpenAssetIO&per_page=1000",
+            body=""
+            )
+
         responses.add(
             method=responses.GET,
             url=members.singleSlugEndpointUrl.format(slug='aswfs'),
