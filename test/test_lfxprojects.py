@@ -36,9 +36,11 @@ class TestLFXProjects(unittest.TestCase):
         logging.getLogger().debug("Running {}".format(unittest.TestCase.id(self)))
         with open("{}/data.yml".format(os.path.dirname(__file__)), 'r', encoding="utf8", errors='ignore') as fileobject:   
             responses.get('https://raw.githubusercontent.com/cncf/landscape2/refs/heads/main/docs/config/data.yml', body=fileobject.read())
-        
         with open("{}/github_openassetio_response.html".format(os.path.dirname(__file__)), 'r', encoding="utf8", errors='ignore') as fileobject:
+            responses.get("https://github.com/OpenAssetIO",body=fileobject.read())
+        with open("{}/github_openassetio_search_repo.json".format(os.path.dirname(__file__)), 'r', encoding="utf8", errors='ignore') as fileobject:
             responses.get("https://api.github.com:443/search/repositories?sort=stars&order=desc&q=org%3AOpenAssetIO&per_page=1000",body=fileobject.read())
+       
         
     @responses.activate
     def testLoadData(self):
