@@ -25,7 +25,7 @@ class LFXProjects(Members):
     singleSlugEndpointUrl = 'https://api-gw.platform.linuxfoundation.org/project-service/v1/public/projects?slug={slug}' 
     calendarUrl = 'https://zoom-lfx.platform.linuxfoundation.org/meetings/{slug}'
     icalUrl = 'https://webcal.prod.itx.linuxfoundation.org/lfx/{project_id}'
-    lfxinsightsUrl = "https://insights.lfx.linuxfoundation.org/foundation/{parent_slug}/overview?project={slug}"
+    lfxinsightsUrl = "https://insights.linuxfoundation.org/project/{slug}"
     artworkRepoUrl = None
 
     defaultCategory = ''
@@ -103,7 +103,7 @@ class LFXProjects(Members):
                         second_path.append('Project Group / {}'.format(parentProject.get("Name").replace("/",":")))
                 member.logo = record.get('ProjectLogo')
                 if not member.logo:
-                    logger.debug("Trying to create text logo")
+                    logger.info("Creating text logo for '{}'".format(member.name))
                     member.logo = SVGLogo(name=member.name)
                 member.crunchbase = record.get('CrunchBaseUrl',self.defaultCrunchbase)
                 member.linkedin = record.get('LinkedIn')
@@ -123,6 +123,7 @@ class LFXProjects(Members):
                 extra['dev_stats_url'] = self.lfxinsightsUrl.format(parent_slug=record.get('ParentSlug',self.project),slug=annotations.get('slug'))
                 annotations['calendar_url'] = self.calendarUrl.format(slug=annotations.get('slug'))
                 annotations['ical_url'] = self.icalUrl.format(project_id=record.get('ProjectID'))
+                annotations['charter_url'] = record.get('CharterURL')
                 if self.artworkRepoUrl:
                     extra['artwork_url'] = self.artworkRepoUrl.format(slug=annotations.get('slug'))
                 extra['annotations'] = annotations
