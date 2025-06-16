@@ -89,6 +89,11 @@ class TestLFXMembers(unittest.TestCase):
             url=LFXMembers.endpointURL.format('tlf2'),
             body='[{"ID":"0014100000Te1TUAAZ","Name":"ConsenSys AG","CNCFLevel":"","OrganizationDescription":"this org is cool","LinkedInURL":"dog.com","CrunchBaseURL":"https://crunchbase.com/organization/consensus-systems--consensys-","Logo":"https://lf-master-organization-logos-prod.s3.us-east-2.amazonaws.com/consensys_ag.svg","Membership":{"Family":"Membership","ID":"01t41000002735aAAA","Name":"Premier Membership","Status":"Active"},"Slug":"hyp","StockTicker":"","Twitter":"","Website":"consensys.net"},{"ID":"0014100000Te04HAAR","Name":"Hitachi, Ltd.","CNCFLevel":"","LinkedInURL":"www.linkedin.com/company/hitachi-data-systems","Logo":"https://lf-master-organization-logos-prod.s3.us-east-2.amazonaws.com/hitachi-ltd.svg","Membership":{"Family":"Membership","ID":"01t41000002735aAAA","Name":"Premier Membership","Status":"Active"},"Slug":"hyp","StockTicker":"","Twitter":"https://yahoo.com","Website":"hitachi-systems.com"}]'
             )
+        responses.add(
+            method=responses.GET,
+            url=LFXMembers.endpointURL.format('aswf'),
+            body='[{"ID":"0014100000Te1TUAAZ","Name":"ConsenSys AG","CNCFLevel":"","OrganizationDescription":"this org is cool","LinkedInURL":"dog.com","CrunchBaseURL":"https://crunchbase.com/organization/consensus-systems--consensys-","Logo":"https://lf-master-organization-logos-prod.s3.us-east-2.amazonaws.com/consensys_ag.svg","Membership":{"Family":"Membership","ID":"01t41000002735aAAA","Name":"Premier Membership","Status":"Active"},"Slug":"hyp","StockTicker":"","ProjectName":"Academy Software Foundation (ASWF)","Twitter":"","Website":"consensys.net"}]'
+            )
         
         config = Config()
         config.project = 'tlf2'
@@ -101,6 +106,7 @@ class TestLFXMembers(unittest.TestCase):
         self.assertEqual(members.members[0].membership,"Premier Membership")
         self.assertEqual(members.members[0].description,"this org is cool")
         self.assertEqual(members.members[0].homepage_url,"https://consensys.net/")
+        self.assertNotIn('Project Membership / Academy Software Foundation (ASWF)',members.members[0].second_path)
         self.assertIsNone(members.members[0].linkedin)
         self.assertIsNone(members.members[0].twitter)
         self.assertEqual(members.members[1].name,"Hitachi, Ltd.")
@@ -109,6 +115,43 @@ class TestLFXMembers(unittest.TestCase):
         self.assertEqual(members.members[1].membership,"Premier Membership")
         self.assertEqual(members.members[1].homepage_url,"https://hitachi-systems.com/")
         self.assertIsNone(members.members[1].twitter)
+        self.assertNotIn('Project Membership / Academy Software Foundation (ASWF)',members.members[1].second_path)
+    
+    @responses.activate
+    def testLoadData(self):
+        responses.add(
+            method=responses.GET,
+            url=LFXMembers.endpointURL.format('tlf2'),
+            body='[{"ID":"0014100000Te1TUAAZ","Name":"ConsenSys AG","CNCFLevel":"","OrganizationDescription":"this org is cool","LinkedInURL":"dog.com","CrunchBaseURL":"https://crunchbase.com/organization/consensus-systems--consensys-","Logo":"https://lf-master-organization-logos-prod.s3.us-east-2.amazonaws.com/consensys_ag.svg","Membership":{"Family":"Membership","ID":"01t41000002735aAAA","Name":"Premier Membership","Status":"Active"},"Slug":"hyp","StockTicker":"","Twitter":"","Website":"consensys.net"},{"ID":"0014100000Te04HAAR","Name":"Hitachi, Ltd.","CNCFLevel":"","LinkedInURL":"www.linkedin.com/company/hitachi-data-systems","Logo":"https://lf-master-organization-logos-prod.s3.us-east-2.amazonaws.com/hitachi-ltd.svg","Membership":{"Family":"Membership","ID":"01t41000002735aAAA","Name":"Premier Membership","Status":"Active"},"Slug":"hyp","StockTicker":"","Twitter":"https://yahoo.com","Website":"hitachi-systems.com"}]'
+            )
+        responses.add(
+            method=responses.GET,
+            url=LFXMembers.endpointURL.format('aswf'),
+            body='[{"ID":"0014100000Te1TUAAZ","Name":"ConsenSys AG","CNCFLevel":"","OrganizationDescription":"this org is cool","LinkedInURL":"dog.com","CrunchBaseURL":"https://crunchbase.com/organization/consensus-systems--consensys-","Logo":"https://lf-master-organization-logos-prod.s3.us-east-2.amazonaws.com/consensys_ag.svg","Membership":{"Family":"Membership","ID":"01t41000002735aAAA","Name":"Premier Membership","Status":"Active"},"Slug":"hyp","StockTicker":"","ProjectName":"Academy Software Foundation (ASWF)","Twitter":"","Website":"consensys.net"}]'
+            )
+        
+        config = Config()
+        config.project = 'tlf2'
+        config.addOtherProjectMemberships = True
+        with unittest.mock.patch('requests_cache.CachedSession', requests.Session):
+            members = LFXMembers(loadData = True, config=config)
+        self.assertEqual(members.project,'tlf2')
+        self.assertEqual(members.members[0].name,"ConsenSys AG")
+        self.assertEqual(members.members[0].crunchbase,"https://www.crunchbase.com/organization/consensus-systems--consensys-")
+        self.assertEqual(members.members[0].logo.filename(members.members[0].name),"consensys_ag.svg")
+        self.assertEqual(members.members[0].membership,"Premier Membership")
+        self.assertEqual(members.members[0].description,"this org is cool")
+        self.assertEqual(members.members[0].homepage_url,"https://consensys.net/")
+        self.assertIn('Project Membership / Academy Software Foundation (ASWF)',members.members[0].second_path)
+        self.assertIsNone(members.members[0].linkedin)
+        self.assertIsNone(members.members[0].twitter)
+        self.assertEqual(members.members[1].name,"Hitachi, Ltd.")
+        self.assertIsNone(members.members[1].crunchbase)
+        self.assertEqual(members.members[1].logo.filename(members.members[1].name),"hitachi_ltd.svg")
+        self.assertEqual(members.members[1].membership,"Premier Membership")
+        self.assertEqual(members.members[1].homepage_url,"https://hitachi-systems.com/")
+        self.assertIsNone(members.members[1].twitter)
+        self.assertNotIn('Project Membership / Academy Software Foundation (ASWF)',members.members[1].second_path)
     
     @responses.activate
     def testLoadDataMissingLogo(self):
