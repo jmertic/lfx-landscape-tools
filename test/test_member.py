@@ -34,6 +34,10 @@ class TestMember(unittest.TestCase):
     
     def setUp(self):
         logging.getLogger().debug("Running {}".format(unittest.TestCase.id(self)))
+        with open("{}/github_openassetio_response.html".format(os.path.dirname(__file__)), 'r', encoding="utf8", errors='ignore') as fileobject:
+            responses.get("https://github.com/OpenAssetIO",body=fileobject.read())
+        with open("{}/github_openassetio_search_repo.json".format(os.path.dirname(__file__)), 'r', encoding="utf8", errors='ignore') as fileobject:
+            responses.get("https://api.github.com:443/search/repositories?sort=stars&order=desc&q=org%3AOpenAssetIO&per_page=1000",body=fileobject.read())
 
     def testLinkedInValid(self):
         validLinkedInURLs = [
@@ -95,6 +99,21 @@ class TestMember(unittest.TestCase):
         member.name = 'test'
         member.repo_url = 'https://gitlab.com/foo/bar'
         self.assertEqual(member.repo_url,'https://gitlab.com/foo/bar')
+
+    @responses.activate
+    def testSetRepoGitHubOrg(self):
+        member = Member()
+        member.name = 'test'
+        member.repo_url = 'https://github.com/OpenAssetIO'
+        self.assertEqual(member.project_org,'https://github.com/OpenAssetIO')
+        self.assertEqual(member.repo_url,'https://github.com/OpenAssetIO/OpenAssetIO')
+        attributes = member.toLandscapeItemAttributes()
+        self.assertEqual(attributes['extra']['annotations']['project_org'],'https://github.com/OpenAssetIO')
+        self.assertEqual(attributes['additional_repos'],[
+            {'repo_url': 'https://github.com/OpenAssetIO/OpenAssetIO-MediaCreation'},
+            {'repo_url': 'https://github.com/OpenAssetIO/OpenAssetIO-TraitGen'},
+            {'repo_url': 'https://github.com/OpenAssetIO/Template-OpenAssetIO-Manager-Python'}
+            ])
 
     def testSetCrunchbaseNotValid(self):
         invalidCrunchbaseURLs = [
