@@ -9,6 +9,8 @@ import unittest
 import tempfile
 import os
 import responses
+import requests
+import requests_cache
 import logging
 
 from lfx_landscape_tools.config import Config
@@ -34,6 +36,9 @@ class TestMember(unittest.TestCase):
     
     def setUp(self):
         logging.getLogger().debug("Running {}".format(unittest.TestCase.id(self)))
+        requests_cache.uninstall_cache()
+        with open("{}/data.yml".format(os.path.dirname(__file__)), 'r', encoding="utf8", errors='ignore') as fileobject:   
+            responses.get('https://raw.githubusercontent.com/cncf/landscape2/refs/heads/main/docs/config/data.yml', body=fileobject.read())
         with open("{}/github_openassetio_response.html".format(os.path.dirname(__file__)), 'r', encoding="utf8", errors='ignore') as fileobject:
             responses.get("https://github.com/OpenAssetIO",body=fileobject.read())
         with open("{}/github_openassetio_search_repo.json".format(os.path.dirname(__file__)), 'r', encoding="utf8", errors='ignore') as fileobject:
@@ -101,19 +106,33 @@ class TestMember(unittest.TestCase):
         self.assertEqual(member.repo_url,'https://gitlab.com/foo/bar')
 
     @responses.activate
-    def testSetRepoGitHubOrg(self):
-        member = Member()
-        member.name = 'test'
-        member.repo_url = 'https://github.com/OpenAssetIO'
-        self.assertEqual(member.project_org,'https://github.com/OpenAssetIO')
-        self.assertEqual(member.repo_url,'https://github.com/OpenAssetIO/OpenAssetIO')
-        attributes = member.toLandscapeItemAttributes()
-        self.assertEqual(attributes['extra']['annotations']['project_org'],'https://github.com/OpenAssetIO')
-        self.assertEqual(attributes['additional_repos'],[
-            {'repo_url': 'https://github.com/OpenAssetIO/OpenAssetIO-MediaCreation'},
-            {'repo_url': 'https://github.com/OpenAssetIO/OpenAssetIO-TraitGen'},
-            {'repo_url': 'https://github.com/OpenAssetIO/Template-OpenAssetIO-Manager-Python'}
-            ])
+    def testSetRepoGitHubOrgWithPins(self):
+        with unittest.mock.patch('requests_cache.CachedSession', requests.Session):
+            member = Member()
+            member.name = 'test'
+            member.repo_url = 'https://github.com/OpenAssetIO'
+            self.assertEqual(member.project_org,'https://github.com/OpenAssetIO')
+            self.assertEqual(member.repo_url,'https://github.com/OpenAssetIO/OpenAssetIO')
+            attributes = member.toLandscapeItemAttributes()
+            self.assertEqual(attributes['extra']['annotations']['project_org'],'https://github.com/OpenAssetIO')
+            self.assertEqual(attributes['additional_repos'],[
+                {'repo_url': 'https://github.com/OpenAssetIO/OpenAssetIO-MediaCreation'},
+                {'repo_url': 'https://github.com/OpenAssetIO/OpenAssetIO-TraitGen'},
+                {'repo_url': 'https://github.com/OpenAssetIO/Template-OpenAssetIO-Manager-Python'}
+                ])
+
+    @responses.activate
+    def testSetRepoGitHubOrgWithoutPins(self):
+        with unittest.mock.patch('requests_cache.CachedSession', requests.Session):
+            responses.replace(responses.GET,"https://github.com/OpenAssetIO",body="")
+            member = Member()
+            member.name = 'test'
+            member.repo_url = 'https://github.com/OpenAssetIO'
+            self.assertEqual(member.project_org,'https://github.com/OpenAssetIO')
+            self.assertEqual(member.repo_url,'https://github.com/OpenAssetIO/OpenAssetIO')
+            attributes = member.toLandscapeItemAttributes()
+            self.assertEqual(attributes['extra']['annotations']['project_org'],'https://github.com/OpenAssetIO')
+            self.assertEqual(attributes['additional_repos'],[])
 
     def testSetCrunchbaseNotValid(self):
         invalidCrunchbaseURLs = [
