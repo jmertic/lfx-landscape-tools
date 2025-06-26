@@ -58,7 +58,7 @@ jobs:
 ```
 4) Add the following code to a `validate.yml` file in your landscape repo's `.github/workflows/` directory.
 ```yaml
-name: Validate Landscape
+name: Validate
 
 on:
   merge_group:
@@ -72,13 +72,18 @@ jobs:
     runs-on: ubuntu-latest
     name: "Validate landscape.yml file"
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@002fdce3c6a235733a90a27c80493a3241e56863 # v2.12.1
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - uses: cncf/landscape2-validate-action@7f299c46e9b03b4e8bc2896882734fb0b0756b37 # v2.0.0
         with:
           target_kind: data
           target_path: ./landscape.yml
       - uses: pascalgn/automerge-action@7961b8b5eec56cc088c140b56d864285eabd3f67 # v0.16.4
-        if: success() && ${{ github.secret_source == 'Actions' }}
+        if: success()
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
           MERGE_LABELS: "automated-build"
