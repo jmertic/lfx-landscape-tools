@@ -58,7 +58,7 @@ jobs:
 ```
 4) Add the following code to a `validate.yml` file in your landscape repo's `.github/workflows/` directory.
 ```yaml
-name: Validate
+name: Validate Landscape
 
 on:
   merge_group:
