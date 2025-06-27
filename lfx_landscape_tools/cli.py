@@ -72,15 +72,14 @@ class Cli:
         }
         if args.verbose:
             args.loglevel = 'info'
+        handlers = [logging.FileHandler("debug.log",mode="w")]
+        if not args.silent:
+            handlers.append(logging.StreamHandler(sys.stdout))
         logging.basicConfig(
             level=levels.get(args.loglevel.lower()),
             format="%(asctime)s [%(levelname)s] %(message)s",
-            handlers=[
-                logging.FileHandler("debug.log",mode="w"),
-            ]
+            handlers=handlers
         )
-        if not args.silent:
-            logging.addHandler(logging.StreamHandler(sys.stdout))
 
         try:
             args.func(args)
