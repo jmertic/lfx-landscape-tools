@@ -53,7 +53,7 @@ runs:
       run: poetry run lfx_landscape build_projects -c ../landscape/$CONFIGFILE
       env:
         GITHUB_TOKEN: ${{ env.token }}
-        GH_TOKEN: ${{ env.token }}
+        GH_TOKEN: ${{ env.ghid_token }}
         CONFIGFILE: ${{ inputs.configfile }}
     - name: Sync projects from LFX and other sources
       if: ${{ inputs.project_processing == 'sync' }}
