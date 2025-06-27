@@ -288,14 +288,14 @@ files = [
 
 [[package]]
 name = "check-jsonschema"
-version = "0.33.0"
+version = "0.33.1"
 description = "A jsonschema CLI and pre-commit hook"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "check_jsonschema-0.33.0-py3-none-any.whl", hash = "sha256:03b17105321c91915b2fdfa47a6821f8c4f9e45bb37b9433752bb6a938f42a2f"},
-    {file = "check_jsonschema-0.33.0.tar.gz", hash = "sha256:504fe09f268d2d25d58381d1ed1d5ae8f6e80e7f300e8b155317b40f9f6db8f6"},
+    {file = "check_jsonschema-0.33.1-py3-none-any.whl", hash = "sha256:e951b89b2c5470891e8cb07427b6d1b6ed7250cc74253e73fec74260482ef98b"},
+    {file = "check_jsonschema-0.33.1.tar.gz", hash = "sha256:69ec6c1fcf3f7b6bd27dbff27959203eeca0b8f2ef0bb5cdb00ceb63312932ce"},
 ]
 
 [package.dependencies]
@@ -1222,14 +1222,14 @@ dev = ["mypy", "pre-commit", "pytest", "pytest-cov", "pytest-socket", "ruff"]
 
 [[package]]
 name = "urllib3"
-version = "2.4.0"
+version = "2.5.0"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
 optional = false
 python-versions = ">=3.9"
 groups = ["main", "test"]
 files = [
-    {file = "urllib3-2.4.0-py3-none-any.whl", hash = "sha256:4e16665048960a0900c702d4a66415956a584919c03361cac9f1df5c5dd7e813"},
-    {file = "urllib3-2.4.0.tar.gz", hash = "sha256:414bc6535b787febd7567804cc015fee39daab8ad86268f1310a9250697de466"},
+    {file = "urllib3-2.5.0-py3-none-any.whl", hash = "sha256:e6b01673c0fa6a13e374b50871808eb3bf7046c4b125b216f6bf1cc604cff0dc"},
+    {file = "urllib3-2.5.0.tar.gz", hash = "sha256:3fc47733c7e419d4bc3f6b3dc2b4f890bb743906a30d56ba4a5bfa4bbff92760"},
 ]
 
 [package.extras]
@@ -1345,4 +1345,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = ">= 3.12"
-content-hash = "c6012ba15878792ddcdd65a9fd747a4bacfa8d1cb1276d4098b42a9e579a6184"
+content-hash = "ddf1c4ec49ae98fee5c7a2a2df292ef61c15384b273c38497766a4bacb6501c3"
