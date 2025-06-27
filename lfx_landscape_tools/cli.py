@@ -30,10 +30,9 @@ class Cli:
         self._starttime = datetime.now()
 
         parser = ArgumentParser("Collection of tools for working with a landscape")
-        group = parser.add_mutually_exclusive_group()
-        group.add_argument("-s", "--silent", dest="silent", action="store_true", help="Suppress all messages")
-        group.add_argument("-l", "--log", dest="loglevel", default="error", choices=['debug', 'info', 'warning', 'error', 'critical'], help="logging level")
-        group.add_argument("-v", "--verbose", dest="verbose", action='store_true', help="Verbose output (i.e. show all INFO level messages in addition to WARN and above - equivalent to `--log info`)")
+        parser.add_argument("-s", "--silent", dest="silent", action="store_true", help="Suppress all messages")
+        parser.add_argument("-l", "--log", dest="loglevel", default="error", choices=['debug', 'info', 'warning', 'error', 'critical'], help="logging level")
+        parser.add_argument("-v", "--verbose", dest="verbose", action='store_true', help="Verbose output (i.e. show all INFO level messages in addition to WARN and above - equivalent to `--log info`)")
         subparsers = parser.add_subparsers(help='sub-command help')
         
         buildlandscapemembers_parser = subparsers.add_parser("build_members", help="Replace current items with latest from LFX")
@@ -78,9 +77,10 @@ class Cli:
             format="%(asctime)s [%(levelname)s] %(message)s",
             handlers=[
                 logging.FileHandler("debug.log",mode="w"),
-                logging.StreamHandler(sys.stdout) if not args.silent else None
             ]
         )
+        if not args.silent:
+            logging.addHandler(logging.StreamHandler(sys.stdout))
 
         try:
             args.func(args)
