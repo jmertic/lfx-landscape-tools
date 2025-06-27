@@ -68,7 +68,7 @@ runs:
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
         name: debug.log 
-        path: ./landscape/debug.log
+        path: ./landscape-tools/debug.log
     - name: Validate landscape2 data
       uses: cncf/landscape2-validate-action@7f299c46e9b03b4e8bc2896882734fb0b0756b37 # v2.0.0
       with:
