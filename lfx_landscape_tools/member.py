@@ -159,36 +159,6 @@ class Member:
                 except socket.timeout:
                     logging.debug("Server error - retrying...")
 
-    def _getAllGithubReposFromGithubOrg(self, url):
-        if not self._isGitHubOrg(url):
-            return list(url)
-        
-        with requests_cache.enabled():
-            while True:
-                try:
-                    if 'GITHUB_TOKEN' in os.environ:
-                        g = Github(auth=Auth.Token(os.environ['GITHUB_TOKEN']), per_page=1000)
-                    else:
-                        g = Github(per_page=1000)
-                    repos = []
-                    for repo in g.get_organization(urlparse(url).path.split("/")[1]).get_repos():
-                        if not repo.fork and not repo.private:
-                            repos.append(repo.html_url)
-                    return repos
-                except RateLimitExceededException:
-                    logging.info("Sleeping until we get past the API rate limit....")
-                    time.sleep(g.rate_limiting_resettime-now())
-                except GithubException as e:
-                    if e.status == 502:
-                        logging.debug("Server error - retrying...")
-                    if e.status == 404:
-                        return False
-                    else:
-                        logging.getLogger().warning(e.data)
-                        return
-                except socket.timeout:
-                    logging.debug("Server error - retrying...")
-
     def _getPinnedGithubReposFromGithubOrg(self, url):
         if not self._isGitHubOrg(url):
             return list(url)
