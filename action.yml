@@ -44,29 +44,32 @@ runs:
     - name: Build members from LFX
       working-directory: ./landscape-tools
       shell: bash
-      run: poetry run lfx_landscape build_members -l debug --logfile ../landscape/$LOGFILE -c ../landscape/$CONFIGFILE
+      run: poetry run lfx_landscape -l debug --logfile ../landscape/$LOGFILE build_members  -c ../landscape/$CONFIGFILE
       env:
         GITHUB_TOKEN: ${{ env.token }}
         GH_TOKEN: ${{ env.token }}
         CONFIGFILE: ${{ inputs.configfile }}
+        LOGFILE: ${{ inputs.logfile }}
     - name: Rebuild projects from LFX and other sources
       if: ${{ inputs.project_processing == 'rebuild' }}
       working-directory: ./landscape-tools
       shell: bash
-      run: poetry run lfx_landscape build_projects -l debug --logfile ../landscape/$LOGFILE -c ../landscape/$CONFIGFILE
+      run: poetry run lfx_landscape -l debug --logfile ../landscape/$LOGFILE build_projects -c ../landscape/$CONFIGFILE
       env:
         GITHUB_TOKEN: ${{ env.token }}
         GH_TOKEN: ${{ env.ghid_token }}
         CONFIGFILE: ${{ inputs.configfile }}
+        LOGFILE: ${{ inputs.logfile }}
     - name: Sync projects from LFX and other sources
       if: ${{ inputs.project_processing == 'sync' }}
       working-directory: ./landscape-tools
       shell: bash
-      run: poetry run lfx_landscape sync_projects -l debug --logfile../landscape/$LOGFILE -c ../landscape/$CONFIGFILE
+      run: poetry run lfx_landscape -l debug --logfile ../landscape/$LOGFILE sync_projects -c ../landscape/$CONFIGFILE
       env:
         GITHUB_TOKEN: ${{ env.token }}
         GH_TOKEN: ${{ env.token }}
         CONFIGFILE: ${{ inputs.configfile }}
+        LOGFILE: ${{ inputs.logfile }}
     - name: Save debug.log file
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
