@@ -7,6 +7,9 @@ inputs:
   configfile:
     description: "Filename for the config file ( defaults to config.yml )"
     default: "config.yml"
+  logfile:
+    description: "Filename for the log file ( defaults to debug.log )"
+    default: "debug.log"
 runs:
   using: composite
   steps:
@@ -41,7 +44,7 @@ runs:
     - name: Build members from LFX
       working-directory: ./landscape-tools
       shell: bash
-      run: poetry run lfx_landscape build_members -c ../landscape/$CONFIGFILE
+      run: poetry run lfx_landscape build_members -l debug --logfile ../landscape/$LOGFILE -c ../landscape/$CONFIGFILE
       env:
         GITHUB_TOKEN: ${{ env.token }}
         GH_TOKEN: ${{ env.token }}
@@ -50,7 +53,7 @@ runs:
       if: ${{ inputs.project_processing == 'rebuild' }}
       working-directory: ./landscape-tools
       shell: bash
-      run: poetry run lfx_landscape -l debug -s build_projects -c ../landscape/$CONFIGFILE
+      run: poetry run lfx_landscape build_projects -l debug --logfile ../landscape/$LOGFILE -c ../landscape/$CONFIGFILE
       env:
         GITHUB_TOKEN: ${{ env.token }}
         GH_TOKEN: ${{ env.ghid_token }}
@@ -59,7 +62,7 @@ runs:
       if: ${{ inputs.project_processing == 'sync' }}
       working-directory: ./landscape-tools
       shell: bash
-      run: poetry run lfx_landscape -l debug -s sync_projects -c ../landscape/$CONFIGFILE
+      run: poetry run lfx_landscape sync_projects -l debug --logfile../landscape/$LOGFILE -c ../landscape/$CONFIGFILE
       env:
         GITHUB_TOKEN: ${{ env.token }}
         GH_TOKEN: ${{ env.token }}
