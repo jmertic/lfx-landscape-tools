@@ -33,6 +33,7 @@ class Cli:
         parser.add_argument("-s", "--silent", dest="silent", action="store_true", help="Suppress all messages")
         parser.add_argument("-l", "--log", dest="loglevel", default="error", choices=['debug', 'info', 'warning', 'error', 'critical'], help="logging level")
         parser.add_argument("-v", "--verbose", dest="verbose", action='store_true', help="Verbose output (i.e. show all INFO level messages in addition to WARN and above - equivalent to `--log info`)")
+        parser.add_argument("--logfile", dest="logfile", default='debug.log', help="Name for the log file to save (default is debug.log")
         subparsers = parser.add_subparsers(help='sub-command help')
         
         buildlandscapemembers_parser = subparsers.add_parser("build_members", help="Replace current items with latest from LFX")
@@ -72,7 +73,7 @@ class Cli:
         }
         if args.verbose:
             args.loglevel = 'info'
-        handlers = [logging.FileHandler("debug.log",mode="w")]
+        handlers = [logging.FileHandler(args.logfile,mode="w")]
         if not args.silent:
             handlers.append(logging.StreamHandler(sys.stdout))
         logging.basicConfig(
