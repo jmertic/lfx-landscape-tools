@@ -73,7 +73,7 @@ runs:
         name: debug.log 
         path: ./landscape-tools/debug.log
     - name: Validate landscape2 data
-      uses: cncf/landscape2-validate-action@7f299c46e9b03b4e8bc2896882734fb0b0756b37 # v2.0.0
+      uses: cncf/landscape2-validate-action@6381e8747c73412e638670807b402ef2b863e9f8 # v2.0.1
       with:
         target_kind: data
         target_path: ./landscape/landscape.yml
