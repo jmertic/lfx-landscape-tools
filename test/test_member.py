@@ -252,6 +252,23 @@ class TestMember(unittest.TestCase):
         member.twitter = None
         self.assertIsNone(member.twitter)
 
+    def testSetExtra(self):
+        member = Member()
+        member.extra = {
+                'foo': 'foo',
+                'happy': None,
+                'annotations': {'bar': 'bar', 'sad': None},
+                'accepted': '2025-01-01',
+                }
+
+        self.assertEqual(member.extra['annotations']['foo'],'foo')
+        self.assertNotIn('foo',member.extra)
+        self.assertNotIn('happy',member.extra)
+        self.assertNotIn('happy',member.extra['annotations'])
+        self.assertEqual(member.extra['accepted'],'2025-01-01')
+        self.assertEqual(member.extra['annotations']['bar'],'bar')
+        self.assertNotIn('sad',member.extra['annotations'])
+
     def testToLandscapeItemAttributes(self):
         member = Member()
         member.name = 'test'
