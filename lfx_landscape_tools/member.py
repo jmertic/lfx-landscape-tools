@@ -294,7 +294,9 @@ class Member:
             else:
                 endextra[key] = value
 
-        endextra['annotations'] = endextra.get('annotations',{}) | endannotations
+        endextraannotations = endextra.get('annotations',{}) | endannotations
+        endextra['annotations'] = {key: value for key, value in endextraannotations.items() if value is not None}
+
         self.__extra = endextra
 
     def toLandscapeItemAttributes(self):
