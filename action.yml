@@ -57,7 +57,7 @@ runs:
       run: poetry run lfx_landscape -s -l debug --logfile $LOGFILE build_projects -c ../landscape/$CONFIGFILE
       env:
         GITHUB_TOKEN: ${{ env.token }}
-        GH_TOKEN: ${{ env.ghid_token }}
+        GH_TOKEN: ${{ env.token }}
         CONFIGFILE: ${{ inputs.configfile }}
         LOGFILE: ${{ inputs.logfile }}
     - name: Sync projects from LFX and other sources
