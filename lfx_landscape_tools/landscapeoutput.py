@@ -75,7 +75,7 @@ class LandscapeOutput:
                         and ( landscapeSubcategory['name'] == member.membership ) 
                         and ( landscapeItemSubcategory['name'] == landscapeSubcategory['category'] ) ):
                     foundCategory = True
-                    # Write out to missing.csv if it's missing key parameters
+                    # Write out to error log if it's missing key parameters
                     if not member.isValidLandscapeItem():
                         logger.error("Not adding '{}' to Landscape - Missing key attributes {}".format(member.name,",".join(member.invalidLandscapeItemAttributes())))
                         self._itemsErrors += 1
@@ -138,7 +138,7 @@ class LandscapeOutput:
                 ryaml.indent(mapping=2, sequence=4, offset=2)
                 ryaml.default_flow_style = False
                 ryaml.allow_unicode = True
-                ryaml.width = 180
+                ryaml.width = 1000000
                 ryaml.preserve_quotes = False
                 ryaml.dump(landscape, fileobject, transform=self._removeNulls)
 
