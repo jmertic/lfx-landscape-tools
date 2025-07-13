@@ -259,6 +259,12 @@ class TestMember(unittest.TestCase):
                 'happy': None,
                 'annotations': {'bar': 'bar', 'sad': None},
                 'accepted': '2025-01-01',
+                'other_links': [
+                    {'name':'test1','url':'https://google.com'},
+                    {'name':'test2','url':' '},
+                    {'name':'test3','url':None},
+                    {'name':'test4','url':'https://cncf.io'},
+                    ]
                 }
 
         self.assertEqual(member.extra['annotations']['foo'],'foo')
@@ -268,6 +274,11 @@ class TestMember(unittest.TestCase):
         self.assertEqual(member.extra['accepted'],'2025-01-01')
         self.assertEqual(member.extra['annotations']['bar'],'bar')
         self.assertNotIn('sad',member.extra['annotations'])
+        self.assertEqual(len(member.extra['other_links']),2)
+        self.assertIn({'name':'test1','url':'https://google.com'},member.extra['other_links'])
+        self.assertNotIn({'name':'test2','url':' '},member.extra['other_links'])
+        self.assertNotIn({'name':'test3','url':None},member.extra['other_links'])
+        self.assertIn({'name':'test4','url':'https://cncf.io'},member.extra['other_links'])
 
     def testToLandscapeItemAttributes(self):
         member = Member()
@@ -433,6 +444,40 @@ class TestMember(unittest.TestCase):
         self.assertEqual(member.homepage_url,'https://foo.com/')
         self.assertEqual(str(member.logo),'<svg>gold.svg</svg>')
 
+    def testOverlayOtherLinks(self):
+        membertooverlay = Member()
+        membertooverlay.name = 'test'
+        membertooverlay.homepage_url = 'https://foo.com'
+        membertooverlay.extra = {
+                'other_links': [
+                    {'name':'test1','url':'https://google.com'},
+                    {'name':'test2','url':' '},
+                    {'name':'test3','url':None},
+                    {'name':'test4','url':'https://cncf.io'},
+                    ]
+                }
+
+        member = Member()
+        member.name = 'test'
+        member.homepage_url = 'https://foo.com'
+        member.extra = {
+                'other_links': [
+                    {'name':'test1','url':'https://google.com'},
+                    {'name':'test2','url':' '},
+                    {'name':'test3','url':None},
+                    {'name':'test5','url':'https://aswf.io'},
+                    ]
+                }
+        member.overlay(membertooverlay)
+
+        self.assertEqual(member.name,'test')
+        self.assertEqual(member.homepage_url,'https://foo.com/')
+        self.assertEqual(len(member.extra['other_links']),3)
+        self.assertIn({'name':'test1','url':'https://google.com'},member.extra['other_links'])
+        self.assertNotIn({'name':'test2','url':' '},member.extra['other_links'])
+        self.assertNotIn({'name':'test3','url':None},member.extra['other_links'])
+        self.assertIn({'name':'test4','url':'https://cncf.io'},member.extra['other_links'])
+        self.assertIn({'name':'test5','url':'https://aswf.io'},member.extra['other_links'])
 
     def testOverlayOnlyKeys(self):
         membertooverlay = Member()
