@@ -290,7 +290,7 @@ class Member:
             if key == 'other_links' and isinstance(value,list):
                 other_links = []
                 for link in value:
-                    if link.get('url',False) and link.get('name',False):
+                    if validators.url(link.get('url',False)) and link.get('name',False):
                         other_links.append(link)
                 endextra['other_links'] = other_links
             elif not value or value == 'nil':
