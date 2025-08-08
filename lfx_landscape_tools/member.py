@@ -286,7 +286,14 @@ class Member:
         endextra = {}
         endannotations = {}
         for key, value in extra.items():
-            if not value or value == 'nil':
+            # remove any entries where name or url is set to None
+            if key == 'other_links' and isinstance(value,list):
+                other_links = []
+                for link in value:
+                    if validators.url(link.get('url',False)) and link.get('name',False):
+                        other_links.append(link)
+                endextra['other_links'] = other_links
+            elif not value or value == 'nil':
                 logging.getLogger().debug("Removing Member.extra.{key} for '{name}' since it's set to '{value}'".format(key=key,value=value,name=self.name))
             elif key not in self.itemschema['extra']:
                 logging.getLogger().debug("Moving Member.extra.{key} for '{name}' under 'annotations'".format(key=key,name=self.name))
@@ -399,6 +406,15 @@ class Member:
                                     getattr(self,key)[subkey][subsubkey] = subsubvalue
                                 else:
                                     setattr(self,key,{subkey:{subsubkey:subsubvalue}})
+                    elif isinstance(subvalue,list):
+                        if subvalue != []:
+                            logging.getLogger().debug("...Overlay '{}.{}'".format(key,subkey))
+                            logging.getLogger().debug(".....Old Value - '{}'".format(getattr(self,key,{}).get(subkey,[])))
+                            logging.getLogger().debug(".....New Value - '{}'".format(self._combine_and_deduplicate(subvalue,getattr(self,key,{}).get(subkey,[]))))
+                            if getattr(self,key,False):
+                                getattr(self,key)[subkey] = self._combine_and_deduplicate(subvalue,getattr(self,key,{}).get(subkey,[]))
+                            else:
+                                setattr(self,key,{subkey:self._combine_and_deduplicate(subvalue,getattr(self,key,{}).get(subkey,[]))})
                     else:
                         if subvalue != None and getattr(self,key,{}).get(subkey,None) != subvalue:
                             logging.getLogger().debug("...Overlay '{}.{}'".format(key,subkey))
@@ -410,7 +426,6 @@ class Member:
                                 setattr(self,key,{subkey:subvalue})
             elif isinstance(value,list):
                 if value != []:
-                    logging.getLogger().debug(type(value[0]))
                     logging.getLogger().debug("...Overlay '{}'".format(key))
                     logging.getLogger().debug(".....Old Value - '{}'".format(sorted(getattr(self,key,[]))))
                     logging.getLogger().debug(".....New Value - '{}'".format(self._combine_and_deduplicate(value,getattr(self,key,[]))))

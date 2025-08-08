@@ -75,6 +75,7 @@ class LFXProjects(Members):
                 second_path = []
                 extra = {}
                 annotations = {}
+                other_links = []
                 member = Member()
                 member.membership = 'All'
                 member.name = record.get('Name')
@@ -121,12 +122,13 @@ class LFXProjects(Members):
                     for sector in sectors:
                         second_path.append('Technology Sector / {}'.format(sector.replace("/",":")))
                 extra['dev_stats_url'] = self.lfxinsightsUrl.format(parent_slug=record.get('ParentSlug',self.project),slug=annotations.get('slug'))
-                annotations['calendar_url'] = self.calendarUrl.format(slug=annotations.get('slug'))
-                annotations['ical_url'] = self.icalUrl.format(project_id=record.get('ProjectID'))
-                annotations['charter_url'] = record.get('CharterURL')
+                other_links.append({'name': 'Calendar','url': self.calendarUrl.format(slug=annotations.get('slug'))})
+                other_links.append({'name': 'iCal', 'url': self.icalUrl.format(project_id=record.get('ProjectID'))})
+                other_links.append({'name': 'Charter', 'url': record.get('CharterURL')})
                 if self.artworkRepoUrl:
                     extra['artwork_url'] = self.artworkRepoUrl.format(slug=annotations.get('slug'))
                 extra['annotations'] = annotations
+                extra['other_links'] = other_links
                 member.extra = extra
                 member.second_path = second_path
                 self.members.append(member)
