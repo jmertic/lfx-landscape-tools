@@ -283,6 +283,7 @@ class Member:
         if not isinstance(extra,dict):
             logging.getLogger().debug("Member.extra for '{name}' must be a list - '{extra}' provided".format(extra=extra,name=self.name))
             self.__extra = {}
+            return
         endextra = {}
         endannotations = {}
         for key, value in extra.items():
@@ -342,13 +343,12 @@ class Member:
             returnentry['additional_repos'] = additional_repos
             logging.getLogger().debug("Setting 'additional_repos' to '{}' for '{}'".format(returnentry.get('additional_repos'),self.name))
             # Put the project_org in annotations
-            if self.project_org:
-                if not returnentry.get('extra'):
-                    returnentry['extra'] = {}
-                if not returnentry['extra'].get('annotations'):
-                    returnentry['extra']['annotations'] = {}
-                returnentry['extra']['annotations']['project_org'] = self.project_org
-                logging.getLogger().debug("Setting 'extra.annotations.project_org' to '{}' for '{}'".format(returnentry.get('extra',{}).get('annotations',{}).get('project_org'),self.name))
+            if not returnentry.get('extra'):
+                returnentry['extra'] = {}
+            if not returnentry['extra'].get('annotations'):
+                returnentry['extra']['annotations'] = {}
+            returnentry['extra']['annotations']['project_org'] = self.project_org
+            logging.getLogger().debug("Setting 'extra.annotations.project_org' to '{}' for '{}'".format(returnentry.get('extra',{}).get('annotations',{}).get('project_org'),self.name))
 
         if not self.crunchbase:
             logging.getLogger().debug("No Crunchbase entry for '{}' - specifying name instead".format(self.name))
