@@ -26,7 +26,7 @@ coverage = "^7.10.3"
 responses = "^0.25.8"
 
 [tool.poetry.group.dev.dependencies]
-build = "^1.2.2"
+build = "^1.3.0"
 
 [tool.poetry.scripts]
 lfx_landscape = "lfx_landscape_tools.cli:Cli.run"
