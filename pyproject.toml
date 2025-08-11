@@ -23,7 +23,7 @@ beautifulsoup4 = "^4.13.4"
 
 [tool.poetry.group.test.dependencies]
 coverage = "^7.9.2"
-responses = "^0.25.7"
+responses = "^0.25.8"
 
 [tool.poetry.group.dev.dependencies]
 build = "^1.2.2"
