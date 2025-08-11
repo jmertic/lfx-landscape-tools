@@ -22,7 +22,7 @@ check-jsonschema = "^0.33.2"
 beautifulsoup4 = "^4.13.4"
 
 [tool.poetry.group.test.dependencies]
-coverage = "^7.9.2"
+coverage = "^7.10.3"
 responses = "^0.25.8"
 
 [tool.poetry.group.dev.dependencies]
