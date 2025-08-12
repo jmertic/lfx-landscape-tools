@@ -10,7 +10,7 @@ license = "Apache-2.0"
 python = ">= 3.12"
 requests = "^2.32.4"
 pycairo = "^1.28.0"
-pygithub = "^2.6.1"
+pygithub = "^2.7.0"
 python-slugify = "^8.0.4"
 requests-cache = "^1.2.1"
 ruamel-yaml = "^0.18.14"
@@ -22,11 +22,11 @@ check-jsonschema = "^0.33.2"
 beautifulsoup4 = "^4.13.4"
 
 [tool.poetry.group.test.dependencies]
-coverage = "^7.9.2"
-responses = "^0.25.7"
+coverage = "^7.10.3"
+responses = "^0.25.8"
 
 [tool.poetry.group.dev.dependencies]
-build = "^1.2.2"
+build = "^1.3.0"
 
 [tool.poetry.scripts]
 lfx_landscape = "lfx_landscape_tools.cli:Cli.run"
