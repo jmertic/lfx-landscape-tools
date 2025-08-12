@@ -14,19 +14,19 @@ runs:
   using: composite
   steps:
     - name: Install cairo
-      uses: awalsh128/cache-apt-pkgs-action@4c82c3ccdc1344ee11e9775dbdbdf43aa8a5614e # v1.5.1
+      uses: awalsh128/cache-apt-pkgs-action@2c09a5e66da6c8016428a2172bd76e5e4f14bb17 # v1.5.3
       with:
         packages: libcairo2-dev pkg-config python3-dev
         version: 1.0
     - name: Checkout landscape
-      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.1.7@v4
+      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4.1.7@v4
       with:
         token: ${{ env.token }}
         repository: ${{ env.repository }}
         ref: ${{ env.ref }}
         path: landscape
     - name: Checkout landscape-tools
-      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.1.7@v4
+      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4.1.7@v4
       with:
         token: ${{ env.token }}
         repository: jmertic/lfx-landscape-tools
@@ -82,7 +82,7 @@ runs:
         target_kind: data
         target_path: ./landscape/landscape.yml
     - name: Checkout landscapeapp
-      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.1.7@v4
+      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4.1.7@v4
       if: ${{ hashFiles('./landscape/settings.yml') != '' }}
       with:
         repository: cncf/landscapeapp
