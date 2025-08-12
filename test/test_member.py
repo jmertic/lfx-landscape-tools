@@ -148,6 +148,12 @@ class TestMember(unittest.TestCase):
                 self.assertEqual(["WARNING:root:Member.crunchbase for '{name}' must be set to a valid Crunchbase URL - '{crunchbase}' provided".format(crunchbase=invalidCrunchbaseURL,name=member.name)], cm.output)
             self.assertIsNone(member.crunchbase)
 
+    def testNoneCrunchbaseNotInLandscapeItemAttributes(self):
+        member = Member()
+        member.crunchbase = None
+        dict = member.toLandscapeItemAttributes()
+        self.assertNotIn('crunchbase',dict)
+
     def testSethomepage_urlValid(self):
         validhomepage_urlURLs = [
             {'before':'https://crunchbase.com/','after':'https://crunchbase.com/'},
@@ -280,6 +286,11 @@ class TestMember(unittest.TestCase):
         self.assertNotIn({'name':'test3','url':None},member.extra['other_links'])
         self.assertIn({'name':'test4','url':'https://cncf.io'},member.extra['other_links'])
 
+    def testSetExtraNotDict(self):
+        member = Member()
+        member.extra = "This won't work"
+        self.assertEqual(member.extra,{})
+
     def testToLandscapeItemAttributes(self):
         member = Member()
         member.name = 'test'
@@ -299,6 +310,26 @@ class TestMember(unittest.TestCase):
         self.assertIsNone(dict.get('item'))
         self.assertIsNone(dict.get('foo'))
 
+    def testToLandscapeItemAttributesProjectOrg(self):
+        member = Member()
+        member.name = 'test'
+        member.homepage_url = 'https://foo.com'
+        member.membership = 'Gold'
+        member.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society'
+        member.extra = {}
+        member.foo = 'foo'
+        member.project_org = 'https://github.com/foobar'
+        dict = member.toLandscapeItemAttributes()
+
+        self.assertEqual(dict.get('name'),member.name)
+        self.assertEqual(dict.get('homepage_url'),member.homepage_url)
+        self.assertEqual(dict.get('crunchbase'),member.crunchbase)
+        self.assertNotIn('membership',dict)
+        self.assertIsNone(dict.get('logo'))
+        self.assertIsNone(dict.get('item'))
+        self.assertIsNone(dict.get('foo'))
+        self.assertEqual(dict.get('extra',{}).get('annotations',{}).get('project_org'),member.project_org)
+
     def testToLandscapeItemAttributesEmptyCrunchbase(self):
         member = Member()
         member.name = 'test'
@@ -306,7 +337,7 @@ class TestMember(unittest.TestCase):
         member.membership = 'Gold'
         member.linkedin = 'https://www.linkedin.com/company/208777'
         member.project_org = 'https://github.com/OpenAssetIO'
-        member.extra = {'foo': 'foo', 'accepted': "2023-05-14", 'annotations': {'foo':'foo'}}
+        member.extra = {'foo': 'foo', 'accepted': "2023-05-14", 'annotations': {'foo':'foo'}, 'other_links': [{'name':'foo','url':'https://google.com'}]}
         member.second_path = ['list2','list3']
         dict = member.toLandscapeItemAttributes()
 
@@ -395,7 +426,7 @@ class TestMember(unittest.TestCase):
         membertooverlay.membership = 'Gold'
         membertooverlay.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society-bad'
         membertooverlay.organization = {'name':'foo'}
-        membertooverlay.extra = {'foo': 'foo', 'accepted': "2023-05-14", 'annotations': {'foo':'foo'}}
+        membertooverlay.extra = {'foo': 'foo', 'accepted': "2023-05-14", 'annotations': {'foo':'foo'}, 'other_links': [{'name':'link1','url':'https://link1.com'}]}
         membertooverlay.second_path = ['list1','list3']
 
         member = Member()
@@ -405,7 +436,7 @@ class TestMember(unittest.TestCase):
         member.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society'
         member.twitter = 'https://twitter.com/mytwitter'
         member.stock_ticker = None
-        member.extra = {'accepted': "2024-05-14", 'annotations': {'bar': 'bar'}}
+        member.extra = {'accepted': "2024-05-14", 'annotations': {'bar': 'bar'}, 'other_links': [{'name':'link2','url':'https://link2.com'}]}
         member.second_path = ['list2','list3']
 
         with unittest.mock.patch("builtins.open", unittest.mock.mock_open(read_data="data")) as mock_file:

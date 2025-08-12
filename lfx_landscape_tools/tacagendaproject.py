@@ -35,7 +35,7 @@ class TACAgendaProject(Members):
         self.assignSIGs = config.projectsAssignSIGs
         if config.tacAgendaProjectUrl:
             urlparts = urlparse(config.tacAgendaProjectUrl).path.split('/')
-            if urlparts and urlparts[1] == 'orgs' and urlparts[3] == 'projects':
+            if urlparts and len(urlparts) > 3 and urlparts[1] == 'orgs' and urlparts[3] == 'projects':
                 self.gh_org = urlparts[2]
                 self.gh_project_id = urlparts[4]
 
