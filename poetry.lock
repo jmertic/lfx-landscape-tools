@@ -285,14 +285,14 @@ files = [
 
 [[package]]
 name = "check-jsonschema"
-version = "0.33.2"
+version = "0.33.3"
 description = "A jsonschema CLI and pre-commit hook"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "check_jsonschema-0.33.2-py3-none-any.whl", hash = "sha256:7200e1c6e29f4db12ee0762fc28f907d16a6dea935d1c5060aec8bef34e9ac2e"},
-    {file = "check_jsonschema-0.33.2.tar.gz", hash = "sha256:20cf97e0a32be7f3652c009ce3538443196677a903b72b3b4cb522fb54ee4588"},
+    {file = "check_jsonschema-0.33.3-py3-none-any.whl", hash = "sha256:db4385a4d48b1c79b29c36181e6305c401b956d84e2f8e74f29e5d58a2eaf9cd"},
+    {file = "check_jsonschema-0.33.3.tar.gz", hash = "sha256:8cdb74660b56b748ef768aee9dc0cdfca9e7420e1d5300d0e2792704af53676f"},
 ]
 
 [package.dependencies]
@@ -304,7 +304,7 @@ requests = "<3.0"
 
 [package.extras]
 dev = ["click-type-test (==1.1.0) ; python_version >= \"3.10\"", "coverage (<8)", "identify (>=2.6.9)", "pytest (<9)", "pytest-xdist (<4)", "responses (==0.25.7)"]
-docs = ["furo (==2024.8.6)", "sphinx (<9)", "sphinx-issues (<6)"]
+docs = ["furo (==2025.7.19)", "sphinx (<9)", "sphinx-issues (<6)"]
 
 [[package]]
 name = "click"
@@ -1257,4 +1257,4 @@ crypto-eth-addresses = ["eth-hash[pycryptodome] (>=0.7.0)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">= 3.12"
-content-hash = "dd1321347f71f7e5a291dcd230eb770131a95a98981bc4f188e43bdf1e79ea3f"
+content-hash = "efc5e723ba3dd322358ddb187db9a69933a6dd36985fb0a93f41b7863a439989"
