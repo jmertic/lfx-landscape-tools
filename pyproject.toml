@@ -17,9 +17,9 @@ ruamel-yaml = "^0.18.15"
 url-normalize = "^2.2.1"
 urllib3 = "^2.5.0"
 validators = "^0.35.0"
-click = "^8.2.1"
-check-jsonschema = "^0.33.3"
-beautifulsoup4 = "^4.13.5"
+click = "^8.3.0"
+check-jsonschema = "^0.34.0"
+beautifulsoup4 = "^4.14.2"
 
 [tool.poetry.group.test.dependencies]
 coverage = "^7.10.7"
