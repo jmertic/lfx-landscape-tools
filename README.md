@@ -36,7 +36,6 @@ landscapeMemberCategory: AOUSD Members
    - If you cannot set `GITHUB_TOKEN` permissions as stated, the fallback option is to add a [repository secret](https://docs.github.com/en/actions/reference/encrypted-secrets) for `PAT`, which is a [GitHub Personal Authorization Token](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) set for the `read:org`, `read:project`, and `repo` scope.
 3) [Add a new label](https://docs.github.com/en/github/managing-your-work-on-github/managing-labels#creating-a-label) - `automated-build`. This is for this workflow to work and shouldn't be used for anything else.
 4) Add the following code to a `build.yml` file in your landscape repo's `.github/workflows/` directory.
-
 ```yaml
 name: Build Landscape from LFX
 
@@ -86,7 +85,28 @@ jobs:
           MERGE_RETRY_SLEEP: 300000
           MERGE_METHOD: "squash"
 ```
-5) Run the `Build Landscape from LFX` GitHub Action following the instructions for [manually running a GitHub Action](https://docs.github.com/en/actions/managing-workflow-runs-and-deployments/managing-workflow-runs/manually-running-a-workflow) to test that it all works.
+5) Add the following code to a `automerge.yml` file in your landscape repo's `.github/workflows/` directory.
+```yaml
+name: Automerge PRs from LFX Landscape Tools
+
+on:
+  workflow_dispatch:
+  schedule:
+  - cron: "45 4 * * *"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Automerge PR if label is set to `automated-build`
+        uses: pascalgn/automerge-action@7961b8b5eec56cc088c140b56d864285eabd3f67 # v0.16.4
+        env:
+          MERGE_LABELS: "automated-build"
+          MERGE_RETRY_SLEEP: 300000
+          MERGE_METHOD: "squash"
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+```
+6) Run the `Build Landscape from LFX` GitHub Action following the instructions for [manually running a GitHub Action](https://docs.github.com/en/actions/managing-workflow-runs-and-deployments/managing-workflow-runs/manually-running-a-workflow) to test that it all works.
 
 ## Local install
 
