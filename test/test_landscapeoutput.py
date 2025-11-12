@@ -194,7 +194,7 @@ landscape:
         member = Member()
         member.name = 'test'
         member.homepage_url = 'https://foo.com'
-        with unittest.mock.patch("builtins.open", unittest.mock.mock_open(read_data="data")) as mock_file:
+        with unittest.mock.patch("lfx_landscape_tools.svglogo.open", unittest.mock.mock_open(read_data="data")) as mock_file:
             member.logo = 'Gold.svg'
         member.membership = 'Premier Membership'
         member.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society'
@@ -204,7 +204,7 @@ landscape:
         member = Member()
         member.name = 'test2'
         member.homepage_url = 'https://foo.com'
-        with unittest.mock.patch("builtins.open", unittest.mock.mock_open(read_data="data")) as mock_file:
+        with unittest.mock.patch("lfx_landscape_tools.svglogo.open", unittest.mock.mock_open(read_data="data")) as mock_file:
             member.logo = 'Gold.svg'
         member.membership = 'Premiere Membership'
         member.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society'
@@ -213,7 +213,7 @@ landscape:
 
         member = Member()
         member.name = 'test3'
-        with unittest.mock.patch("builtins.open", unittest.mock.mock_open(read_data="data")) as mock_file:
+        with unittest.mock.patch("lfx_landscape_tools.svglogo.open", unittest.mock.mock_open(read_data="data")) as mock_file:
             member.logo = 'Gold.svg'
         member.membership = 'Premier Membership'
         member.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society'
@@ -275,7 +275,7 @@ landscape:
 
             members.overlay(LandscapeMembers(config=config))
             landscape = LandscapeOutput(config=config)
-            with unittest.mock.patch("builtins.open", unittest.mock.mock_open(read_data="data")) as mock_file:
+            with unittest.mock.patch("lfx_landscape_tools.svglogo.open", unittest.mock.mock_open(read_data="data")) as mock_file:
                 members.members[0].logo = 'Gold.svg'
             with unittest.mock.patch('lfx_landscape_tools.svglogo.SVGLogo.save') as mock_svglogo_save:
                 mock_svglogo_save.return_value = 'Gold.svg'
