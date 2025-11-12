@@ -194,7 +194,7 @@ class TestMember(unittest.TestCase):
         ]
 
         for validLogo in validLogos:
-            with unittest.mock.patch("builtins.open", unittest.mock.mock_open(read_data="data")) as mock_file:
+            with unittest.mock.patch("lfx_landscape_tools.svglogo.open", unittest.mock.mock_open(read_data="data")) as mock_file:
                 member = Member()
                 member.name = 'dog'
                 member.logo = validLogo
@@ -215,7 +215,7 @@ class TestMember(unittest.TestCase):
         ]
 
         for invalidLogo in invalidLogos:
-            with unittest.mock.patch("builtins.open", unittest.mock.mock_open(read_data="<text")) as mock_file:
+            with unittest.mock.patch("lfx_landscape_tools.svglogo.open", unittest.mock.mock_open(read_data="<text")) as mock_file:
                 member = Member()
                 member.name = 'test'
                 with self.assertLogs() as cm:
@@ -379,7 +379,7 @@ class TestMember(unittest.TestCase):
         member = Member()
         member.name = 'test'
         member.homepage_url = 'https://foo.com'
-        with unittest.mock.patch("builtins.open", unittest.mock.mock_open(read_data="data")) as mock_file:
+        with unittest.mock.patch("lfx_landscape_tools.svglogo.open", unittest.mock.mock_open(read_data="data")) as mock_file:
             member.logo = 'Gold.svg'
         member.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society'
 
@@ -389,7 +389,7 @@ class TestMember(unittest.TestCase):
         member = Member()
         member.name = 'test3'
         member.homepage_url = 'https://foo.com'
-        with unittest.mock.patch("builtins.open", unittest.mock.mock_open(read_data="data")) as mock_file:
+        with unittest.mock.patch("lfx_landscape_tools.svglogo.open", unittest.mock.mock_open(read_data="data")) as mock_file:
             member.logo = 'Gold.svg'
 
         self.assertTrue(member.isValidLandscapeItem())
@@ -398,7 +398,7 @@ class TestMember(unittest.TestCase):
         member = Member()
         member.name = ''
         member.homepage_url = 'https://foo.com'
-        with unittest.mock.patch("builtins.open", unittest.mock.mock_open(read_data="data")) as mock_file:
+        with unittest.mock.patch("lfx_landscape_tools.svglogo.open", unittest.mock.mock_open(read_data="data")) as mock_file:
             member.logo = 'Gold.svg'
         member.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society'
 
@@ -409,7 +409,7 @@ class TestMember(unittest.TestCase):
         member = Member()
         member.name = 'foo'
         member.homepage_url = ''
-        with unittest.mock.patch("builtins.open", unittest.mock.mock_open(read_data="data")) as mock_file:
+        with unittest.mock.patch("lfx_landscape_tools.svglogo.open", unittest.mock.mock_open(read_data="data")) as mock_file:
             member.logo = ''
         member.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society'
 
@@ -421,7 +421,7 @@ class TestMember(unittest.TestCase):
         membertooverlay = Member()
         membertooverlay.name = 'test2'
         membertooverlay.homepage_url = 'https://foo.com'
-        with unittest.mock.patch("builtins.open", unittest.mock.mock_open(read_data="data")) as mock_file:
+        with unittest.mock.patch("lfx_landscape_tools.svglogo.open", unittest.mock.mock_open(read_data="data")) as mock_file:
             membertooverlay.logo = 'gold.svg'
         membertooverlay.membership = 'Gold'
         membertooverlay.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society-bad'
@@ -439,7 +439,7 @@ class TestMember(unittest.TestCase):
         member.extra = {'accepted': "2024-05-14", 'annotations': {'bar': 'bar'}, 'other_links': [{'name':'link2','url':'https://link2.com'}]}
         member.second_path = ['list2','list3']
 
-        with unittest.mock.patch("builtins.open", unittest.mock.mock_open(read_data="data")) as mock_file:
+        with unittest.mock.patch("lfx_landscape_tools.svglogo.open", unittest.mock.mock_open(read_data="data")) as mock_file:
             member.overlay(membertooverlay)
 
         self.assertEqual(member.name,'test2')
@@ -514,7 +514,7 @@ class TestMember(unittest.TestCase):
         membertooverlay = Member()
         membertooverlay.name = 'test'
         membertooverlay.homepage_url = 'https://foo.com'
-        with unittest.mock.patch("builtins.open", unittest.mock.mock_open(read_data="data")) as mock_file:
+        with unittest.mock.patch("lfx_landscape_tools.svglogo.open", unittest.mock.mock_open(read_data="data")) as mock_file:
             membertooverlay.logo = 'gold.svg'
         membertooverlay.membership = 'Gold'
         membertooverlay.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society-bad'
@@ -523,14 +523,14 @@ class TestMember(unittest.TestCase):
         member = Member()
         member.name = 'test'
         member.homepage_url = 'https://foo.org'
-        with unittest.mock.patch("builtins.open", unittest.mock.mock_open(read_data="data")) as mock_file:
+        with unittest.mock.patch("lfx_landscape_tools.svglogo.open", unittest.mock.mock_open(read_data="data")) as mock_file:
             member.logo = 'silver.svg'
         member.membership = 'Silver'
         member.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society'
         member.twitter = 'https://twitter.com/mytwitter'
         member.stock_ticker = None
 
-        with unittest.mock.patch("builtins.open", unittest.mock.mock_open(read_data="data")) as mock_file:
+        with unittest.mock.patch("lfx_landscape_tools.svglogo.open", unittest.mock.mock_open(read_data="data")) as mock_file:
             membertooverlay.overlay(member,['homepage_url'])
 
         self.assertEqual(member.name,'test')
@@ -546,7 +546,7 @@ class TestMember(unittest.TestCase):
         membertooverlay = Member()
         membertooverlay.name = 'test2'
         membertooverlay.homepage_url = 'https://foo.com'
-        with unittest.mock.patch("builtins.open", unittest.mock.mock_open(read_data="data")) as mock_file:
+        with unittest.mock.patch("lfx_landscape_tools.svglogo.open", unittest.mock.mock_open(read_data="data")) as mock_file:
             membertooverlay.logo = 'gold.svg'
         membertooverlay.membership = 'Gold'
         
@@ -561,7 +561,7 @@ class TestMember(unittest.TestCase):
         member.twitter = 'https://twitter.com/mytwitter'
         member.stock_ticker = None
 
-        with unittest.mock.patch("builtins.open", unittest.mock.mock_open(read_data="data")) as mock_file:
+        with unittest.mock.patch("lfx_landscape_tools.svglogo.open", unittest.mock.mock_open(read_data="data")) as mock_file:
             membertooverlay.overlay(member)
 
     @responses.activate

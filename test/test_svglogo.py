@@ -51,7 +51,7 @@ class TestSVGLogo(unittest.TestCase):
             body='this is image data'
             )
 
-        with unittest.mock.patch("builtins.open", unittest.mock.mock_open(read_data="data")) as mock_file:
+        with unittest.mock.patch("lfx_landscape_tools.svglogo.open", unittest.mock.mock_open(read_data="data")) as mock_file:
             self.assertEqual(str(SVGLogo(url="https://someurl.com/boom.svg")),"this is image data")
 
     @responses.activate
@@ -62,7 +62,7 @@ class TestSVGLogo(unittest.TestCase):
             body='this is image data'
             )
 
-        with unittest.mock.patch("builtins.open", unittest.mock.mock_open(read_data="data")) as mock_file:
+        with unittest.mock.patch("lfx_landscape_tools.svglogo.open", unittest.mock.mock_open(read_data="data")) as mock_file:
             self.assertEqual(str(SVGLogo(url="https://someurl.com/boom.svg").filename('privée')),'privee.svg')
     
     @responses.activate
@@ -73,7 +73,7 @@ class TestSVGLogo(unittest.TestCase):
             body=b'this is image data'
             )
 
-        with unittest.mock.patch("builtins.open", unittest.mock.mock_open(read_data="data")) as mock_file:
+        with unittest.mock.patch("lfx_landscape_tools.svglogo.open", unittest.mock.mock_open(read_data="data")) as mock_file:
             self.assertEqual(str(SVGLogo(url="https://someurl.com/boom.svg").filename('北京数悦铭金技术有限公司')),'bei_jing_shu_yue_ming_jin_ji_zhu_you_xian_gong_si.svg')
         
     def testHostLogoContainsPNG(self):

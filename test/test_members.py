@@ -95,7 +95,7 @@ class TestMembers(unittest.TestCase):
         member = Member()
         member.name = 'test'
         member.homepage_url = 'https://foo.com'
-        with unittest.mock.patch("builtins.open", unittest.mock.mock_open(read_data="data")) as mock_file:
+        with unittest.mock.patch("lfx_landscape_tools.svglogo.open", unittest.mock.mock_open(read_data="data")) as mock_file:
             member.logo = 'Gold.svg'
         member.membership = 'Gold'
         member.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society'
@@ -115,7 +115,7 @@ class TestMembers(unittest.TestCase):
         member = Member()
         member.name = 'test'
         member.homepage_url = 'https://foo.com'
-        with unittest.mock.patch("builtins.open", unittest.mock.mock_open(read_data="data")) as mock_file:
+        with unittest.mock.patch("lfx_landscape_tools.svglogo.open", unittest.mock.mock_open(read_data="data")) as mock_file:
             member.logo = 'Gold.svg'
         member.membership = 'Gold'
         member.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society'
