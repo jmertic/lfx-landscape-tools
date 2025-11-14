@@ -81,26 +81,6 @@ runs:
       with:
         target_kind: data
         target_path: ./landscape/landscape.yml
-    - name: Checkout landscapeapp
-      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4.1.7@v4
-      if: ${{ hashFiles('./landscape/settings.yml') != '' }}
-      with:
-        repository: cncf/landscapeapp
-        path: landscapeapp
-    - name: Setup node
-      uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
-      if: ${{ hashFiles('./landscape/settings.yml') != '' }}
-      with:
-        node-version: '18'
-    - name: Cleanup YAML files
-      if: ${{ hashFiles('./landscape/settings.yml') != '' }}
-      working-directory: ./landscapeapp
-      shell: bash
-      run: |
-        node tools/removePuppeteer
-        npm install
-        PROJECT_PATH=../landscape node tools/removeQuotes
-        PROJECT_PATH=../landscape node tools/pruneExtraEntries
     - name: Get current date
       id: date
       uses: Kaven-Universe/github-action-current-date-time@f2c12d90cff9c3e7b1f50430886e632fe31fcee1 # v1.4.0
