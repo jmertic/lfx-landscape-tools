@@ -93,7 +93,10 @@ runs:
         branch-suffix: timestamp
         path: ./landscape
         title: "Update Landscape from LFX ${{ steps.date.outputs.time }}"
-        labels: automated-build
         commit-message: Update Landscape from LFX
         signoff: true
-
+    - name: Enable Pull Request Automerge
+      shell: bash
+      run: gh pr merge --merge --auto "1"
+      env:
+        GH_TOKEN: ${{ env.token }}
