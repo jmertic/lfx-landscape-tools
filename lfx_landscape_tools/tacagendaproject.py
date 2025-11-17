@@ -87,7 +87,7 @@ class TACAgendaProject(Members):
             projectdetailsfromlfxcommittee = self._lookupProjectAndCommitteeDetailsByLFXURL(item.get('pCC TSC Committee URL',''))
             if self.assignSIGs and projectdetailsfromlfxcommittee.get('category') != 'SIG':
                 member.second_path = ['SIG / {}'.format(item.get('sIG','No SIG'))]
-            annotations['slug'] = projectdetailsfromlfxcommittee.get('slug')
+            extra['lfx_slug'] = projectdetailsfromlfxcommittee.get('slug')
             session = requests_cache.CachedSession()
             chair = []
             if projectdetailsfromlfxcommittee.get('project_id') and projectdetailsfromlfxcommittee.get('committee_id'):
