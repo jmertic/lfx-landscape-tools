@@ -108,15 +108,17 @@ class LandscapeOutput:
         except Exception as e:
             logging.getLogger().error("Error opening landscape file '{}'; will reset file - error message is '{}'".format(self.landscapefile,e))
             landscape = {
-                'landscape': [{
-                    'category': None,
+                'categories': [{
                     'name': self.landscapeCategory,
                     'subcategories': self.landscapeItems
                 }]
             }
         else:
             found = False
-            for x in landscape.get('landscape',[]):
+            rootcategory = 'categories'
+            if landscape.get('landscape'):
+                rootcategory = 'landscape'
+            for x in landscape.get(rootcategory,[]):
                 if x['name'] == self.landscapeCategory:
                     logging.getLogger().debug("Landscape Category '{}' found".format(self.landscapeCategory))
                     x['subcategories'] = self.landscapeItems
@@ -125,7 +127,7 @@ class LandscapeOutput:
 
             if not found:
                 logging.getLogger().debug("Landscape Category '{}' not found; adding it".format(self.landscapeCategory))
-                landscape['landscape'].append({
+                landscape[rootcategory].append({
                     'category': None,
                     'name': self.landscapeCategory,
                     'subcategories': self.landscapeItems

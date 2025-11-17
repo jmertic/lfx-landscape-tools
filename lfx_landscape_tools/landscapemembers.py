@@ -51,7 +51,10 @@ class LandscapeMembers(Members):
         except Exception as e:
             logging.getLogger().error("Error opening landscape file '{}' - will not load current landscape data - '{}'".format(self.landscapefile,e))
         else:
-            for x in landscape.get('landscape',{}):
+            rootcategory = 'categories'
+            if landscape.get('landscape'):
+                rootcategory = 'landscape'
+            for x in landscape.get(rootcategory,{}):
                 if x.get('name') == self.landscapeCategory:
                     for subcategory in x.get('subcategories'):
                         logger.debug("Processing subcategory '{}'...".format(subcategory['name']))

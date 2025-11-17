@@ -59,9 +59,8 @@ class TestLandscapeOutput(unittest.TestCase):
         landscape.save()
 
         with open(tmpfilename.name) as fp:
-            self.assertEqual(fp.read(),"""landscape:
-  - category:
-    name: test me
+            self.assertEqual(fp.read(),"""categories:
+  - name: test me
     subcategories:
       - subcategory:
         name: Good
@@ -368,9 +367,8 @@ landscape:
 
             with open(tmpfilename.name) as fp:
                 self.maxDiff = None
-                self.assertEqual(fp.read(),"""landscape:
-  - category:
-    name: test me
+                self.assertEqual(fp.read(),"""categories:
+  - name: test me
     subcategories:
       - subcategory:
         name: Good
