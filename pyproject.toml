@@ -19,7 +19,7 @@ urllib3 = "^2.6.0"
 validators = "^0.35.0"
 click = "^8.3.1"
 check-jsonschema = "^0.35.0"
-beautifulsoup4 = "^4.14.2"
+beautifulsoup4 = "^4.14.3"
 
 [tool.poetry.group.test.dependencies]
 coverage = "^7.12.0"
