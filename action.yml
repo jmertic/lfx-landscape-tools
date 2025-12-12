@@ -19,20 +19,20 @@ runs:
         packages: libcairo2-dev pkg-config python3-dev
         version: 1.0
     - name: Checkout landscape
-      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4.1.7@v4
+      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4.1.7@v4
       with:
         token: ${{ env.token }}
         repository: ${{ env.repository }}
         ref: ${{ env.ref }}
         path: landscape
     - name: Checkout landscape-tools
-      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4.1.7@v4
+      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4.1.7@v4
       with:
         token: ${{ env.token }}
         repository: jmertic/lfx-landscape-tools
         path: landscape-tools
     - name: Set up Python 3.x
-      uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
+      uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
       with:
         python-version: '3.x'
     - name: Install poetry
@@ -81,33 +81,13 @@ runs:
       with:
         target_kind: data
         target_path: ./landscape/landscape.yml
-    - name: Checkout landscapeapp
-      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4.1.7@v4
-      if: ${{ hashFiles('./landscape/settings.yml') != '' }}
-      with:
-        repository: cncf/landscapeapp
-        path: landscapeapp
-    - name: Setup node
-      uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
-      if: ${{ hashFiles('./landscape/settings.yml') != '' }}
-      with:
-        node-version: '18'
-    - name: Cleanup YAML files
-      if: ${{ hashFiles('./landscape/settings.yml') != '' }}
-      working-directory: ./landscapeapp
-      shell: bash
-      run: |
-        node tools/removePuppeteer
-        npm install
-        PROJECT_PATH=../landscape node tools/removeQuotes
-        PROJECT_PATH=../landscape node tools/pruneExtraEntries
     - name: Get current date
       id: date
       uses: Kaven-Universe/github-action-current-date-time@f2c12d90cff9c3e7b1f50430886e632fe31fcee1 # v1.4.0
       with:
         format: "YYYY-MM-DD"
     - name: Create Pull Request
-      uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
+      uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7.0.11
       with:
         token: ${{ env.token }}
         branch-suffix: timestamp
