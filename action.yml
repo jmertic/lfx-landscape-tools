@@ -70,6 +70,16 @@ runs:
         GH_TOKEN: ${{ env.token }}
         CONFIGFILE: ${{ inputs.configfile }}
         LOGFILE: ${{ inputs.logfile }}
+    - name: Rebuild LFEU projects from LFX and other sources
+      if: ${{ inputs.project_processing == 'lfeu' }}
+      working-directory: ./landscape-tools
+      shell: bash
+      run: poetry run lfx_landscape -s -l debug --logfile $LOGFILE build_lfeuprojects -c ../landscape/$CONFIGFILE
+      env:
+        GITHUB_TOKEN: ${{ env.token }}
+        GH_TOKEN: ${{ env.token }}
+        CONFIGFILE: ${{ inputs.configfile }}
+        LOGFILE: ${{ inputs.logfile }}
     - name: Save logfiles file
       uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
       with:
