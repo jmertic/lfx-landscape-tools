@@ -10,6 +10,9 @@ inputs:
   logfile:
     description: "Filename for the log file ( defaults to debug.log )"
     default: "debug.log"
+  datafile:
+    description: "Filename for the data file ( defaults to landscape.yml )"
+    default: "landscape.yml"
 runs:
   using: composite
   steps:
@@ -80,7 +83,7 @@ runs:
       uses: cncf/landscape2-validate-action@6381e8747c73412e638670807b402ef2b863e9f8 # v2.0.1
       with:
         target_kind: data
-        target_path: ./landscape/landscape.yml
+        target_path: ./landscape/${{ inputs.datafile }}
     - name: Get current date
       id: date
       uses: Kaven-Universe/github-action-current-date-time@f2c12d90cff9c3e7b1f50430886e632fe31fcee1 # v1.4.0
