@@ -8,6 +8,7 @@
 from lfx_landscape_tools.config import Config
 from lfx_landscape_tools.lfxmembers import LFXMembers
 from lfx_landscape_tools.lfxprojects import LFXProjects
+from lfx_landscape_tools.lfxprojectseu import LFXProjectsEU
 from lfx_landscape_tools.landscapemembers import LandscapeMembers
 from lfx_landscape_tools.landscapeoutput import LandscapeOutput
 from lfx_landscape_tools.svglogo import SVGLogo
@@ -45,6 +46,11 @@ class Cli:
         buildlandscapeprojects_parser.add_argument("-c", "--config", dest="configfile", default=self._defaultconfigfile, type=FileType('r'), help="name of YAML config file")
         buildlandscapeprojects_parser.add_argument("-d", "--dir", dest="basedir", default=".", type=self._dir_path, help="path to where landscape directory is")
         buildlandscapeprojects_parser.set_defaults(func=self.buildprojects)
+        
+        buildlandscapeeuprojects_parser = subparsers.add_parser("build_lfeuprojects", help="Replace current items with latest from LFX")
+        buildlandscapeeuprojects_parser.add_argument("-c", "--config", dest="configfile", default=self._defaultconfigfile, type=FileType('r'), help="name of YAML config file")
+        buildlandscapeeuprojects_parser.add_argument("-d", "--dir", dest="basedir", default=".", type=self._dir_path, help="path to where landscape directory is")
+        buildlandscapeeuprojects_parser.set_defaults(func=self.buildlfeuprojects)
         
         synclandscapeprojects_parser = subparsers.add_parser("sync_projects", help="Sync current items with latest from LFX")
         synclandscapeprojects_parser.add_argument("-c", "--config", dest="configfile", default=self._defaultconfigfile, type=FileType('r'), help="name of YAML config file")
@@ -116,6 +122,14 @@ class Cli:
         
         logging.getLogger().info("Successfully processed {} projects and skipped {} projects".format(landscapeoutput.itemsProcessed,landscapeoutput.itemsErrors))
 
+    def buildlfeuprojects(self,args):
+        config = Config(args.configfile,view='projects')
+        landscapeoutput = LandscapeOutput(config=config)
+        landscapeoutput.load(members=LFXProjectsEU(config=config))
+        landscapeoutput.save()
+        
+        logging.getLogger().info("Successfully processed {} projects and skipped {} projects".format(landscapeoutput.itemsProcessed,landscapeoutput.itemsErrors))
+    
     def syncprojects(self,args):
         config = Config(args.configfile,view='projects')
         items = LFXProjects(config=config)

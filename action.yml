@@ -10,6 +10,9 @@ inputs:
   logfile:
     description: "Filename for the log file ( defaults to debug.log )"
     default: "debug.log"
+  datafile:
+    description: "Filename for the data file ( defaults to landscape.yml )"
+    default: "landscape.yml"
 runs:
   using: composite
   steps:
@@ -19,20 +22,20 @@ runs:
         packages: libcairo2-dev pkg-config python3-dev
         version: 1.0
     - name: Checkout landscape
-      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4.1.7@v4
+      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4.1.7@v4
       with:
         token: ${{ env.token }}
         repository: ${{ env.repository }}
         ref: ${{ env.ref }}
         path: landscape
     - name: Checkout landscape-tools
-      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4.1.7@v4
+      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4.1.7@v4
       with:
         token: ${{ env.token }}
         repository: jmertic/lfx-landscape-tools
         path: landscape-tools
     - name: Set up Python 3.x
-      uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
+      uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
       with:
         python-version: '3.x'
     - name: Install poetry
@@ -70,8 +73,18 @@ runs:
         GH_TOKEN: ${{ env.token }}
         CONFIGFILE: ${{ inputs.configfile }}
         LOGFILE: ${{ inputs.logfile }}
+    - name: Rebuild LFEU projects from LFX and other sources
+      if: ${{ inputs.project_processing == 'lfeu' }}
+      working-directory: ./landscape-tools
+      shell: bash
+      run: poetry run lfx_landscape -s -l debug --logfile $LOGFILE build_lfeuprojects -c ../landscape/$CONFIGFILE
+      env:
+        GITHUB_TOKEN: ${{ env.token }}
+        GH_TOKEN: ${{ env.token }}
+        CONFIGFILE: ${{ inputs.configfile }}
+        LOGFILE: ${{ inputs.logfile }}
     - name: Save logfiles file
-      uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
       with:
         name: ${{ inputs.logfile }} 
         path: ./landscape-tools/${{ inputs.logfile }}
@@ -80,14 +93,14 @@ runs:
       uses: cncf/landscape2-validate-action@6381e8747c73412e638670807b402ef2b863e9f8 # v2.0.1
       with:
         target_kind: data
-        target_path: ./landscape/landscape.yml
+        target_path: ./landscape/${{ inputs.datafile }}
     - name: Get current date
       id: date
       uses: Kaven-Universe/github-action-current-date-time@f2c12d90cff9c3e7b1f50430886e632fe31fcee1 # v1.4.0
       with:
         format: "YYYY-MM-DD"
     - name: Create Pull Request
-      uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
+      uses: peter-evans/create-pull-request@98357b18bf14b5342f975ff684046ec3b2a07725 # v8.0.0
       with:
         token: ${{ env.token }}
         branch-suffix: timestamp
