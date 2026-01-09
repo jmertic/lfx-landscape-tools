@@ -81,6 +81,7 @@ class LFXProjects(Members):
                 member.name = record.get('Name')
                 logger.info("Found LFX Project '{}'".format(member.name))
                 annotations['slug'] = record.get('Slug')
+                member.license = record.get('PrimaryOpenSourceLicense')
                 # Let's not include the root project
                 if annotations.get('slug') == self.project:
                     continue
