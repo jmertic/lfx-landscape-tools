@@ -46,6 +46,9 @@ class SVGLogo:
                     if r.status_code == 200:
                         self.__contents = r.content.decode('utf-8')
                     break
+                except requests.exceptions.ConnectionError:
+                    logging.getLogger().warning("ConnectionError with '{}'",format(url))
+                    break
                 except requests.exceptions.ChunkedEncodingError:
                     pass
                 except UnicodeDecodeError:
