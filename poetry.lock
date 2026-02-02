@@ -317,14 +317,14 @@ files = [
 
 [[package]]
 name = "check-jsonschema"
-version = "0.36.0"
+version = "0.36.1"
 description = "A jsonschema CLI and pre-commit hook"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "check_jsonschema-0.36.0-py3-none-any.whl", hash = "sha256:a2f0888783cc4584cac548144f5c2ef78a63122b46ba7845a715d35d46e3c69a"},
-    {file = "check_jsonschema-0.36.0.tar.gz", hash = "sha256:9570e56ae885c59449fed9abe1766239901befe03bca7054077f8c0639fc71df"},
+    {file = "check_jsonschema-0.36.1-py3-none-any.whl", hash = "sha256:5b546af49b8937c8541bc96c6f78fa1521cab51ec8c4dc44f8a100a98163e210"},
+    {file = "check_jsonschema-0.36.1.tar.gz", hash = "sha256:d0fa1b92573d0404ad81d9b02b4a93cdd0d5c1871f4bea7361e664afc52938e7"},
 ]
 
 [package.dependencies]
@@ -332,7 +332,7 @@ click = ">=8,<9"
 jsonschema = ">=4.18.0,<5.0"
 regress = ">=2024.11.1"
 requests = "<3.0"
-"ruamel.yaml" = ">=0.18.10,<0.19.0"
+"ruamel.yaml" = ">=0.18.10,<0.20.0"
 
 [[package]]
 name = "click"
@@ -1386,4 +1386,4 @@ crypto-eth-addresses = ["eth-hash[pycryptodome] (>=0.7.0)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">= 3.12"
-content-hash = "5146483349b5ae3bcc288c9e6fa9edaf0d4e5ce618abc9ffbda922bec9951b6d"
+content-hash = "cd05337466667e0cacb7ed666833e45aa2ba5cc2ccd90aa220521ae3f7e0e959"
