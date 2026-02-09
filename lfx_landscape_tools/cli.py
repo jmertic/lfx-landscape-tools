@@ -37,22 +37,22 @@ class Cli:
         parser.add_argument("--logfile", dest="logfile", default='debug.log', help="Name for the log file to save (default is debug.log")
         subparsers = parser.add_subparsers(help='sub-command help')
         
-        buildlandscapemembers_parser = subparsers.add_parser("build_members", help="Replace current items with latest from LFX")
+        buildlandscapemembers_parser = subparsers.add_parser("build_members", help="Replace current members with latest from LFX")
         buildlandscapemembers_parser.add_argument("-c", "--config", dest="configfile", default=self._defaultconfigfile, type=FileType('r'), help="name of YAML config file")
         buildlandscapemembers_parser.add_argument("-d", "--dir", dest="basedir", default=".", type=self._dir_path, help="path to where landscape directory is")
         buildlandscapemembers_parser.set_defaults(func=self.buildmembers)
         
-        buildlandscapeprojects_parser = subparsers.add_parser("build_projects", help="Replace current items with latest from LFX")
+        buildlandscapeprojects_parser = subparsers.add_parser("build_projects", help="Replace current projects with latest from LFX")
         buildlandscapeprojects_parser.add_argument("-c", "--config", dest="configfile", default=self._defaultconfigfile, type=FileType('r'), help="name of YAML config file")
         buildlandscapeprojects_parser.add_argument("-d", "--dir", dest="basedir", default=".", type=self._dir_path, help="path to where landscape directory is")
         buildlandscapeprojects_parser.set_defaults(func=self.buildprojects)
         
-        buildlandscapeeuprojects_parser = subparsers.add_parser("build_lfeuprojects", help="Replace current items with latest from LFX")
+        buildlandscapeeuprojects_parser = subparsers.add_parser("build_lfeuprojects", help="Replace current LF Europe projects with latest from LFX")
         buildlandscapeeuprojects_parser.add_argument("-c", "--config", dest="configfile", default=self._defaultconfigfile, type=FileType('r'), help="name of YAML config file")
         buildlandscapeeuprojects_parser.add_argument("-d", "--dir", dest="basedir", default=".", type=self._dir_path, help="path to where landscape directory is")
         buildlandscapeeuprojects_parser.set_defaults(func=self.buildlfeuprojects)
         
-        synclandscapeprojects_parser = subparsers.add_parser("sync_projects", help="Sync current items with latest from LFX")
+        synclandscapeprojects_parser = subparsers.add_parser("sync_projects", help="Sync current projects with latest from LFX")
         synclandscapeprojects_parser.add_argument("-c", "--config", dest="configfile", default=self._defaultconfigfile, type=FileType('r'), help="name of YAML config file")
         synclandscapeprojects_parser.add_argument("-d", "--dir", dest="basedir", default=".", type=self._dir_path, help="path to where landscape directory is")
         synclandscapeprojects_parser.set_defaults(func=self.syncprojects)
