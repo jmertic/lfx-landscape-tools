@@ -77,40 +77,21 @@ jobs:
         with:
           target_kind: data
           target_path: ./landscape.yml
-      - uses: pascalgn/automerge-action@7961b8b5eec56cc088c140b56d864285eabd3f67 # v0.16.4
-        if: success()
-        env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-          MERGE_LABELS: "automated-build"
-          MERGE_RETRY_SLEEP: 300000
-          MERGE_METHOD: "squash"
 ```
-5) Add the following code to a `automerge.yml` file in your landscape repo's `.github/workflows/` directory.
-```yaml
-name: Automerge PRs from LFX Landscape Tools
 
-on:
-  workflow_dispatch:
-  schedule:
-  - cron: "45 4 * * *"
+5) Run the `Build Landscape from LFX` GitHub Action following the instructions for [manually running a GitHub Action](https://docs.github.com/en/actions/managing-workflow-runs-and-deployments/managing-workflow-runs/manually-running-a-workflow) to test that it all works.
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Automerge PR if label is set to `automated-build`
-        uses: pascalgn/automerge-action@7961b8b5eec56cc088c140b56d864285eabd3f67 # v0.16.4
-        env:
-          MERGE_LABELS: "automated-build"
-          MERGE_RETRY_SLEEP: 300000
-          MERGE_METHOD: "squash"
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-```
-6) Run the `Build Landscape from LFX` GitHub Action following the instructions for [manually running a GitHub Action](https://docs.github.com/en/actions/managing-workflow-runs-and-deployments/managing-workflow-runs/manually-running-a-workflow) to test that it all works.
+### Auto-merging landscape build changes
+ 
+If the build results in data that differs from the current data in the landscape, a pull request is created to apply those changes. This pull request is by default set to be [automatically merged](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/incorporating-changes-from-a-pull-request/automatically-merging-a-pull-request) only if the following conditions are met.
+
+- The target repository must have **[Allow auto-merge](https://docs.github.com/en/github/administering-a-repository/managing-auto-merge-for-pull-requests-in-your-repository)** enabled in settings.
+- The pull request base must have a branch protection rule with at least one requirement enabled.
+- The pull request must be in a state where requirements have not yet been satisfied. If the pull request is in a state where it can already be merged, the action will merge it immediately without enabling auto-merge.
 
 ## Local install
 
-You can install this tool on your local computer via `pipx`
+You can install this tool on your local computer via [`pipx`](https://pipx.pypa.io).
 
 ```bash
 pipx install git+https://github.com/jmertic/lfx-landscape-tools.git
