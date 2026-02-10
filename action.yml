@@ -114,7 +114,7 @@ runs:
       if: steps.cpr.outputs.pull-request-number != ''
       working-directory: ./landscape
       shell: bash
-      run: run: |
+      run: |
         gh pr merge --squash --auto "${{ steps.cpr.outputs.pull-request-number }}" \
         || gh pr merge --squash "${{ steps.cpr.outputs.pull-request-number }}"
       env:
