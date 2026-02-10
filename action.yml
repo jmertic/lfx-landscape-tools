@@ -112,7 +112,7 @@ runs:
         signoff: true
     - name: Enable Pull Request Automerge
       if: steps.cpr.outputs.pull-request-number != ''
-      working-directory: ./repo
+      working-directory: ./landscape
       shell: bash
       run: gh pr merge --squash --auto "${{ steps.cpr.outputs.pull-request-number }}"
       env:
