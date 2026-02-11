@@ -12,21 +12,21 @@ requests = "^2.32.5"
 pycairo = "^1.28.0"
 pygithub = "^2.8.1"
 python-slugify = "^8.0.4"
-requests-cache = "^1.2.1"
+requests-cache = "^1.3.0"
 ruamel-yaml = "^0.18.17"
 url-normalize = "^2.2.1"
 urllib3 = "^2.6.3"
 validators = "^0.35.0"
 click = "^8.3.1"
-check-jsonschema = "^0.36.0"
+check-jsonschema = "^0.36.1"
 beautifulsoup4 = "^4.14.3"
 
 [tool.poetry.group.test.dependencies]
-coverage = "^7.13.1"
+coverage = "^7.13.4"
 responses = "^0.25.8"
 
 [tool.poetry.group.dev.dependencies]
-build = "^1.3.0"
+build = "^1.4.0"
 
 [tool.poetry.scripts]
 lfx_landscape = "lfx_landscape_tools.cli:Cli.run"

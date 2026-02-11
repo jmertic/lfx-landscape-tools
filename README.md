@@ -78,11 +78,20 @@ jobs:
           target_kind: data
           target_path: ./landscape.yml
 ```
+
 5) Run the `Build Landscape from LFX` GitHub Action following the instructions for [manually running a GitHub Action](https://docs.github.com/en/actions/managing-workflow-runs-and-deployments/managing-workflow-runs/manually-running-a-workflow) to test that it all works.
+
+### Auto-merging landscape build changes
+ 
+If the build results in data that differs from the current data in the landscape, a pull request is created to apply those changes. This pull request is by default set to be [automatically merged](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/incorporating-changes-from-a-pull-request/automatically-merging-a-pull-request) only if the following conditions are met.
+
+- The target repository must have **[Allow auto-merge](https://docs.github.com/en/github/administering-a-repository/managing-auto-merge-for-pull-requests-in-your-repository)** enabled in settings.
+- The pull request base must have a branch protection rule with at least one requirement enabled.
+- The pull request must be in a state where requirements have not yet been satisfied. If the pull request is in a state where it can already be merged, the action will merge it immediately without enabling auto-merge.
 
 ## Local install
 
-You can install this tool on your local computer via `pipx`
+You can install this tool on your local computer via [`pipx`](https://pipx.pypa.io).
 
 ```bash
 pipx install git+https://github.com/jmertic/lfx-landscape-tools.git
