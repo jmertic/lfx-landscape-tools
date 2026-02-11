@@ -52,8 +52,8 @@ class Members(ABC):
         members = []
         for member in self.members:
             if slug:
-                if member.extra.get('annotations',{}).get('slug') and member.extra.get('annotations',{}).get('slug') == slug:
-                    logger.debug("Found '{}' by slug '{}'".format(member.name,member.extra.get('annotations',{}).get('slug')))
+                if member.extra.get('lfx_slug') and member.extra.get('lfx_slug') == slug:
+                    logger.debug("Found '{}' by slug '{}'".format(member.name,member.extra.get('lfx_slug')))
                     members.append(member)
             elif membership and normalizedname and normalizedhomepage_url:
                 if ( self.normalizeName(member.name) == normalizedname or member.homepage_url == normalizedhomepage_url ) and member.membership == membership:
@@ -87,7 +87,7 @@ class Members(ABC):
         for member in self.members:
             logging.getLogger().debug("Checking matching item to overlay '{}'".format(member.name)) 
             foundmembers = []
-            foundmembers = memberstooverlay.find(name=member.name,homepage_url=member.homepage_url,slug=member.extra.get('annotations',{}).get('slug'))
+            foundmembers = memberstooverlay.find(name=member.name,homepage_url=member.homepage_url,slug=member.extra.get('lfx_slug'))
             for foundmember in foundmembers:
                 logging.getLogger().debug("Found item to check for overlay '{}'".format(foundmember.name)) 
                 member.overlay(membertooverlay=foundmember,onlykeys=onlykeys,skipkeys=skipkeys)

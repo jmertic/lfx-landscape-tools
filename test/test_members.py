@@ -82,7 +82,7 @@ class TestMembers(unittest.TestCase):
         member = Member()
         member.name = 'test'
         member.homepage_url = 'https://foo.com'
-        member.extra = {'annotations':{'slug':'aswf'}}
+        member.extra = {'lfx_slug':'aswf'}
 
         members = Members(config=Config())
         members.members.append(member)
@@ -162,7 +162,7 @@ class TestMembers(unittest.TestCase):
 
         member = Member()
         member.name = 'weirdtest'
-        member.extra = {'annotations':{'slug':'test3'}}
+        member.extra = {'lfx_slug':'test3'}
         member.homepage_url = 'https://foo2.com'
         member.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society'
         members1.members.append(member)
@@ -179,7 +179,7 @@ class TestMembers(unittest.TestCase):
         member.name = 'test3'
         member.homepage_url = 'https://foo3.com'
         member.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society'
-        member.extra = {'annotations':{'slug':'test3'}}
+        member.extra = {'lfx_slug':'test3'}
         members2.members.append(member)
         
         members1.overlay(members2)
