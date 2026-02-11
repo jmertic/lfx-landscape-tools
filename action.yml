@@ -107,7 +107,6 @@ runs:
         branch-suffix: timestamp
         path: ./landscape
         title: "Update Landscape from LFX ${{ steps.date.outputs.time }}"
-        labels: automated-build
         commit-message: Update Landscape from LFX
         signoff: true
     - name: Enable Pull Request Automerge

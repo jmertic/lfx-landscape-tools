@@ -80,10 +80,10 @@ class LFXProjects(Members):
                 member.membership = 'All'
                 member.name = record.get('Name')
                 logger.info("Found LFX Project '{}'".format(member.name))
-                annotations['slug'] = record.get('Slug')
+                extra['lfx_slug'] = record.get('Slug')
                 member.license = record.get('PrimaryOpenSourceLicense')
                 # Let's not include the root project
-                if annotations.get('slug') == self.project:
+                if extra.get('lfx_slug') == self.project:
                     continue
                 member.repo_url = record.get('RepositoryURL')
                 extra['accepted'] = record.get('StartDate')
@@ -122,12 +122,12 @@ class LFXProjects(Members):
                     sectors = record['TechnologySector'].split(";")
                     for sector in sectors:
                         second_path.append('Technology Sector / {}'.format(sector.replace("/",":")))
-                extra['dev_stats_url'] = self.lfxinsightsUrl.format(parent_slug=record.get('ParentSlug',self.project),slug=annotations.get('slug'))
-                other_links.append({'name': 'Calendar','url': self.calendarUrl.format(slug=annotations.get('slug'))})
+                extra['dev_stats_url'] = self.lfxinsightsUrl.format(parent_slug=record.get('ParentSlug',self.project),slug=extra.get('lfx_slug'))
+                other_links.append({'name': 'Calendar','url': self.calendarUrl.format(slug=extra.get('lfx_slug'))})
                 other_links.append({'name': 'iCal', 'url': self.icalUrl.format(project_id=record.get('ProjectID'))})
                 other_links.append({'name': 'Charter', 'url': record.get('CharterURL')})
                 if self.artworkRepoUrl:
-                    extra['artwork_url'] = self.artworkRepoUrl.format(slug=annotations.get('slug'))
+                    extra['artwork_url'] = self.artworkRepoUrl.format(slug=extra.get('lfx_slug'))
                 extra['annotations'] = annotations
                 extra['other_links'] = other_links
                 member.extra = extra
