@@ -317,14 +317,14 @@ files = [
 
 [[package]]
 name = "check-jsonschema"
-version = "0.36.2"
+version = "0.37.0"
 description = "A jsonschema CLI and pre-commit hook"
 optional = false
-python-versions = ">=3.9"
+python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "check_jsonschema-0.36.2-py3-none-any.whl", hash = "sha256:51a2e21a03771004312f48b034da5bc4a988e3646f5705904732143653e652c8"},
-    {file = "check_jsonschema-0.36.2.tar.gz", hash = "sha256:bc5de8b0270eb9c5b82adf1f977cb8d05ff2578eb7e2317a44620c1639f1e55b"},
+    {file = "check_jsonschema-0.37.0-py3-none-any.whl", hash = "sha256:c9a1476746627daf1d3b362d15ea70b4e176588a2de9dbfb6933315553bcb393"},
+    {file = "check_jsonschema-0.37.0.tar.gz", hash = "sha256:f1fef56b041e8cd1ad42e340f8422c1f27e00877e29c4f34bce357955b262e9d"},
 ]
 
 [package.dependencies]
@@ -1319,4 +1319,4 @@ crypto-eth-addresses = ["eth-hash[pycryptodome] (>=0.7.0)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">= 3.12"
-content-hash = "c5112fa829f4e275dcb894105bb70c4d63d84aaf8f7945c00e5cae58d21dec32"
+content-hash = "1d6637c75089c46bc1d9280e98100572597bbe9545dc64d87a2d935dc0025f8a"
