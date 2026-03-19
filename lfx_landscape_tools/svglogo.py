@@ -55,7 +55,7 @@ class SVGLogo:
                     logging.getLogger().warning("UnicodeDecodeError with '{}'".format(url))
                     break
         elif name:
-           width = len(max(name.split(" "),key=len)) * 32
+           width = len(max(name.split(" "),key=len)) * 34
            height = len(name.split(" ")) * 65
            with tempfile.TemporaryFile() as fp:
                 with cairo.SVGSurface(fp, width, height) as surface:
