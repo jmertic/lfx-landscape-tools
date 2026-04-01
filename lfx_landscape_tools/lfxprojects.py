@@ -87,6 +87,7 @@ class LFXProjects(Members):
                     continue
                 member.repo_url = record.get('RepositoryURL')
                 extra['accepted'] = record.get('StartDate')
+                extra['archived'] = record.get('ProjectEntityDissolutionDate')
                 member.description = record.get('Description')
                 if self.addCategory and record.get('Category'):
                     for projectLevel in self.landscapeProjectsLevels:

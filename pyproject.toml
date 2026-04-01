@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "lfx-landscape-tools"
-version = "20250713"
+version = "20260331"
 description = "Collection of tools for automating the data management of a landscape from LFX"
 authors = ["John Mertic <jmertic@linuxfoundation.org>"]
 readme = "README.md"
@@ -8,25 +8,25 @@ license = "Apache-2.0"
 
 [tool.poetry.dependencies]
 python = ">= 3.12"
-requests = "^2.32.5"
+requests = "^2.33.0"
 pycairo = "^1.28.0"
-pygithub = "^2.8.1"
+pygithub = "^2.9.0"
 python-slugify = "^8.0.4"
-requests-cache = "^1.3.0"
-ruamel-yaml = "^0.18.17"
+requests-cache = "^1.3.1"
+ruamel-yaml = "^0.19.1"
 url-normalize = "^2.2.1"
 urllib3 = "^2.6.3"
 validators = "^0.35.0"
 click = "^8.3.1"
-check-jsonschema = "^0.36.1"
+check-jsonschema = "^0.37.1"
 beautifulsoup4 = "^4.14.3"
 
 [tool.poetry.group.test.dependencies]
-coverage = "^7.13.4"
-responses = "^0.25.8"
+coverage = "^7.13.5"
+responses = "^0.26.0"
 
 [tool.poetry.group.dev.dependencies]
-build = "^1.4.0"
+build = "^1.4.2"
 
 [tool.poetry.scripts]
 lfx_landscape = "lfx_landscape_tools.cli:Cli.run"

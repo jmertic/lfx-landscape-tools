@@ -48,7 +48,7 @@ jobs:
   build:
     runs-on: ubuntu-24.04
     steps:
-      - uses: jmertic/lfx-landscape-tools@20a188cdc3f2ee0318047b50de7e9b75b8f48268 # 20250528
+      - uses: jmertic/lfx-landscape-tools@4a1b2a68b4110e5528b1df83bf41bdf9ac8413f1 # 20260330
         with:
           project_processing: skip # see options in action.yml
         env:
@@ -72,8 +72,8 @@ jobs:
     runs-on: ubuntu-latest
     name: "Validate landscape.yml file"
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - uses: cncf/landscape2-validate-action@7f299c46e9b03b4e8bc2896882734fb0b0756b37 # v2.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: cncf/landscape2-validate-action@6381e8747c73412e638670807b402ef2b863e9f8 # v2.0.1
         with:
           target_kind: data
           target_path: ./landscape.yml

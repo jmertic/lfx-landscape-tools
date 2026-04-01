@@ -4,6 +4,9 @@ inputs:
   project_processing:
     description: "Indicate for project processing, if they should be 'rebuild' or 'sync' ( or 'skip' to not build projects )"
     default: "sync"
+  member_processing:
+    description: "Indicate for member processing, if they should be 'build' or 'sync'"
+    default: "build"
   configfile:
     description: "Filename for the config file ( defaults to config.yml )"
     default: "config.yml"
@@ -22,14 +25,14 @@ runs:
         packages: libcairo2-dev pkg-config python3-dev
         version: 1.0
     - name: Checkout landscape
-      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4.1.7@v4
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4.1.7
       with:
         token: ${{ env.token }}
         repository: ${{ env.repository }}
         ref: ${{ env.ref }}
         path: landscape
     - name: Checkout landscape-tools
-      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4.1.7@v4
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4.1.7
       with:
         token: ${{ env.token }}
         repository: jmertic/lfx-landscape-tools
@@ -45,9 +48,20 @@ runs:
       working-directory: ./landscape-tools
       run: poetry install
     - name: Build members from LFX
+      if: ${{ inputs.member_processing == 'build' }}
       working-directory: ./landscape-tools
       shell: bash
       run: poetry run lfx_landscape -s -l debug --logfile $LOGFILE build_members  -c ../landscape/$CONFIGFILE
+      env:
+        GITHUB_TOKEN: ${{ env.token }}
+        GH_TOKEN: ${{ env.token }}
+        CONFIGFILE: ${{ inputs.configfile }}
+        LOGFILE: ${{ inputs.logfile }}
+    - name: Sync members from LFX
+      if: ${{ inputs.member_processing == 'sync' }}
+      working-directory: ./landscape-tools
+      shell: bash
+      run: poetry run lfx_landscape -s -l debug --logfile $LOGFILE sync_members  -c ../landscape/$CONFIGFILE
       env:
         GITHUB_TOKEN: ${{ env.token }}
         GH_TOKEN: ${{ env.token }}
@@ -84,7 +98,7 @@ runs:
         CONFIGFILE: ${{ inputs.configfile }}
         LOGFILE: ${{ inputs.logfile }}
     - name: Save logfiles file
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: ${{ inputs.logfile }} 
         path: ./landscape-tools/${{ inputs.logfile }}
@@ -96,7 +110,7 @@ runs:
         target_path: ./landscape/${{ inputs.datafile }}
     - name: Get current date
       id: date
-      uses: Kaven-Universe/github-action-current-date-time@f2c12d90cff9c3e7b1f50430886e632fe31fcee1 # v1.4.0
+      uses: Kaven-Universe/github-action-current-date-time@7c1d8465d1bfd7d35466d2ee82a8e460780561ae # v1.5.0
       with:
         format: "YYYY-MM-DD"
     - name: Create Pull Request
@@ -114,7 +128,9 @@ runs:
       working-directory: ./landscape
       shell: bash
       run: |
-        gh pr merge --squash --auto "${{ steps.cpr.outputs.pull-request-number }}" \
-        || gh pr merge --squash "${{ steps.cpr.outputs.pull-request-number }}"
+        if [ "$(gh api repos/${{ env.repository }} --jq '.allow_auto_merge')" = "true" ]; then
+          gh pr merge --squash --auto "${{ steps.cpr.outputs.pull-request-number }}" \
+          || gh pr merge --squash "${{ steps.cpr.outputs.pull-request-number }}"
+        fi
       env:
         GH_TOKEN: ${{ env.token }}

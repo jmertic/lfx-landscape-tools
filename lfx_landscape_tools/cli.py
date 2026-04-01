@@ -57,6 +57,11 @@ class Cli:
         synclandscapeprojects_parser.add_argument("-d", "--dir", dest="basedir", default=".", type=self._dir_path, help="path to where landscape directory is")
         synclandscapeprojects_parser.set_defaults(func=self.syncprojects)
 
+        synclandscapemembers_parser = subparsers.add_parser("sync_members", help="Sync current members with latest from LFX, preserving project-specific fields")
+        synclandscapemembers_parser.add_argument("-c", "--config", dest="configfile", default=self._defaultconfigfile, type=FileType('r'), help="name of YAML config file")
+        synclandscapemembers_parser.add_argument("-d", "--dir", dest="basedir", default=".", type=self._dir_path, help="path to where landscape directory is")
+        synclandscapemembers_parser.set_defaults(func=self.syncmembers)
+        
         maketextlogo_parser = subparsers.add_parser("maketextlogo", help="Create a text pure SVG logo")
         maketextlogo_parser.add_argument("-n", "--name", dest="name", required=True, help="Name to appear in logo")
         maketextlogo_parser.add_argument("--autocrop", dest="autocrop", action='store_true', help="Process logo with autocrop")
@@ -148,6 +153,20 @@ class Cli:
         landscapeoutput.save()
         
         logging.getLogger().info("Successfully processed {} projects and skipped {} projects".format(landscapeoutput.itemsProcessed,landscapeoutput.itemsErrors))
+
+    def syncmembers(self,args):
+        config = Config(args.configfile,view='members')
+        items = LFXMembers(config=config)
+        logging.getLogger().info("Overlaying current Landscape member data")
+        items.overlay(memberstooverlay=LandscapeMembers(config=config))
+        # Re-overlay LFX data to keep it authoritative for fields it manages
+        logging.getLogger().info("Re-overlaying LFX member data")
+        items.overlay(memberstooverlay=LFXMembers(config=config))
+        landscapeoutput = LandscapeOutput(config=config)
+        landscapeoutput.load(members=items)
+        landscapeoutput.save()
+        
+        logging.getLogger().info("Successfully processed {} members and skipped {} members".format(landscapeoutput.itemsProcessed,landscapeoutput.itemsErrors))
 
     def maketextlogo(self,args):
         svglogo = SVGLogo(name=args.name)
