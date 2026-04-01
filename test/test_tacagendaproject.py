@@ -23,7 +23,7 @@ from lfx_landscape_tools.lfxprojects import LFXProjects
 from lfx_landscape_tools.tacagendaproject import TACAgendaProject
 
 class TestTACAgendaProjects(unittest.TestCase):
-    
+
     logging.basicConfig(
         level=logging.DEBUG,
         format="%(asctime)s [%(levelname)s] %(message)s",
@@ -31,10 +31,10 @@ class TestTACAgendaProjects(unittest.TestCase):
             logging.FileHandler("debug.log",mode="w"),
         ]
     )
-    
+
     def setUp(self):
         logging.getLogger().debug("Running {}".format(unittest.TestCase.id(self)))
-        with open("{}/data.yml".format(os.path.dirname(__file__)), 'r', encoding="utf8", errors='ignore') as fileobject:   
+        with open("{}/data.yml".format(os.path.dirname(__file__)), 'r', encoding="utf8", errors='ignore') as fileobject:
             responses.get('https://raw.githubusercontent.com/cncf/landscape2/refs/heads/main/docs/config/data.yml', body=fileobject.read())
         responses.add(
             method=responses.GET,
@@ -188,7 +188,46 @@ class TestTACAgendaProjects(unittest.TestCase):
     @unittest.mock.patch('subprocess.run')
     def testLoadData(self, mock_run):
         mock_result = unittest.mock.Mock()
-        mock_result.stdout = '{"items":[{"assignees":["carolalynn"],"content":{"body":"","number":473,"repository":"AcademySoftwareFoundation/tac","title":"D&I Working Group","type":"Issue","url":"https://github.com/AcademySoftwareFoundation/tac/issues/473"},"id":"PVTI_lADOAm6tAs4AS_w4zgJSO7E","labels":["foo"],"landscape URL":"https://landscape.aswf.io/card-mode?project=working-group&selected=d-i-working-group","pCC Project ID":"a092M00001KWjDZQA1","pCC TSC Committee ID":"ac9cbe7f-0dc8-4be0-b404-cb7b9b0bb22f","repository":"https://github.com/AcademySoftwareFoundation/tac","scheduled Date":"2024-12-11","status":"Next Meeting Agenda Items","title":"D&I Working Group"},{"assignees":["carolalynn"],"content":{"body":"","number":473,"repository":"AcademySoftwareFoundation/tac","title":"D&I Working Group","type":"Issue","url":"https://github.com/AcademySoftwareFoundation/tac/issues/473"},"id":"PVTI_lADOAm6tAs4AS_w4zgJSO7E","labels":["2-annual-review"],"pCC TSC Committee URL":"https://projectadmin.lfx.linuxfoundation.org/project/a092M00001KWjDZQA1/collaboration/committees/ac9cbe7f-0dc8-4be0-b404-cb7b9b0bb22f","repository":"https://github.com/AcademySoftwareFoundation/tac","scheduled Date":"2024-12-11","status":"Next Meeting Agenda Items","title":"D&I Working Group"},{"assignees":["carolalynn"],"content":{"body":"","number":473,"repository":"AcademySoftwareFoundation/tac","title":"D&I Working Group","type":"Issue","url":"https://github.com/AcademySoftwareFoundation/tac/issues/473"},"id":"PVTI_lADOAm6tAs4AS_w4zgJSO7E","labels":[],"landscape URL":"https://landscape.aswf.io/card-mode?project=working-group&selected=d-i-working-group","pCC Project ID":"a092M00001KWjDZQA1","pCC TSC Committee ID":"ac9cbe7f-0dc8-4be0-b404-cb7b9b0bb22f","repository":"https://github.com/AcademySoftwareFoundation/tac","scheduled Date":"2024-12-11","status":"Next Meeting Agenda Items","title":"D&I Working Group"}],"totalCount":32}'
+        mock_result.stdout = '[{"assignees":["carolalynn"],"content":{"body":"","number":473,"repository":"AcademySoftwareFoundation/tac","title":"D&I Working Group","type":"Issue","url":"https://github.com/AcademySoftwareFoundation/tac/issues/473"},"id":"PVTI_lADOAm6tAs4AS_w4zgJSO7E","labels":["foo"],"landscape URL":"https://landscape.aswf.io/card-mode?project=working-group&selected=d-i-working-group","pCC Project ID":"a092M00001KWjDZQA1","pCC TSC Committee ID":"ac9cbe7f-0dc8-4be0-b404-cb7b9b0bb22f","repository":"https://github.com/AcademySoftwareFoundation/tac","scheduled Date":"2024-12-11","status":"Next Meeting Agenda Items","title":"D&I Working Group"},{"assignees":["carolalynn"],"content":{"body":"","number":473,"repository":"AcademySoftwareFoundation/tac","title":"D&I Working Group","type":"Issue","url":"https://github.com/AcademySoftwareFoundation/tac/issues/473"},"id":"PVTI_lADOAm6tAs4AS_w4zgJSO7E","labels":["2-annual-review"],"pCC TSC Committee URL":"https://projectadmin.lfx.linuxfoundation.org/project/a092M00001KWjDZQA1/collaboration/committees/ac9cbe7f-0dc8-4be0-b404-cb7b9b0bb22f","repository":"https://github.com/AcademySoftwareFoundation/tac","scheduled Date":"2024-12-11","status":"Next Meeting Agenda Items","title":"D&I Working Group"},{"assignees":["carolalynn"],"content":{"body":"","number":473,"repository":"AcademySoftwareFoundation/tac","title":"D&I Working Group","type":"Issue","url":"https://github.com/AcademySoftwareFoundation/tac/issues/473"},"id":"PVTI_lADOAm6tAs4AS_w4zgJSO7E","labels":[],"landscape URL":"https://landscape.aswf.io/card-mode?project=working-group&selected=d-i-working-group","pCC Project ID":"a092M00001KWjDZQA1","pCC TSC Committee ID":"ac9cbe7f-0dc8-4be0-b404-cb7b9b0bb22f","repository":"https://github.com/AcademySoftwareFoundation/tac","scheduled Date":"2024-12-11","status":"Next Meeting Agenda Items","title":"D&I Working Group"}]'
+        mock_run.return_value = mock_result
+
+        config = Config()
+        config.slug = 'aswf'
+        config.projectsAddTechnologySector = True
+        config.projectsAddIndustrySector = True
+        config.projectsAddPMOManagedStatus = True
+        config.projectsAddParentProject = True
+        config.artworkRepoUrl = "https://artwork.aswf.io/projects/{slug}"
+        config.tacAgendaProjectUrl = "https://github.com/orgs/AcademySoftwareFoundation/projects/19/views/1"
+        members = TACAgendaProject(config=config,loadData=False)
+        with unittest.mock.patch('requests_cache.CachedSession', requests.Session):
+            members.loadData()
+        self.assertEqual(members.members[0].name,"D&I Working Group")
+        self.assertEqual(members.members[0].extra.get('annotations',[]).get('chair'),'Carol Payne, Rachel Rose')
+        self.assertEqual(members.members[0].extra.get('annotations',[]).get('TAC_representative'),'Bill Rose')
+        self.assertEqual(len(members.members),1)
+
+    @responses.activate
+    @unittest.mock.patch('subprocess.run')
+    def testLoadData(self, mock_run):
+        mock_result = unittest.mock.Mock()
+        mock_result.stdout = """
+[
+  {
+    "title": "D&I Working Group",
+    "url": "https://github.com/AcademySoftwareFoundation/tac/issues/473",
+    "created": "2023-09-18T20:39:35Z",
+    "labels": "2-annual-review",
+    "custom_fields": {
+      "Title": "D&I Working Group",
+      "Status": "Future Meeting Agenda Items",
+      "Scheduled Date": "2027-01-06",
+      "PCC TSC Committee URL": "https://projectadmin.lfx.linuxfoundation.org/project/a092M00001KWjDZQA1/collaboration/committees/ac9cbe7f-0dc8-4be0-b404-cb7b9b0bb22f",
+      "Last Review Date": "2026-01-21",
+      "Accepted": "2020-08-26"
+    }
+  }
+]"""
         mock_run.return_value = mock_result
 
         config = Config()
@@ -205,13 +244,32 @@ class TestTACAgendaProjects(unittest.TestCase):
         self.assertEqual(members.members[0].name,"D&I Working Group")
         self.assertEqual(members.members[0].extra.get('annotations',[]).get('chair'),'Carol Payne, Rachel Rose')
         self.assertEqual(members.members[0].extra.get('annotations',[]).get('TAC_representative'),'Bill Rose')
+        self.assertEqual(members.members[0].extra.get('annotations',[]).get('submitted_date'),"2023-09-18")
         self.assertEqual(len(members.members),1)
-    
+
     @responses.activate
     @unittest.mock.patch('subprocess.run')
     def testLoadDataAssignSIGs(self, mock_run):
         mock_result = unittest.mock.Mock()
-        mock_result.stdout = '{"items":[{"assignees":["carolalynn"],"content":{"body":"","number":473,"repository":"AcademySoftwareFoundation/tac","title":"D&I Working Group","type":"Issue","url":"https://github.com/AcademySoftwareFoundation/tac/issues/473"},"id":"PVTI_lADOAm6tAs4AS_w4zgJSO7E","labels":["foo"],"landscape URL":"https://landscape.aswf.io/card-mode?project=working-group&selected=d-i-working-group","pCC Project ID":"a092M00001KWjDZQA1","pCC TSC Committee ID":"ac9cbe7f-0dc8-4be0-b404-cb7b9b0bb22f","repository":"https://github.com/AcademySoftwareFoundation/tac","scheduled Date":"2024-12-11","status":"Next Meeting Agenda Items","title":"D&I Working Group"},{"assignees":["carolalynn"],"content":{"body":"","number":473,"repository":"AcademySoftwareFoundation/tac","title":"D&I Working Group","type":"Issue","url":"https://github.com/AcademySoftwareFoundation/tac/issues/473"},"id":"PVTI_lADOAm6tAs4AS_w4zgJSO7E","labels":["2-annual-review"],"pCC TSC Committee URL":"https://projectadmin.lfx.linuxfoundation.org/project/a092M00001KWjDZQA1/collaboration/committees/ac9cbe7f-0dc8-4be0-b404-cb7b9b0bb22f","repository":"https://github.com/AcademySoftwareFoundation/tac","scheduled Date":"2024-12-11","status":"Next Meeting Agenda Items","title":"D&I Working Group","sIG":"dog"},{"assignees":["carolalynn"],"content":{"body":"","number":473,"repository":"AcademySoftwareFoundation/tac","title":"D&I Working Group","type":"Issue","url":"https://github.com/AcademySoftwareFoundation/tac/issues/473"},"id":"PVTI_lADOAm6tAs4AS_w4zgJSO7E","labels":[],"landscape URL":"https://landscape.aswf.io/card-mode?project=working-group&selected=d-i-working-group","pCC Project ID":"a092M00001KWjDZQA1","pCC TSC Committee ID":"ac9cbe7f-0dc8-4be0-b404-cb7b9b0bb22f","repository":"https://github.com/AcademySoftwareFoundation/tac","scheduled Date":"2024-12-11","status":"Next Meeting Agenda Items","title":"D&I Working Group"}],"totalCount":32}'
+        mock_result.returncode = 0
+        mock_result.stdout = """
+[
+  {
+    "title": "D&I Working Group",
+    "url": "https://github.com/AcademySoftwareFoundation/tac/issues/473",
+    "created": "2023-09-18T20:39:35Z",
+    "labels": "2-annual-review",
+    "custom_fields": {
+      "Title": "D&I Working Group",
+      "Status": "Future Meeting Agenda Items",
+      "Scheduled Date": "2027-01-06",
+      "Last Review Date": "2026-01-21",
+      "Accepted": "2020-08-26",
+      "SIG": "dog"
+    }
+  }
+]
+"""
         mock_run.return_value = mock_result
 
         config = Config()
@@ -222,7 +280,7 @@ class TestTACAgendaProjects(unittest.TestCase):
         config.projectsAddParentProject = True
         config.projectsAssignSIGs = True
         config.artworkRepoUrl = "https://artwork.aswf.io/projects/{slug}"
-        config.tacAgendaProjectUrl = "https://github.com/orgs/AcademySoftwareFoundation/projects/19/views/1" 
+        config.tacAgendaProjectUrl = "https://github.com/orgs/AcademySoftwareFoundation/projects/19/views/1"
         members = TACAgendaProject(config=config,loadData=False)
         with unittest.mock.patch('requests_cache.CachedSession', requests.Session):
             members.loadData()
@@ -234,7 +292,24 @@ class TestTACAgendaProjects(unittest.TestCase):
     @unittest.mock.patch('subprocess.run')
     def testLoadDataNoPCCCommitteeUrl(self, mock_run):
         mock_result = unittest.mock.Mock()
-        mock_result.stdout = '{"items":[{"assignees":["carolalynn"],"content":{"body":"","number":473,"repository":"AcademySoftwareFoundation/tac","title":"D&I Working Group","type":"Issue","url":"https://github.com/AcademySoftwareFoundation/tac/issues/473"},"id":"PVTI_lADOAm6tAs4AS_w4zgJSO7E","labels":["2-annual-review"],"repository":"https://github.com/AcademySoftwareFoundation/tac","scheduled Date":"2024-12-11","status":"Next Meeting Agenda Items","title":"D&I Working Group"}],"totalCount":32}'
+        mock_result.returncode = 0
+        mock_result.stdout = """
+[
+  {
+    "title": "D&I Working Group",
+    "url": "https://github.com/AcademySoftwareFoundation/tac/issues/473",
+    "created": "2023-09-18T20:39:35Z",
+    "labels": "2-annual-review",
+    "custom_fields": {
+      "Title": "D&I Working Group",
+      "Status": "Future Meeting Agenda Items",
+      "Scheduled Date": "2027-01-06",
+      "Last Review Date": "2026-01-21",
+      "Accepted": "2020-08-26"
+    }
+  }
+]
+"""
         mock_run.return_value = mock_result
 
         config = Config()
@@ -244,17 +319,35 @@ class TestTACAgendaProjects(unittest.TestCase):
         config.projectsAddPMOManagedStatus = True
         config.projectsAddParentProject = True
         config.artworkRepoUrl = "https://artwork.aswf.io/projects/{slug}"
-        config.tacAgendaProjectUrl = "https://github.com/orgs/AcademySoftwareFoundation/projects/19/views/1" 
+        config.tacAgendaProjectUrl = "https://github.com/orgs/AcademySoftwareFoundation/projects/19/views/1"
         members = TACAgendaProject(config=config,loadData=False)
         with unittest.mock.patch('requests_cache.CachedSession', requests.Session):
             members.loadData()
         self.assertEqual(members.members[0].name,"D&I Working Group")
+        self.assertEqual(members.members[0].extra.get('annotations',[]).get('submitted_date'),"2023-09-18")
         self.assertEqual(len(members.members),1)
 
     @unittest.mock.patch('subprocess.run')
     def testLoadDataNoTACAgendaProject(self, mock_run):
         mock_result = unittest.mock.Mock()
-        mock_result.stdout = '{"items":[{"assignees":["carolalynn"],"content":{"body":"","number":473,"repository":"AcademySoftwareFoundation/tac","title":"D&I Working Group","type":"Issue","url":"https://github.com/AcademySoftwareFoundation/tac/issues/473"},"id":"PVTI_lADOAm6tAs4AS_w4zgJSO7E","labels":["1-new-project-wg"],"landscape URL":"https://landscape.aswf.io/card-mode?project=working-group&selected=d-i-working-group","pCC Project ID":"a092M00001KWjDZQA1","pCC TSC Committee ID":"ac9cbe7f-0dc8-4be0-b404-cb7b9b0bb22f","repository":"https://github.com/AcademySoftwareFoundation/tac","scheduled Date":"2024-12-11","status":"Next Meeting Agenda Items","title":"D&I Working Group"},{"assignees":["carolalynn"],"content":{"body":"","number":473,"repository":"AcademySoftwareFoundation/tac","title":"D&I Working Group","type":"Issue","url":"https://github.com/AcademySoftwareFoundation/tac/issues/473"},"id":"PVTI_lADOAm6tAs4AS_w4zgJSO7E","labels":["2-annual-review"],"landscape URL":"https://landscape.aswf.io/card-mode?project=working-group&selected=d-i-working-group","pCC Project ID":"a092M00001KWjDZQA1","pCC TSC Committee ID":"ac9cbe7f-0dc8-4be0-b404-cb7b9b0bb22f","repository":"https://github.com/AcademySoftwareFoundation/tac","scheduled Date":"2024-12-11","status":"Next Meeting Agenda Items","title":"D&I Working Group"}],"totalCount":32}'
+        mock_result.returncode = 0
+        mock_result.stdout = """
+[
+  {
+    "title": "D&I Working Group",
+    "url": "https://github.com/AcademySoftwareFoundation/tac/issues/473",
+    "created": "2023-09-18T20:39:35Z",
+    "labels": "2-annual-review",
+    "custom_fields": {
+      "Title": "D&I Working Group",
+      "Status": "Future Meeting Agenda Items",
+      "Scheduled Date": "2027-01-06",
+      "Last Review Date": "2026-01-21",
+      "Accepted": "2020-08-26"
+    }
+  }
+]
+"""
         mock_run.return_value = mock_result
 
         config = Config()
@@ -268,9 +361,51 @@ class TestTACAgendaProjects(unittest.TestCase):
         with self.assertLogs(level='ERROR') as cm:
             with unittest.mock.patch('requests_cache.CachedSession', requests.Session):
                 members.loadData()
-        self.assertEqual(cm.output, ['ERROR:root:Cannot find GitHub Project - ID: Org:'])        
+        self.assertEqual(cm.output, ['ERROR:root:Cannot find GitHub Project - ID: Org:'])
         self.assertEqual(members.members,[])
-    
+
+    @responses.activate
+    @unittest.mock.patch('subprocess.run')
+    def testLoadData(self, mock_run):
+        mock_result = unittest.mock.Mock()
+        mock_result.returncode = 0
+        mock_result.stdout = """
+[
+  {
+    "title": "D&I Working Group",
+    "url": "https://github.com/AcademySoftwareFoundation/tac/issues/473",
+    "created": "2023-09-18T20:39:35Z",
+    "labels": "2-annual-review",
+    "custom_fields": {
+      "Title": "D&I Working Group",
+      "Status": "Future Meeting Agenda Items",
+      "Scheduled Date": "2027-01-06",
+      "PCC TSC Committee URL": "https://projectadmin.lfx.linuxfoundation.org/project/a092M00001KWjDZQA1/collaboration/committees/ac9cbe7f-0dc8-4be0-b404-cb7b9b0bb22f",
+      "Last Review Date": "2026-01-21",
+      "Accepted": "2020-08-26"
+    }
+  }
+]
+"""
+        mock_run.return_value = mock_result
+
+        config = Config()
+        config.slug = 'aswf'
+        config.projectsAddTechnologySector = True
+        config.projectsAddIndustrySector = True
+        config.projectsAddPMOManagedStatus = True
+        config.projectsAddParentProject = True
+        config.artworkRepoUrl = "https://artwork.aswf.io/projects/{slug}"
+        config.tacAgendaProjectUrl = "https://github.com/orgs/AcademySoftwareFoundation/projects/19/views/1"
+        members = TACAgendaProject(config=config,loadData=False)
+        with unittest.mock.patch('requests_cache.CachedSession', requests.Session):
+            members.loadData()
+        print(members.members)
+        self.assertEqual(members.members[0].name,"D&I Working Group")
+        self.assertEqual(members.members[0].extra.get('annotations',[]).get('chair'),'Carol Payne, Rachel Rose')
+        self.assertEqual(members.members[0].extra.get('annotations',[]).get('TAC_representative'),'Bill Rose')
+        self.assertEqual(len(members.members),1)
+
     @unittest.mock.patch('subprocess.run')
     def testLoadDataInvalidJSONResponse(self, mock_run):
         mock_result = unittest.mock.Mock()
@@ -285,7 +420,7 @@ class TestTACAgendaProjects(unittest.TestCase):
         config.projectsAddPMOManagedStatus = True
         config.projectsAddParentProject = True
         config.artworkRepoUrl = "https://artwork.aswf.io/projects/{slug}"
-        config.tacAgendaProjectUrl = "https://github.com/orgs/AcademySoftwareFoundation/projects/19/views/1" 
+        config.tacAgendaProjectUrl = "https://github.com/orgs/AcademySoftwareFoundation/projects/19/views/1"
         members = TACAgendaProject(config=config,loadData=False)
         with self.assertLogs(level='ERROR') as cm:
             with unittest.mock.patch('requests_cache.CachedSession', requests.Session):

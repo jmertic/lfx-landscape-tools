@@ -36,27 +36,27 @@ class Cli:
         parser.add_argument("-v", "--verbose", dest="verbose", action='store_true', help="Verbose output (i.e. show all INFO level messages in addition to WARN and above - equivalent to `--log info`)")
         parser.add_argument("--logfile", dest="logfile", default='debug.log', help="Name for the log file to save (default is debug.log")
         subparsers = parser.add_subparsers(help='sub-command help')
-        
+
         buildlandscapemembers_parser = subparsers.add_parser("build_members", help="Replace current members with latest from LFX")
         buildlandscapemembers_parser.add_argument("-c", "--config", dest="configfile", default=self._defaultconfigfile, type=FileType('r'), help="name of YAML config file")
         buildlandscapemembers_parser.add_argument("-d", "--dir", dest="basedir", default=".", type=self._dir_path, help="path to where landscape directory is")
         buildlandscapemembers_parser.set_defaults(func=self.buildmembers)
-        
+
         buildlandscapeprojects_parser = subparsers.add_parser("build_projects", help="Replace current projects with latest from LFX")
         buildlandscapeprojects_parser.add_argument("-c", "--config", dest="configfile", default=self._defaultconfigfile, type=FileType('r'), help="name of YAML config file")
         buildlandscapeprojects_parser.add_argument("-d", "--dir", dest="basedir", default=".", type=self._dir_path, help="path to where landscape directory is")
         buildlandscapeprojects_parser.set_defaults(func=self.buildprojects)
-        
+
         buildlandscapeeuprojects_parser = subparsers.add_parser("build_lfeuprojects", help="Replace current LF Europe projects with latest from LFX")
         buildlandscapeeuprojects_parser.add_argument("-c", "--config", dest="configfile", default=self._defaultconfigfile, type=FileType('r'), help="name of YAML config file")
         buildlandscapeeuprojects_parser.add_argument("-d", "--dir", dest="basedir", default=".", type=self._dir_path, help="path to where landscape directory is")
         buildlandscapeeuprojects_parser.set_defaults(func=self.buildlfeuprojects)
-        
+
         synclandscapeprojects_parser = subparsers.add_parser("sync_projects", help="Sync current projects with latest from LFX")
         synclandscapeprojects_parser.add_argument("-c", "--config", dest="configfile", default=self._defaultconfigfile, type=FileType('r'), help="name of YAML config file")
         synclandscapeprojects_parser.add_argument("-d", "--dir", dest="basedir", default=".", type=self._dir_path, help="path to where landscape directory is")
         synclandscapeprojects_parser.set_defaults(func=self.syncprojects)
-        
+
         maketextlogo_parser = subparsers.add_parser("maketextlogo", help="Create a text pure SVG logo")
         maketextlogo_parser.add_argument("-n", "--name", dest="name", required=True, help="Name to appear in logo")
         maketextlogo_parser.add_argument("--autocrop", dest="autocrop", action='store_true', help="Process logo with autocrop")
@@ -90,28 +90,28 @@ class Cli:
 
         try:
             args.func(args)
-        except AttributeError as e:
+        except Exception as e:
             logging.getLogger().debug(e)
             parser.print_help()
-        
+
         logging.getLogger().info("This took {} seconds".format(datetime.now() - self._starttime))
 
     @staticmethod
     def run():
-        Cli() 
+        Cli()
 
     def _dir_path(self,path):
         if os.path.isdir(path):
             return path
         else:
             raise argparse.ArgumentTypeError(f"readable_dir:{path} is not a valid path")
-    
+
     def buildmembers(self,args):
         config = Config(args.configfile,view='members')
         landscapeoutput = LandscapeOutput(config=config)
         landscapeoutput.load(members=LFXMembers(config=config))
         landscapeoutput.save()
-        
+ 
         logging.getLogger().info("Successfully processed {} members and skipped {} members".format(landscapeoutput.itemsProcessed,landscapeoutput.itemsErrors))
 
     def buildprojects(self,args):

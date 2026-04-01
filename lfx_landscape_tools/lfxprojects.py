@@ -19,7 +19,7 @@ from lfx_landscape_tools.config import Config
 
 class LFXProjects(Members):
 
-    project = '' 
+    project = ''
     defaultCrunchbase = 'https://www.crunchbase.com/organization/linux-foundation'
     endpointURL = 'https://api-gw.platform.linuxfoundation.org/project-service/v1/public/projects?$filter=parentSlug%20eq%20{}&pageSize=2000&orderBy=name'
     singleSlugEndpointUrl = 'https://api-gw.platform.linuxfoundation.org/project-service/v1/public/projects?slug={slug}' 
