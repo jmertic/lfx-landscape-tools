@@ -148,7 +148,7 @@ query($org: String!, $number: Int!) {
                                 chair.append('{} {}'.format(record.get('FirstName').title(),record.get('LastName').title()))
                             elif record.get('Role') == 'TAC/TOC Representative':
                                 annotations["TAC_representative"] = '{} {}'.format(record.get('FirstName').title(),record.get('LastName').title())
-
+                    except Exception as e:
                         logger.error("Couldn't load TSC Committee data for '{project}' - {error}".format(project=member.name,error=e))
             annotations['chair'] = ", ".join(chair)
             extra['annotations'] = annotations
