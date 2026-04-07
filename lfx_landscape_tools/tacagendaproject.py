@@ -83,9 +83,9 @@ query($org: String!, $number: Int!) {
         logger.info("Loading TAC Agenda Project data")
 
         if not self.gh_project_id or not self.gh_org:
-            id = self.gh_project_id if self.gh_project_id else ''
-            org = self.gh_org if self.gh_org else ''
-            logger.error("Cannot find GitHub Project - ID:{id} Org:{org}".format(id=id,org=org))
+            project_id = self.gh_project_id if self.gh_project_id else ''
+            project_org = self.gh_org if self.gh_org else ''
+            logger.error(f"Cannot find GitHub Project - ID:{project_id} Org:{project_org}")
             return None
 
         cmd = [
@@ -106,15 +106,15 @@ query($org: String!, $number: Int!) {
 
         csvRows = []
         try:
-            projectData = json.loads(result.stdout)
+            project_data = json.loads(result.stdout)
         except Exception as e:
             logger.debug(e)
-            logger.error("Invalid json: '{}'".format(jsonProjectData))
+            logger.error("Invalid json: '{}'".format(json_project_data))
             return None
 
-        logger.info('Found {} records'.format(len(projectData)))
+        logger.info('Found {} records'.format(len(project_data)))
 
-        for item in projectData:
+        for item in project_data:
             logger.info("Processing {}...".format(item.get('title')))
             member = Member()
             member.name = item.get('title').strip()
@@ -165,6 +165,6 @@ query($org: String!, $number: Int!) {
                 if len(parentProject.get('Data')) > 0:
                     return {'project_id': urlparts[2],'committee_id': urlparts[5],'slug': parentProject.get('Data')[0]["Slug"],'category': parentProject.get('Data')[0].get('Category')}
 
-        logging.getLogger().warning("Couldn't find project information with LFX URL '{}'".format(url)) 
+        logging.getLogger().warning("Couldn't find project information with LFX URL '{}'".format(url))
 
         return {}

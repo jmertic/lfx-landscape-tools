@@ -20,7 +20,6 @@ from lfx_landscape_tools.members import Members
 
 class LandscapeOutput:
 
-    
     landscapeCategory = 'Members'
     landscapeSubcategories = [
         {"name": "Premier Membership", "category": "Premier"},
@@ -30,7 +29,7 @@ class LandscapeOutput:
     landscapefile = 'landscape.yml'
     hostedLogosDir = 'hosted_logos'
     memberSuffix = ''
-    
+
     _itemsProcessed = 0
     _itemsErrors = 0
 
@@ -52,7 +51,7 @@ class LandscapeOutput:
     @property
     def itemsProcessed(self):
         return self._itemsProcessed
-    
+
     @property
     def itemsErrors(self):
         return self._itemsErrors
@@ -64,7 +63,7 @@ class LandscapeOutput:
         Keyword arguments:
         members -- Members object to load
         '''
-        logger = logging.getLogger() 
+        logger = logging.getLogger()
         logger.info("Processing '{}' items".format(self.landscapeCategory))
         for member in members.members:
             logger.info("Processing '{}'...".format(member.name))
@@ -72,7 +71,7 @@ class LandscapeOutput:
             for landscapeItemSubcategory in self.landscapeItems:
                 landscapeSubcategory = next((item for item in self.landscapeSubcategories if item["name"] == member.membership), None)
                 if ( ( landscapeSubcategory is not None )
-                        and ( landscapeSubcategory['name'] == member.membership ) 
+                        and ( landscapeSubcategory['name'] == member.membership )
                         and ( landscapeItemSubcategory['name'] == landscapeSubcategory['category'] ) ):
                     foundCategory = True
                     # Write out to error log if it's missing key parameters
@@ -98,7 +97,7 @@ class LandscapeOutput:
         # open existing landscape data file and see where to add the category data
         landscape = {}
         try:
-            with open(self.landscapefile, 'r', encoding="utf8", errors='ignore') as fileobject: 
+            with open(self.landscapefile, 'r', encoding="utf8", errors='ignore') as fileobject:
                 logging.getLogger().debug("Successfully opened landscape file '{}'".format(self.landscapefile))
                 landscape = ruamel.yaml.YAML().load(fileobject)
                 if not isinstance(landscape,dict) or landscape is None:
@@ -133,7 +132,7 @@ class LandscapeOutput:
                     'subcategories': self.landscapeItems
                     })
         finally:
-            with open(self.landscapefile, 'w+', encoding="utf8", errors='ignore') as fileobject: 
+            with open(self.landscapefile, 'w+', encoding="utf8", errors='ignore') as fileobject:
                 ryaml = ruamel.yaml.YAML(typ='rt')
                 ryaml.Representer.add_representer(str,self._str_presenter)
                 ryaml.Representer.add_representer(type(None),self._none_representer)
@@ -143,6 +142,7 @@ class LandscapeOutput:
                 ryaml.width = 1000000
                 ryaml.preserve_quotes = False
                 ryaml.dump(landscape, fileobject, transform=self._removeNulls)
+            logging.getLogger().info("Successfully processed {} members and skipped {} members".format(self.itemsProcessed,self.itemsErrors))
 
     def _removeNulls(self,yamlout):
         return yamlout.replace('- item: null','- item:') \

@@ -21,7 +21,7 @@ from lfx_landscape_tools.lfxprojects import LFXProjects
 from lfx_landscape_tools.tacagendaproject import TACAgendaProject
 
 class TestMembers(unittest.TestCase):
-    
+
     logging.basicConfig(
         level=logging.DEBUG,
         format="%(asctime)s [%(levelname)s] %(message)s",
@@ -29,7 +29,7 @@ class TestMembers(unittest.TestCase):
             logging.FileHandler("debug.log",mode="w"),
         ]
     )
-    
+
     def setUp(self):
         logging.getLogger().debug("Running {}".format(unittest.TestCase.id(self)))
 
@@ -40,7 +40,7 @@ class TestMembers(unittest.TestCase):
         member.homepage_url = 'https://foo.com'
         member.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society'
 
-        members = Members(config=Config())
+        members = Members(Config())
         members.members.append(member)
 
         self.assertTrue(members.find(member.name,member.homepage_url))
@@ -54,15 +54,15 @@ class TestMembers(unittest.TestCase):
         member.homepage_url = 'https://foo.com'
         member.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society'
 
-        members = Members(config=Config())
+        members = Members(Config())
         members.members.append(member)
 
         self.assertFalse(members.find('dog','https://bar.com'))
 
     @unittest.mock.patch("lfx_landscape_tools.members.Members.__abstractmethods__", set())
     def testFindMultiple(self):
-        members = Members(config=Config())
-        
+        members = Members(Config())
+
         member = Member()
         member.name = 'test'
         member.homepage_url = 'https://foo.com'
@@ -74,9 +74,9 @@ class TestMembers(unittest.TestCase):
         member.homepage_url = 'https://foo.com'
         member.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society'
         members.members.append(member)
-        
+
         self.assertEqual(len(members.find(member.name,member.homepage_url)),2)
-    
+
     @unittest.mock.patch("lfx_landscape_tools.members.Members.__abstractmethods__", set())
     def testFindBySlug(self):
         member = Member()
@@ -84,12 +84,12 @@ class TestMembers(unittest.TestCase):
         member.homepage_url = 'https://foo.com'
         member.extra = {'lfx_slug':'aswf'}
 
-        members = Members(config=Config())
+        members = Members(Config())
         members.members.append(member)
 
         self.assertEqual(members.find(name=member.name,homepage_url='https://bar.com',slug='aswf')[0].name,'test')
         self.assertTrue(members.find(member.name,'https://bar.com',repo_url=member.repo_url))
-    
+
     @unittest.mock.patch("lfx_landscape_tools.members.Members.__abstractmethods__", set())
     def testFindByMembership(self):
         member = Member()
@@ -101,7 +101,7 @@ class TestMembers(unittest.TestCase):
         member.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society'
         member.repo_url = "https://github.com/foo/bar"
 
-        members = Members(config=Config())
+        members = Members(Config())
         members.members.append(member)
 
         self.assertTrue(members.find(name=member.name,homepage_url=member.homepage_url))
@@ -121,16 +121,16 @@ class TestMembers(unittest.TestCase):
         member.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society'
         member.repo_url = "https://github.com/foo/bar"
 
-        members = Members(config=Config())
+        members = Members(Config())
         members.members.append(member)
 
         self.assertFalse(members.find('dog','https://bar.com',member.membership))
         self.assertFalse(members.find(member.name,member.homepage_url,'Silver'))
         self.assertFalse(members.find('dog','https://bar.com',repo_url='https://github.com/bar/foo'))
-    
+
     @unittest.mock.patch("lfx_landscape_tools.members.Members.__abstractmethods__", set())
     def testNormalizeNameEmptyOrg(self):
-        members = Members(config=Config(),loadData=False)
+        members = Members(Config(),loadData=False)
         self.assertEqual(members.normalizeName(None),'')
 
     @unittest.mock.patch("lfx_landscape_tools.members.Members.__abstractmethods__", set())
@@ -141,13 +141,13 @@ class TestMembers(unittest.TestCase):
         ]
 
         for company in companies:
-            members = Members(config=Config(),loadData=False)
+            members = Members(Config(),loadData=False)
             self.assertEqual(members.normalizeName(company["name"]),company["normalized"])
-    
+
     @unittest.mock.patch("lfx_landscape_tools.members.Members.__abstractmethods__", set())
     def testOverlay(self):
-        members1 = Members(config=Config())
-        
+        members1 = Members(Config())
+
         member = Member()
         member.name = 'test1'
         member.homepage_url = 'https://foo.com'
@@ -166,9 +166,9 @@ class TestMembers(unittest.TestCase):
         member.homepage_url = 'https://foo2.com'
         member.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society'
         members1.members.append(member)
-        
-        members2 = Members(config=Config())
-        
+
+        members2 = Members(Config())
+
         member = Member()
         member.name = 'test1'
         member.homepage_url = 'https://foo1.com'
@@ -181,7 +181,7 @@ class TestMembers(unittest.TestCase):
         member.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society'
         member.extra = {'lfx_slug':'test3'}
         members2.members.append(member)
-        
+
         members1.overlay(members2)
 
         self.assertEqual(len(members1.members),3)

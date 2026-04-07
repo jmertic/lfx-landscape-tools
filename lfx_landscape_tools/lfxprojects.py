@@ -59,17 +59,14 @@ class LFXProjects(Members):
         with session.get(self.endpointURL.format(self.project if self.projectsFilterByParentSlug else '')) as endpointResponse:
             memberList = endpointResponse.json()
             for record in memberList['Data']:
-                if self.find(name=record.get('Name'),homepage_url=record.get('Website'),slug=record.get('Slug')):
-                    logger.debug("Skipping '{}'".format(record.get('Name')))
-                    continue
-                if self.activeOnly and record['Status'] != 'Active':
-                    logger.debug("Skipping '{}'".format(record.get('Name')))
-                    continue
-                if not record.get('DisplayOnWebsite'):
-                    logger.debug("Skipping '{}'".format(record.get('Name')))
-                    continue
-                if record.get('TestRecord'):
-                    logger.debug("Skipping '{}'".format(record.get('Name')))
+                if (
+                    self.find(name=record.get('Name'),homepage_url=record.get('Website'),slug=record.get('Slug')) or
+                    ( self.activeOnly and record['Status'] != 'Active' ) or
+                    not record.get('DisplayOnWebsite') or
+                    record.get('TestRecord') or
+                    record.get('Slug') == self.project
+                ):
+                    logger.debug(f"Skipping '{record.get('Name')}'")
                     continue
 
                 second_path = []
@@ -82,9 +79,6 @@ class LFXProjects(Members):
                 logger.info("Found LFX Project '{}'".format(member.name))
                 extra['lfx_slug'] = record.get('Slug')
                 member.license = record.get('PrimaryOpenSourceLicense')
-                # Let's not include the root project
-                if extra.get('lfx_slug') == self.project:
-                    continue
                 member.repo_url = record.get('RepositoryURL')
                 extra['accepted'] = record.get('StartDate')
                 extra['archived'] = record.get('ProjectEntityDissolutionDate')

@@ -31,46 +31,40 @@ class Cli:
         self._starttime = datetime.now()
 
         parser = ArgumentParser("Collection of tools for working with a landscape")
-        parser.add_argument("-s", "--silent", dest="silent", action="store_true", help="Suppress all messages")
-        parser.add_argument("-l", "--log", dest="loglevel", default="error", choices=['debug', 'info', 'warning', 'error', 'critical'], help="logging level")
-        parser.add_argument("-v", "--verbose", dest="verbose", action='store_true', help="Verbose output (i.e. show all INFO level messages in addition to WARN and above - equivalent to `--log info`)")
-        parser.add_argument("--logfile", dest="logfile", default='debug.log', help="Name for the log file to save (default is debug.log")
+        parser.add_argument("-s", "--silent", action="store_true", help="Suppress all messages")
+        parser.add_argument("-l", "--log", dest="loglevel", default="error",
+                            choices=['debug', 'info', 'warning', 'error', 'critical'], help="logging level")
+        parser.add_argument("-v", "--verbose", action='store_true', help="Verbose output")
+        parser.add_argument("--logfile", default='debug.log', help="Name for the log file")
         subparsers = parser.add_subparsers(help='sub-command help')
 
-        buildlandscapemembers_parser = subparsers.add_parser("build_members", help="Replace current members with latest from LFX")
-        buildlandscapemembers_parser.add_argument("-c", "--config", dest="configfile", default=self._defaultconfigfile, type=FileType('r'), help="name of YAML config file")
-        buildlandscapemembers_parser.add_argument("-d", "--dir", dest="basedir", default=".", type=self._dir_path, help="path to where landscape directory is")
-        buildlandscapemembers_parser.set_defaults(func=self.buildmembers)
+        lfx_parent = ArgumentParser(add_help=False)
+        lfx_parent.add_argument("-c", "--config", dest="configfile", default=self._defaultconfigfile,
+                                type=FileType('r'), help="name of YAML config file")
+        lfx_parent.add_argument("-d", "--dir", dest="basedir", default=".",
+                                type=self._dir_path, help="path to where landscape directory is")
 
-        buildlandscapeprojects_parser = subparsers.add_parser("build_projects", help="Replace current projects with latest from LFX")
-        buildlandscapeprojects_parser.add_argument("-c", "--config", dest="configfile", default=self._defaultconfigfile, type=FileType('r'), help="name of YAML config file")
-        buildlandscapeprojects_parser.add_argument("-d", "--dir", dest="basedir", default=".", type=self._dir_path, help="path to where landscape directory is")
-        buildlandscapeprojects_parser.set_defaults(func=self.buildprojects)
+        lfx_commands = [
+            ("build_members", "Replace current members with latest from LFX", self.buildmembers),
+            ("build_projects", "Replace current projects with latest from LFX", self.buildprojects),
+            ("build_lfeuprojects", "Replace current LF Europe projects with latest from LFX", self.buildlfeuprojects),
+            ("sync_projects", "Sync current projects with latest from LFX", self.syncprojects),
+            ("sync_members", "Sync current members with latest from LFX", self.syncmembers),
+        ]
 
-        buildlandscapeeuprojects_parser = subparsers.add_parser("build_lfeuprojects", help="Replace current LF Europe projects with latest from LFX")
-        buildlandscapeeuprojects_parser.add_argument("-c", "--config", dest="configfile", default=self._defaultconfigfile, type=FileType('r'), help="name of YAML config file")
-        buildlandscapeeuprojects_parser.add_argument("-d", "--dir", dest="basedir", default=".", type=self._dir_path, help="path to where landscape directory is")
-        buildlandscapeeuprojects_parser.set_defaults(func=self.buildlfeuprojects)
+        for name, help_text, func in lfx_commands:
+            sp = subparsers.add_parser(name, help=help_text, parents=[lfx_parent])
+            sp.set_defaults(func=func)
 
-        synclandscapeprojects_parser = subparsers.add_parser("sync_projects", help="Sync current projects with latest from LFX")
-        synclandscapeprojects_parser.add_argument("-c", "--config", dest="configfile", default=self._defaultconfigfile, type=FileType('r'), help="name of YAML config file")
-        synclandscapeprojects_parser.add_argument("-d", "--dir", dest="basedir", default=".", type=self._dir_path, help="path to where landscape directory is")
-        synclandscapeprojects_parser.set_defaults(func=self.syncprojects)
+        logo_parser = subparsers.add_parser("maketextlogo", help="Create a text pure SVG logo")
+        logo_parser.add_argument("-n", "--name", required=True, help="Name to appear in logo")
+        logo_parser.add_argument("--autocrop", action='store_true', help="Process logo with autocrop")
+        logo_parser.add_argument("-o", "--output", dest="filename", help="Filename to save logo")
+        logo_parser.set_defaults(func=self.maketextlogo)
 
-        synclandscapemembers_parser = subparsers.add_parser("sync_members", help="Sync current members with latest from LFX, preserving project-specific fields")
-        synclandscapemembers_parser.add_argument("-c", "--config", dest="configfile", default=self._defaultconfigfile, type=FileType('r'), help="name of YAML config file")
-        synclandscapemembers_parser.add_argument("-d", "--dir", dest="basedir", default=".", type=self._dir_path, help="path to where landscape directory is")
-        synclandscapemembers_parser.set_defaults(func=self.syncmembers)
-        
-        maketextlogo_parser = subparsers.add_parser("maketextlogo", help="Create a text pure SVG logo")
-        maketextlogo_parser.add_argument("-n", "--name", dest="name", required=True, help="Name to appear in logo")
-        maketextlogo_parser.add_argument("--autocrop", dest="autocrop", action='store_true', help="Process logo with autocrop")
-        maketextlogo_parser.add_argument("-o", "--output", dest="filename", help="Filename to save created logo to")
-        maketextlogo_parser.set_defaults(func=self.maketextlogo)
-
-        validate_parser = subparsers.add_parser("validatedata", help="Validate landscape data file")
-        validate_parser.add_argument("filename", help="Landscape data file name", default="landscape.yml")
-        validate_parser.set_defaults(func=self.validatedata)
+        val_parser = subparsers.add_parser("validatedata", help="Validate landscape data file")
+        val_parser.add_argument("filename", nargs="?", default="landscape.yml", help="Landscape data file name")
+        val_parser.set_defaults(func=self.validatedata)
 
         args = parser.parse_args()
 
@@ -113,60 +107,50 @@ class Cli:
 
     def buildmembers(self,args):
         config = Config(args.configfile,view='members')
-        landscapeoutput = LandscapeOutput(config=config)
-        landscapeoutput.load(members=LFXMembers(config=config))
+        landscapeoutput = LandscapeOutput(config)
+        landscapeoutput.load(LFXMembers(config))
         landscapeoutput.save()
- 
-        logging.getLogger().info("Successfully processed {} members and skipped {} members".format(landscapeoutput.itemsProcessed,landscapeoutput.itemsErrors))
 
     def buildprojects(self,args):
         config = Config(args.configfile,view='projects')
-        landscapeoutput = LandscapeOutput(config=config)
-        landscapeoutput.load(members=LFXProjects(config=config))
+        landscapeoutput = LandscapeOutput(config)
+        landscapeoutput.load(LFXProjects(config))
         landscapeoutput.save()
-        
-        logging.getLogger().info("Successfully processed {} projects and skipped {} projects".format(landscapeoutput.itemsProcessed,landscapeoutput.itemsErrors))
 
     def buildlfeuprojects(self,args):
         config = Config(args.configfile,view='projects')
-        landscapeoutput = LandscapeOutput(config=config)
-        landscapeoutput.load(members=LFXProjectsEU(config=config))
+        landscapeoutput = LandscapeOutput(config)
+        landscapeoutput.load(LFXProjectsEU(config))
         landscapeoutput.save()
-        
-        logging.getLogger().info("Successfully processed {} projects and skipped {} projects".format(landscapeoutput.itemsProcessed,landscapeoutput.itemsErrors))
-    
+
     def syncprojects(self,args):
         config = Config(args.configfile,view='projects')
-        items = LFXProjects(config=config)
+        items = LFXProjects(config)
         logging.getLogger().info("Overlaying current Landscape data")
-        items.overlay(memberstooverlay=LandscapeMembers(config=config))
+        items.overlay(LandscapeMembers(config))
         logging.getLogger().info("Overlaying TAC Agenda Project data")
-        items.overlay(memberstooverlay=TACAgendaProject(config=config))
+        items.overlay(TACAgendaProject(config))
         # yes, this is intentional :). This ensures the LFX data is the predominate source of truth
         logging.getLogger().info("Overlaying LFX Projects data")
-        items.overlay(memberstooverlay=LFXProjects(config=config))
+        items.overlay(LFXProjects(config))
         # also intentional, to overlay extra field dates where the TAC Agenda is the source of truth
         logging.getLogger().info("Overlaying TAC Agenda Project data 'extra' field")
-        items.overlay(memberstooverlay=TACAgendaProject(config=config),onlykeys=['extra'])
-        landscapeoutput = LandscapeOutput(config=config)
-        landscapeoutput.load(members=items)
+        items.overlay(TACAgendaProject(config),onlykeys=['extra'])
+        landscapeoutput = LandscapeOutput(config)
+        landscapeoutput.load(items)
         landscapeoutput.save()
-        
-        logging.getLogger().info("Successfully processed {} projects and skipped {} projects".format(landscapeoutput.itemsProcessed,landscapeoutput.itemsErrors))
 
     def syncmembers(self,args):
         config = Config(args.configfile,view='members')
-        items = LFXMembers(config=config)
+        items = LFXMembers(config)
         logging.getLogger().info("Overlaying current Landscape member data")
-        items.overlay(memberstooverlay=LandscapeMembers(config=config))
+        items.overlay(LandscapeMembers(config))
         # Re-overlay LFX data to keep it authoritative for fields it manages
         logging.getLogger().info("Re-overlaying LFX member data")
-        items.overlay(memberstooverlay=LFXMembers(config=config))
-        landscapeoutput = LandscapeOutput(config=config)
-        landscapeoutput.load(members=items)
+        items.overlay(LFXMembers(config))
+        landscapeoutput = LandscapeOutput(config)
+        landscapeoutput.load(items)
         landscapeoutput.save()
-        
-        logging.getLogger().info("Successfully processed {} members and skipped {} members".format(landscapeoutput.itemsProcessed,landscapeoutput.itemsErrors))
 
     def maketextlogo(self,args):
         svglogo = SVGLogo(name=args.name)

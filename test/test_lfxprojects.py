@@ -23,7 +23,7 @@ from lfx_landscape_tools.lfxprojects import LFXProjects
 from lfx_landscape_tools.tacagendaproject import TACAgendaProject
 
 class TestLFXProjects(unittest.TestCase):
-    
+
     logging.basicConfig(
         level=logging.DEBUG,
         format="%(asctime)s [%(levelname)s] %(message)s",
@@ -31,17 +31,16 @@ class TestLFXProjects(unittest.TestCase):
             logging.FileHandler("debug.log",mode="w"),
         ]
     )
-    
+
     def setUp(self):
         logging.getLogger().debug("Running {}".format(unittest.TestCase.id(self)))
-        with open("{}/data.yml".format(os.path.dirname(__file__)), 'r', encoding="utf8", errors='ignore') as fileobject:   
+        with open("{}/data.yml".format(os.path.dirname(__file__)), 'r', encoding="utf8", errors='ignore') as fileobject:
             responses.get('https://raw.githubusercontent.com/cncf/landscape2/refs/heads/main/docs/config/data.yml', body=fileobject.read())
         with open("{}/github_openassetio_response.html".format(os.path.dirname(__file__)), 'r', encoding="utf8", errors='ignore') as fileobject:
             responses.get("https://github.com/OpenAssetIO",body=fileobject.read())
         with open("{}/github_openassetio_search_repo.json".format(os.path.dirname(__file__)), 'r', encoding="utf8", errors='ignore') as fileobject:
             responses.get("https://api.github.com:443/search/repositories?sort=stars&order=desc&q=org%3AOpenAssetIO&per_page=1000",body=fileobject.read())
-       
-        
+
     @responses.activate
     def testLoadData(self):
         config = Config()
@@ -751,7 +750,7 @@ class TestLFXProjects(unittest.TestCase):
                   }
                 }
             )
-          
+
         with unittest.mock.patch('requests_cache.CachedSession', requests.Session):
             members.loadData()
         self.assertEqual(members.members[0].name,"OpenCue")
@@ -795,7 +794,7 @@ class TestLFXProjects(unittest.TestCase):
         config.projectsAddTechnologySector = True
         config.projectsAddIndustrySector = True
         config.projectsAddPMOManagedStatus = True
-        config.projectsAddParentProject = True 
+        config.projectsAddParentProject = True
         members = LFXProjects(config=config,loadData=False)
         responses.add(
             method=responses.GET,
@@ -871,6 +870,37 @@ class TestLFXProjects(unittest.TestCase):
                         "TestRecord": True,
                         "Website": "http://opentimeline.io/"
                     },
+                    {
+                        "AutoJoinEnabled": True,
+                        "Description": "The mission of the Academy Software Foundation (ASWF) is to increase the quality and quantity of contributions to the content creation industry’s open source software base; to provide a neutral forum to coordinate cross-project efforts; to provide a common build and test infrastructure; and to provide individuals and organizations a clear path to participation in advancing our open source ecosystem.",
+                        "DisplayOnWebsite": True,
+                        "DocumentationLinks": [],
+                        "HasProgramManager": True,
+                        "Industry": [
+                          "Motion Pictures"
+                        ],
+                        "IndustrySector": "Motion Pictures",
+                        "LegalParent": {
+                          "ID": "a0941000002wBz9AAE",
+                          "LogoURL": "https://lf-master-project-logos-prod.s3.us-east-2.amazonaws.com/thelinuxfoundation-color.svg",
+                          "Name": "The Linux Foundation",
+                          "Slug": "tlf"
+                        },
+                        "Model": [
+                          "Membership"
+                        ],
+                        "Name": "Academy Software Foundation (ASWF)",
+                        "ProjectID": "a09410000182dD2AAI",
+                        "ProjectLogo": "https://lf-master-project-logos-prod.s3.us-east-2.amazonaws.com/aswf.svg",
+                        "ProjectType": "Project Group",
+                        "RepositoryURL": "https://github.com/academysoftwarefoundation",
+                        "Slug": "aswf",
+                        "StartDate": "2018-08-10",
+                        "Status": "Active",
+                        "TechnologySector": "Visual Effects",
+                        "TestRecord": False,
+                        "Website": "https://www.aswf.io/",
+                    },
                 ],
                 "Metadata": {
                     "Offset": 0,
@@ -878,7 +908,7 @@ class TestLFXProjects(unittest.TestCase):
                     "TotalSize": 2
                 }
             })
-        
+
         with unittest.mock.patch('requests_cache.CachedSession', requests.Session):
             members.loadData()
         self.assertEqual(members.members,[])

@@ -33,13 +33,13 @@ class SVGLogo:
                     self.__contents = f.read()
                     self.__filename = os.path.basename(filename)
             except FileNotFoundError:
-                logging.getLogger().warning("Logo '{}' not found".format(filename))
+                logging.getLogger().warning(f"Logo '{filename}' not found")
         elif url:
             session = requests.Session()
             retry = Retry(backoff_factor=0.5)
             adapter = HTTPAdapter(max_retries=retry)
             session.mount('http://', adapter)
-            session.mount('https://', adapter)        
+            session.mount('https://', adapter)
             while True:
                 try:
                     r = session.get(url, allow_redirects=True)
@@ -47,12 +47,12 @@ class SVGLogo:
                         self.__contents = r.content.decode('utf-8')
                     break
                 except requests.exceptions.ConnectionError:
-                    logging.getLogger().warning("ConnectionError with '{}'",format(url))
+                    logging.getLogger().warning(f"ConnectionError with '{url}'")
                     break
                 except requests.exceptions.ChunkedEncodingError:
                     pass
                 except UnicodeDecodeError:
-                    logging.getLogger().warning("UnicodeDecodeError with '{}'".format(url))
+                    logging.getLogger().warning(f"UnicodeDecodeError with '{url}'")
                     break
         elif name:
            width = len(max(name.split(" "),key=len)) * 34
@@ -102,7 +102,7 @@ class SVGLogo:
 
     def addCaption(self, caption="", title=""):
         postJson = {
-            'svg': self.__contents, 
+            'svg': self.__contents,
             'title': title,
             'caption': caption
         }
@@ -115,7 +115,7 @@ class SVGLogo:
 
     def autocrop(self, title=''):
         postJson = {
-            'svg': self.__contents, 
+            'svg': self.__contents,
             'title': title
         }
         x = requests.post("https://autocrop.cncf.io/autocrop", json=postJson)

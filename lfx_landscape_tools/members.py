@@ -41,11 +41,11 @@ class Members(ABC):
 
         Matches in this order - slug, membership+name+homepage_url, repo_url+name+homepage_url, name+homepage_url
         '''
-        
+
         normalizedname = self.normalizeName(name)
         normalizedhomepage_url = self.normalizeURL(homepage_url)
         normalizedrepo_url = self.normalizeURL(homepage_url)
-        
+
         logger = logging.getLogger()
         logger.debug("Looking for '{}'".format(normalizedname))
 
@@ -72,24 +72,23 @@ class Members(ABC):
                     logger.debug("Found '{}' by name".format(member.name))
                     members.append(member)
 
-                
         return members
-    
+
     def overlay(self, memberstooverlay: Self, onlykeys: list = [], skipkeys: list = []):
         '''
         Overlay another Members data onto this Members; if something is in the other
         Member that is in this member, it will NOT be added
-        
+
         Keyword arguments:
         memberstooverlay -- the Members object to override this Members data values
         '''
         logging.getLogger().debug("Overlaying items")
         for member in self.members:
-            logging.getLogger().debug("Checking matching item to overlay '{}'".format(member.name)) 
+            logging.getLogger().debug("Checking matching item to overlay '{}'".format(member.name))
             foundmembers = []
             foundmembers = memberstooverlay.find(name=member.name,homepage_url=member.homepage_url,slug=member.extra.get('lfx_slug'))
             for foundmember in foundmembers:
-                logging.getLogger().debug("Found item to check for overlay '{}'".format(foundmember.name)) 
+                logging.getLogger().debug("Found item to check for overlay '{}'".format(foundmember.name))
                 member.overlay(membertooverlay=foundmember,onlykeys=onlykeys,skipkeys=skipkeys)
 
     def normalizeName(self, name):
