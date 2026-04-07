@@ -26,43 +26,62 @@ class LFXMembers(Members):
     def processConfig(self, config: type[Config]):
         self.project = config.project
         self.endpointURL = self.endpointURLUsePublicMembershipLogo if config.memberUsePublicMembershipLogo else self.endpointURL
-        self.addOtherProjectMemberships = config.addOtherProjectMemberships 
+        self.addOtherProjectMemberships = config.addOtherProjectMemberships
+
+    def _get_other_project_memberships(self, record_id):
+        """Helper to fetch memberships across other projects."""
+        second_path = []
+        if not self.addOtherProjectMemberships:
+            return second_path
+
+        session = requests_cache.CachedSession()
+        for slug in self.projectsOnAutojoin:
+            with session.get(self.endpointURL.format(slug)) as response:
+                for membership in response.json():
+                    if membership.get('ID') == record_id:
+                        project_name = membership.get("ProjectName")
+                        logging.getLogger().info(f"Adding other membership - {project_name}")
+                        second_path.append(f'Project Membership / {project_name}')
+        return second_path
 
     def loadData(self):
         logger = logging.getLogger()
         logger.info("Loading LFX Members data")
 
         with requests.get(self.endpointURL.format(self.project)) as endpointResponse:
-            memberList = endpointResponse.json()
-            logger.info('Found {} records'.format(len(memberList)))
-            for record in memberList:
-                if self.find(name=record.get('Name'),homepage_url=record.get('Website'),membership=record.get('Membership',{}).get('Name')) or self._isTestRecord(record):
-                    logger.debug("Skipping '{}'".format(record.get('Name')))
+            member_list = endpointResponse.json()
+            logger.info(f'Found {len(member_list)} records')
+
+            for record in member_list:
+                name = record.get('Name')
+                membership_name = record.get('Membership', {}).get('Name')
+
+                if self._isTestRecord(record) or self.find(
+                    name=name,
+                    homepage_url=record.get('Website'),
+                    membership=membership_name
+                ):
+                    logger.debug(f"Skipping '{name}'")
                     continue
 
+                logger.info(f"Found LFX Member '{name}'")
+
                 member = Member()
-                member.name = record.get('Name')
-                logger.info("Found LFX Member '{}'".format(member.name))
-                second_path = []
-                member.membership = record.get('Membership',{}).get('Name')
+                member.name = name
+                member.membership = membership_name
                 member.homepage_url = record.get('Website')
                 member.description = record.get('OrganizationDescription')
-                member.logo = record.get('Logo')
-                if not member.logo:
-                    logger.info("Creating text logo for '{}'".format(member.name))
-                    member.logo = SVGLogo(name=member.name)
+                member.logo = record.get('Logo') or SVGLogo(name=name)
+
+                if not record.get('Logo'):
+                    logger.info(f"Creating text logo for '{name}'")
+
                 member.crunchbase = record.get('CrunchBaseURL')
                 member.twitter = record.get('Twitter')
                 member.linkedin = record.get('LinkedInURL')
-                if self.addOtherProjectMemberships:
-                    for slug in self.projectsOnAutojoin:
-                        session = requests_cache.CachedSession()
-                        with session.get(self.endpointURL.format(slug)) as otherProjectMembershipsEndpointResponse:
-                            for membership in otherProjectMembershipsEndpointResponse.json():
-                                if membership.get('ID') == record.get('ID'):
-                                    logger.info("Adding other membership - {}".format(membership.get("ProjectName")))
-                                    second_path.append('Project Membership / {}'.format(membership.get("ProjectName")))
-                member.second_path = second_path
+
+                member.second_path = self._get_other_project_memberships(record.get('ID'))
+
                 self.members.append(member)
 
     @property
