@@ -54,11 +54,11 @@ class Member:
         try:
             schemaURL = 'https://raw.githubusercontent.com/cncf/landscape2/refs/heads/main/docs/config/data.yml'
             endpointResponse = requests_cache.CachedSession().get(schemaURL)
-            endpointResponse.raise_for_status() 
+            endpointResponse.raise_for_status()
             dataschema = ruamel.yaml.YAML().load(endpointResponse.text)
         except requests.exceptions.RequestException as e:
             logging.getLogger().error("Cannot load data file schema at {} - error message '{}'".format(schemaURL,e))
-        except ruamel.yaml.YAMLError as e: 
+        except ruamel.yaml.YAMLError as e:
             logging.getLogger().error("Data file at {} is not valid YAML - error message '{}'".format(schemaURL,e))
         else:
             self.itemschema = dataschema.get('categories',{})[0].get('subcategories',{})[0].get('items',{})[0]
@@ -97,7 +97,7 @@ class Member:
                     found_repo_url = self._getPrimaryGitHubRepoFromGitHubOrg(repo_url)
                     if found_repo_url:
                         self.project_org = "https://github.com/{}".format(urlparse(found_repo_url).path.split("/")[1])
-                        self.__repo_url = found_repo_url 
+                        self.__repo_url = found_repo_url
                         logging.debug("{} is determined to be the associated GitHub Repo for GitHub Org {} for '{}'".format(self.__repo_url,self.project_org,self.name))
                     else:
                         self.project_org = None
@@ -119,45 +119,55 @@ class Member:
 
     def _isGitHubURL(self, url):
         return urlparse(url).netloc == 'www.github.com' or urlparse(url).netloc == 'github.com'
-    
+
     def _isGitHubRepo(self, url):
         return self._isGitHubURL(url) and len(urlparse(url).path.split("/")) == 3
 
     def _isGitHubOrg(self, url):
         return self._isGitHubURL(url) and len(urlparse(url).path.split("/")) == 2
 
+    def _fetch_best_repo_via_api(self, org_name):
+        """Extracted helper to handle GitHub API search and rate limiting."""
+        token = os.environ.get('GITHUB_TOKEN')
+        auth = Auth.Token(token) if token else None
+        g = Github(auth=auth, per_page=100) # per_page=1000 is often capped by GitHub to 100
+
+        while True:
+            try:
+                query = f"org:{org_name}"
+                repos = g.search_repositories(query=query, sort="stars", order="desc")
+
+                # Use next() for efficiency instead of converting whole result to a list
+                first_repo = next(iter(repos), None)
+                return first_repo.html_url if first_repo else ''
+
+            except RateLimitExceededException:
+                sleep_time = g.rate_limiting_resettime - now()
+                logging.info(f"Rate limit hit. Sleeping for {sleep_time} seconds...")
+                time.sleep(max(sleep_time, 1))
+            except GithubException as e:
+                if e.status == 502:
+                    logging.debug("Server error (502) - retrying...")
+                    continue
+                if e.status == 404:
+                    return False
+                logging.getLogger().warning(e.data)
+                return None
+            except (socket.timeout, ConnectionError):
+                logging.debug("Network error - retrying...")
+                continue
+
     def _getPrimaryGitHubRepoFromGitHubOrg(self, url):
         if not self._isGitHubOrg(url):
-            return list(url)
+            return url # Removed list(url) as it likely intended to return the string
 
-        if len(self._getPinnedGithubReposFromGithubOrg(url)) > 0:
-            return self._getPinnedGithubReposFromGithubOrg(url)[0]
+        pinned = self._getPinnedGithubReposFromGithubOrg(url)
+        if pinned:
+            return pinned[0]
 
+        org_name = urlparse(url).path.split("/")[1]
         with requests_cache.enabled():
-            while True:
-                try:
-                    if 'GITHUB_TOKEN' in os.environ:
-                        g = Github(auth=Auth.Token(os.environ['GITHUB_TOKEN']), per_page=1000)
-                    else:
-                        g = Github(per_page=1000)
-                    repos = g.search_repositories(query="org:{}".format(urlparse(url).path.split("/")[1]),sort="stars",order="desc")
-                    if len(list(repos)) > 0:
-                        return repos[0].html_url
-                    else:
-                        return ''
-                except RateLimitExceededException:
-                    logging.info("Sleeping until we get past the API rate limit....")
-                    time.sleep(g.rate_limiting_resettime-now())
-                except GithubException as e:
-                    if e.status == 502:
-                        logging.debug("Server error - retrying...")
-                    if e.status == 404:
-                        return False
-                    else:
-                        logging.getLogger().warning(e.data)
-                        return
-                except socket.timeout:
-                    logging.debug("Server error - retrying...")
+            return self._fetch_best_repo_via_api(org_name)
 
     def _getPinnedGithubReposFromGithubOrg(self, url):
         if not self._isGitHubOrg(url):
@@ -249,7 +259,7 @@ class Member:
         if not self.__logo.isValid():
             self.__logo = None
             logging.getLogger().warning("Member.logo for '{name}' invalid format".format(name=self.name))
-    
+
     def hostLogo(self, path = "./"):
         self.__logo.save(self.name,path)
 
@@ -278,32 +288,49 @@ class Member:
     def extra(self):
         return self.__extra
 
+    def _sanitize_links(self, links):
+        """Helper to filter valid name/url pairs from other_links."""
+        if not isinstance(links, list):
+            return []
+        return [
+            link for link in links
+            if link.get('name') and validators.url(str(link.get('url', '')))
+        ]
+
     @extra.setter
     def extra(self, extra):
-        if not isinstance(extra,dict):
-            logging.getLogger().debug("Member.extra for '{name}' must be a list - '{extra}' provided".format(extra=extra,name=self.name))
+        logger = logging.getLogger()
+
+        # Guard Clause: Early exit for invalid types
+        if not isinstance(extra, dict):
+            logger.debug(f"Member.extra for '{self.name}' must be a dict - '{extra}' provided")
             self.__extra = {}
             return
+
         endextra = {}
         endannotations = {}
+
         for key, value in extra.items():
-            # remove any entries where name or url is set to None
-            if key == 'other_links' and isinstance(value,list):
-                other_links = []
-                for link in value:
-                    if validators.url(link.get('url',False)) and link.get('name',False):
-                        other_links.append(link)
-                endextra['other_links'] = other_links
-            elif not value or value == 'nil':
-                logging.getLogger().debug("Removing Member.extra.{key} for '{name}' since it's set to '{value}'".format(key=key,value=value,name=self.name))
-            elif key not in self.itemschema['extra']:
-                logging.getLogger().debug("Moving Member.extra.{key} for '{name}' under 'annotations'".format(key=key,name=self.name))
+            # 1. Handle special 'other_links' case
+            if key == 'other_links':
+                endextra['other_links'] = self._sanitize_links(value)
+                continue
+
+            # 2. Skip empty/nil values
+            if not value or value == 'nil':
+                logger.debug(f"Removing Member.extra.{key} for '{self.name}' (value: '{value}')")
+                continue
+
+            # 3. Categorize as Annotation or Extra
+            if key not in self.itemschema['extra']:
+                logger.debug(f"Moving Member.extra.{key} for '{self.name}' under 'annotations'")
                 endannotations[key] = value
             else:
                 endextra[key] = value
 
-        endextraannotations = endextra.get('annotations',{}) | endannotations
-        endextra['annotations'] = {key: value for key, value in endextraannotations.items() if value is not None}
+        # Merge annotations and filter out None values
+        merged_annotations = endextra.get('annotations', {}) | endannotations
+        endextra['annotations'] = {k: v for k, v in merged_annotations.items() if v is not None}
 
         self.__extra = endextra
 
@@ -327,7 +354,7 @@ class Member:
                             for subsubkey, subsubvalue in subvalue.items():
                                 if getattr(self,key,[]).get(subkey).get(subsubkey):
                                     returnentry[key][subkey][subsubkey] = getattr(self,key,[]).get(subkey).get(subsubkey)
-                        else:    
+                        else:
                             returnentry[key][subkey] = getattr(self,key,[]).get(subkey)
                 if returnentry[key] == {}:
                     del returnentry[key]
