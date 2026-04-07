@@ -5,7 +5,7 @@
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=jmertic_lfx-landscape-tools&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=jmertic_lfx-landscape-tools)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=jmertic_lfx-landscape-tools&metric=coverage)](https://sonarcloud.io/summary/new_code?id=jmertic_lfx-landscape-tools)
 
-This project contains tools that make building and maintaining a [landscape](https://github.com/cncf/landscapeapp) easier by pulling data from LFX on projects and members. 
+This project contains tools that make building and maintaining a [landscape](https://github.com/cncf/landscapeapp) easier by pulling data from LFX on projects and members.
 
 It is an evolution of the former [landscape-tools](https://github.com/jmertic/landscape-tools), with a refactor to add the ability to pull projects from LFX and generate text logos when a pure SVG does not exist. Additional differences include:
 
@@ -19,7 +19,7 @@ The default configuration for the build is located in the `config.yml` file, whi
 
 ```yaml
 # Membership levels; name is the membership level name in LFX; category is the matching subcategory name in the landscape
-landscapeMemberClasses: 
+landscapeMemberClasses:
    - name: Steering Membership
      category: Steering
    - name: General Membership
@@ -34,8 +34,9 @@ landscapeMemberCategory: AOUSD Members
 
 1) Review the permissions for the `GITHUB_TOKEN` for your repository ( more details [here](https://docs.github.com/en/actions/security-for-github-actions/security-guides/automatic-token-authentication#permissions-for-the-github_token) ). Note that you need to ensure `GITHUB_TOKEN` has the permission to merge PRs (more [here](https://docs.github.com/en/organizations/managing-organization-settings/disabling-or-limiting-github-actions-for-your-organization#preventing-github-actions-from-creating-or-approving-pull-requests)).
    - If you cannot set `GITHUB_TOKEN` permissions as stated, the fallback option is to add a [repository secret](https://docs.github.com/en/actions/reference/encrypted-secrets) for `PAT`, which is a [GitHub Personal Authorization Token](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) set for the `read:org`, `read:project`, and `repo` scope.
-3) [Add a new label](https://docs.github.com/en/github/managing-your-work-on-github/managing-labels#creating-a-label) - `automated-build`. This is for this workflow to work and shouldn't be used for anything else.
-4) Add the following code to a `build.yml` file in your landscape repo's `.github/workflows/` directory.
+2) [Add a new label](https://docs.github.com/en/github/managing-your-work-on-github/managing-labels#creating-a-label) - `automated-build`. This is for this workflow to work and shouldn't be used for anything else.
+3) Add the following code to a `build.yml` file in your landscape repo's `.github/workflows/` directory.
+
 ```yaml
 name: Build Landscape from LFX
 
@@ -44,11 +45,19 @@ on:
   schedule:
   - cron: "0 4 * * *"
 
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - uses: jmertic/lfx-landscape-tools@4a1b2a68b4110e5528b1df83bf41bdf9ac8413f1 # 20260330
+      - uses: jmertic/lfx-landscape-tools@29c3da5bc185f8b7118c50607bf4d58b8b73c0e4 # 20260331
         with:
           project_processing: skip # see options in action.yml
         env:
@@ -56,7 +65,9 @@ jobs:
           repository: ${{ github.repository }}
           ref: ${{ github.ref }}
 ```
+
 4) Add the following code to a `validate.yml` file in your landscape repo's `.github/workflows/` directory.
+
 ```yaml
 name: Validate Landscape
 
@@ -67,12 +78,22 @@ on:
       - main
       - master
 
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate-landscape:
     runs-on: ubuntu-latest
     name: "Validate landscape.yml file"
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - uses: cncf/landscape2-validate-action@6381e8747c73412e638670807b402ef2b863e9f8 # v2.0.1
         with:
           target_kind: data
@@ -82,7 +103,7 @@ jobs:
 5) Run the `Build Landscape from LFX` GitHub Action following the instructions for [manually running a GitHub Action](https://docs.github.com/en/actions/managing-workflow-runs-and-deployments/managing-workflow-runs/manually-running-a-workflow) to test that it all works.
 
 ### Auto-merging landscape build changes
- 
+
 If the build results in data that differs from the current data in the landscape, a pull request is created to apply those changes. This pull request is by default set to be [automatically merged](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/incorporating-changes-from-a-pull-request/automatically-merging-a-pull-request) only if the following conditions are met.
 
 - The target repository must have **[Allow auto-merge](https://docs.github.com/en/github/administering-a-repository/managing-auto-merge-for-pull-requests-in-your-repository)** enabled in settings.
