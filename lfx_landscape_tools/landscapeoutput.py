@@ -57,38 +57,48 @@ class LandscapeOutput:
         return self._itemsErrors
 
     def load(self, members: Members):
-        '''
+        """
         Load Members into landscapeItems
-
         Keyword arguments:
         members -- Members object to load
-        '''
+        """
         logger = logging.getLogger()
-        logger.info("Processing '{}' items".format(self.landscapeCategory))
+        logger.info(f"Processing '{self.landscapeCategory}' items")
+
+        # Optimization: Map subcategory names to their parent categories once.
+        # This eliminates the need for the 'next()' call inside the loop.
+        subcat_to_parent = {s['name']: s['category'] for s in self.landscapeSubcategories}
+
         for member in members.members:
-            logger.info("Processing '{}'...".format(member.name))
-            foundCategory = False
-            for landscapeItemSubcategory in self.landscapeItems:
-                landscapeSubcategory = next((item for item in self.landscapeSubcategories if item["name"] == member.membership), None)
-                if ( ( landscapeSubcategory is not None )
-                        and ( landscapeSubcategory['name'] == member.membership )
-                        and ( landscapeItemSubcategory['name'] == landscapeSubcategory['category'] ) ):
-                    foundCategory = True
-                    # Write out to error log if it's missing key parameters
-                    if not member.isValidLandscapeItem():
-                        logger.error("Not adding '{}' to Landscape - Missing key attributes {}".format(member.name,",".join(member.invalidLandscapeItemAttributes())))
-                        self._itemsErrors += 1
-                    # otherwise we can add it
-                    else:
-                        logger.info("Added '{}' to Landscape in SubCategory '{}'".format(member.name,member.membership))
-                        self._itemsProcessed += 1
-                        member.hostLogo(self.hostedLogosDir)
-                        member.entrysuffix = self.memberSuffix if self.memberSuffix else member.entrysuffix
-                        landscapeItemSubcategory['items'].append(member.toLandscapeItemAttributes())
-                    break
-            if not foundCategory:
-                logger.error("Not adding '{}' to Landscape - SubCategory '{}' not found".format(member.name,member.membership))
+            logger.info(f"Processing '{member.name}'...")
+
+            # 1. Resolve target category using our map
+            parent_cat_name = subcat_to_parent.get(member.membership)
+            target_subcat = next((item for item in self.landscapeItems
+                                 if item['name'] == parent_cat_name), None)
+
+            # Guard Clause: Category not found
+            if not target_subcat:
+                logger.error(f"Not adding '{member.name}' - SubCategory '{member.membership}' not found")
                 self._itemsErrors += 1
+                continue
+
+            # Guard Clause: Validation check
+            if not member.isValidLandscapeItem():
+                missing = ",".join(member.invalidLandscapeItemAttributes())
+                logger.error(f"Not adding '{member.name}' - Missing key attributes {missing}")
+                self._itemsErrors += 1
+                continue
+
+            logger.info(f"Added '{member.name}' to Landscape in SubCategory '{member.membership}'")
+            self._itemsProcessed += 1
+
+            member.hostLogo(self.hostedLogosDir)
+
+            if self.memberSuffix:
+                member.entrysuffix = self.memberSuffix
+
+            target_subcat['items'].append(member.toLandscapeItemAttributes())
 
     def save(self):
         '''
