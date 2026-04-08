@@ -23,15 +23,19 @@ class TestCli(unittest.TestCase):
         self.patch_output = patch('lfx_landscape_tools.cli.LandscapeOutput')
         self.patch_members = patch('lfx_landscape_tools.cli.LFXMembers')
         self.patch_projects = patch('lfx_landscape_tools.cli.LFXProjects')
+        self.patch_lfeuprojects = patch('lfx_landscape_tools.cli.LFXProjectsEU')
         self.patch_svg = patch('lfx_landscape_tools.cli.SVGLogo')
         self.patch_run = patch('lfx_landscape_tools.cli.subprocess.run')
+        self.patch_tacagendaproject = patch('lfx_landscape_tools.cli.TACAgendaProject')
 
         self.mock_config = self.patch_config.start()
         self.mock_output = self.patch_output.start()
         self.mock_members = self.patch_members.start()
         self.mock_projects = self.patch_projects.start()
+        self.mock_lfeuprojects = self.patch_lfeuprojects.start()
         self.mock_svg = self.patch_svg.start()
         self.mock_run = self.patch_run.start()
+        self.mock_tacagendaproject = self.patch_tacagendaproject.start()
 
         self.patch_file = patch('argparse.FileType', return_value=lambda x: mock_open(read_data="dummy").return_value)
         self.patch_file.start()
@@ -46,6 +50,48 @@ class TestCli(unittest.TestCase):
         Cli()
         # Ensure LFXMembers was initialized
         self.mock_members.assert_called()
+        # Ensure LandscapeOutput was loaded and saved
+        self.mock_output.return_value.load.assert_called_once()
+        self.mock_output.return_value.save.assert_called_once()
+
+    @patch('sys.argv', ['cli.py', '--silent', 'build_lfeuprojects'])
+    def test_build_lfeuprojects_routing(self):
+        """Verify build_lfeuprojects command triggers the LFXProjectsEU pipeline."""
+        Cli()
+        # Ensure LFXProjectsEU was initialized
+        self.mock_lfeuprojects.assert_called()
+        # Ensure LandscapeOutput was loaded and saved
+        self.mock_output.return_value.load.assert_called_once()
+        self.mock_output.return_value.save.assert_called_once()
+
+    @patch('sys.argv', ['cli.py', '--silent', 'sync_projects'])
+    def test_build_projects_routing(self):
+        """Verify build_projects command triggers the LFXProjects pipeline."""
+        Cli()
+        # Ensure LFXProjects was initialized
+        self.mock_projects.assert_called()
+        # Ensure LandscapeOutput was loaded and saved
+        self.mock_output.return_value.load.assert_called_once()
+        self.mock_output.return_value.save.assert_called_once()
+
+    @patch('sys.argv', ['cli.py', '--silent', 'sync_members'])
+    def test_sync_members_routing(self):
+        """Verify sync_members command triggers the LFXMembers pipeline."""
+        Cli()
+        # Ensure LFXMembers was initialized
+        self.mock_members.assert_called()
+        # Ensure LandscapeOutput was loaded and saved
+        self.mock_output.return_value.load.assert_called_once()
+        self.mock_output.return_value.save.assert_called_once()
+
+    @patch('sys.argv', ['cli.py', '--silent', 'sync_projects'])
+    def test_sync_projects_routing(self):
+        """Verify sync_projects command triggers the LFXProjects and TACAgendaProject pipeline."""
+        Cli()
+        # Ensure LFXProjects was initialized
+        self.mock_projects.assert_called()
+        # Ensure TACAgendaProject was initialized
+        self.mock_tacagendaproject.assert_called()
         # Ensure LandscapeOutput was loaded and saved
         self.mock_output.return_value.load.assert_called_once()
         self.mock_output.return_value.save.assert_called_once()
