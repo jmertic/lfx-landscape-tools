@@ -140,7 +140,9 @@ class Member:
                 # Use next() for efficiency instead of converting whole result to a list
                 first_repo = next(iter(repos), None)
                 return first_repo.html_url if first_repo else ''
-
+            except UnknownObjectException:
+                logging.debug(f"Organization or Repository not found: {org_name}")
+                return False
             except RateLimitExceededException:
                 sleep_time = g.rate_limiting_resettime - now()
                 logging.info(f"Rate limit hit. Sleeping for {sleep_time} seconds...")
@@ -149,8 +151,6 @@ class Member:
                 if e.status == 502:
                     logging.debug("Server error (502) - retrying...")
                     continue
-                if e.status == 404:
-                    return False
                 logging.getLogger().warning(e.data)
                 return None
             except (socket.timeout, ConnectionError):
