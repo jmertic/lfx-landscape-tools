@@ -25,7 +25,7 @@ from lfx_landscape_tools.lfxprojects import LFXProjects
 from lfx_landscape_tools.tacagendaproject import TACAgendaProject
 
 class TestMember(unittest.TestCase):
-    
+
     logging.basicConfig(
         level=logging.DEBUG,
         format="%(asctime)s [%(levelname)s] %(message)s",
@@ -33,7 +33,7 @@ class TestMember(unittest.TestCase):
             logging.FileHandler("debug.log",mode="w"),
         ]
     )
-    
+
     def setUp(self):
         logging.getLogger().debug("Running {}".format(unittest.TestCase.id(self)))
         requests_cache.uninstall_cache()
@@ -76,7 +76,7 @@ class TestMember(unittest.TestCase):
                 member.linkedin = invalidLinkedInURL
                 self.assertEqual(["WARNING:root:Member.linkedin for 'test' must be set to a valid LinkedIn URL - '{}' provided".format(invalidLinkedInURL)], cm.output)
             self.assertIsNone(member.linkedin)
-    
+
     def testSetCrunchbaseValid(self):
         validCrunchbaseURLs = [
             'https://www.crunchbase.com/organization/visual-effects-society'
@@ -98,7 +98,7 @@ class TestMember(unittest.TestCase):
         member.name = 'test'
         member.repo_url = ''
         self.assertIsNone(member.repo_url)
-    
+
     def testSetRepoGitlab(self):
         member = Member()
         member.name = 'test'
@@ -356,7 +356,6 @@ class TestMember(unittest.TestCase):
         self.assertIn('list2',member.second_path)
         self.assertIn('list3',member.second_path)
 
-    
     def testToLandscapeItemAttributesWithSuffix(self):
         member = Member()
         member.entrysuffix = ' (testme)'
@@ -393,7 +392,7 @@ class TestMember(unittest.TestCase):
             member.logo = 'Gold.svg'
 
         self.assertTrue(member.isValidLandscapeItem())
-    
+
     def testIsValidLandscapeItemEmptyname(self):
         member = Member()
         member.name = ''
@@ -404,7 +403,7 @@ class TestMember(unittest.TestCase):
 
         self.assertFalse(member.isValidLandscapeItem())
         self.assertIn('name',member.invalidLandscapeItemAttributes())
-    
+
     def testIsValidLandscapeItemEmptyhomepage_urlLogo(self):
         member = Member()
         member.name = 'foo'
@@ -518,7 +517,7 @@ class TestMember(unittest.TestCase):
             membertooverlay.logo = 'gold.svg'
         membertooverlay.membership = 'Gold'
         membertooverlay.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society-bad'
-        membertooverlay.organization = {'name':'foo'} 
+        membertooverlay.organization = {'name':'foo'}
 
         member = Member()
         member.name = 'test'
@@ -549,9 +548,9 @@ class TestMember(unittest.TestCase):
         with unittest.mock.patch("lfx_landscape_tools.svglogo.open", unittest.mock.mock_open(read_data="data")) as mock_file:
             membertooverlay.logo = 'gold.svg'
         membertooverlay.membership = 'Gold'
-        
+
         membertooverlay.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society-bad'
-        membertooverlay.organization = {'name':'foo'} 
+        membertooverlay.organization = {'name':'foo'}
 
         member = Member()
         member.name = 'test'

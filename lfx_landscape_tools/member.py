@@ -130,7 +130,7 @@ class Member:
         """Extracted helper to handle GitHub API search and rate limiting."""
         token = os.environ.get('GITHUB_TOKEN')
         auth = Auth.Token(token) if token else None
-        g = Github(auth=auth, per_page=100) # per_page=1000 is often capped by GitHub to 100
+        g = Github(auth=auth, per_page=1000)
 
         while True:
             try:
@@ -393,7 +393,7 @@ class Member:
             returnentry['extra']['linkedin_url'] = self.linkedin
 
         return returnentry
-        
+
     def isValidLandscapeItem(self):
         return self.homepage_url and self.logo and self.name
 
