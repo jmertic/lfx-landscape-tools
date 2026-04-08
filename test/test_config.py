@@ -252,5 +252,58 @@ slug: aswf
 
         os.unlink(tmpfilename.name)
 
-if __name__ == '__main__':
-    unittest.main()
+    @responses.activate
+    def testLookupSlugByProjectIDFail(self):
+
+        responses.add(
+            method=responses.GET,
+            url='https://api-gw.platform.linuxfoundation.org/project-service/v1/public/projects?slug=foo',
+            json={
+                "Data": [],
+                "Metadata": {
+                    "Offset": 0,
+                    "PageSize": 100,
+                    "TotalSize": 0
+                }
+            })
+
+        testconfigfilecontents = """
+slug: foo
+"""
+        tmpfilename = tempfile.NamedTemporaryFile(mode='w',delete=False)
+        tmpfilename.write(testconfigfilecontents)
+        tmpfilename.close()
+
+        with open(tmpfilename.name) as fp:
+            with self.assertRaises(ValueError, msg="Invalid project specification in config file"):
+                config = Config(fp)
+
+        os.unlink(tmpfilename.name)
+
+    @responses.activate
+    def testLookupProjectIDBySlugFail(self):
+
+        responses.add(
+            method=responses.GET,
+            url='https://api-gw.platform.linuxfoundation.org/project-service/v1/public/projects?$filter=projectId%20eq%2012345678',
+            json={
+                "Data": [],
+                "Metadata": {
+                    "Offset": 0,
+                    "PageSize": 100,
+                    "TotalSize": 0
+                }
+            })
+
+        testconfigfilecontents = """
+project: 12345678
+"""
+        tmpfilename = tempfile.NamedTemporaryFile(mode='w',delete=False)
+        tmpfilename.write(testconfigfilecontents)
+        tmpfilename.close()
+
+        with open(tmpfilename.name) as fp:
+            with self.assertRaises(ValueError, msg="Invalid project specification in config file"):
+                config = Config(fp)
+
+        os.unlink(tmpfilename.name)

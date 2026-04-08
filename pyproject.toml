@@ -34,3 +34,14 @@ lfx_landscape = "lfx_landscape_tools.cli:Cli.run"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.coverage.run]
+source = ["lfx_landscape_tools"]
+omit = [
+    "tests/*",
+    "**/__init__.py",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_empty = true

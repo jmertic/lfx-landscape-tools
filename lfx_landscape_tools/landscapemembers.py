@@ -29,7 +29,7 @@ class LandscapeMembers(Members):
     ]
     landscapefile = 'landscape.yml'
     memberSuffix = ''
-    
+
     def processConfig(self, config: type[Config]):
         self.landscapeCategory = config.landscapeCategory
         self.landscapeSubcategories = config.landscapeSubcategories

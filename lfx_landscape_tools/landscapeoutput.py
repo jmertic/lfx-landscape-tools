@@ -163,10 +163,10 @@ class LandscapeOutput:
 
     def _str_presenter(self, dumper, data):
         if '\n' in data:
-            return dumper.represent_scalar(u'tag:yaml.org,2002:str', data, style='|')
+            return dumper.represent_literal_scalarstring(data)
         if len(data.splitlines()) > 1:  # check for multiline string
-            return dumper.represent_scalar(u'tag:yaml.org,2002:str', data, style='>')
-        return dumper.represent_scalar(u'tag:yaml.org,2002:str', data)
+            return dumper.represent_folded_scalarstring(data)
+        return dumper.represent_str(data)
 
     def _none_representer(self, dumper, data):
         return dumper.represent_scalar(u'tag:yaml.org,2002:null', u'null')

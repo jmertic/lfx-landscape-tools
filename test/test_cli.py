@@ -64,7 +64,7 @@ class TestCli(unittest.TestCase):
         self.mock_output.return_value.load.assert_called_once()
         self.mock_output.return_value.save.assert_called_once()
 
-    @patch('sys.argv', ['cli.py', '--silent', 'sync_projects'])
+    @patch('sys.argv', ['cli.py', '--silent', 'build_projects'])
     def test_build_projects_routing(self):
         """Verify build_projects command triggers the LFXProjects pipeline."""
         Cli()
@@ -102,6 +102,20 @@ class TestCli(unittest.TestCase):
         Cli()
         self.mock_svg.assert_called_with(name='OpenSource')
         self.mock_svg.return_value.save.assert_called_with('logo.svg')
+
+    @patch('sys.argv', ['cli.py', 'maketextlogo', '--n', 'OpenSource'])
+    def test_maketextlogo_args_nofilename(self):
+        """Verify logo command correctly passes arguments to SVGLogo."""
+        Cli()
+        self.mock_svg.assert_called_with(name='OpenSource')
+        self.mock_svg.return_value.save.assert_not_called()
+
+    @patch('sys.argv', ['cli.py', 'maketextlogo', '--name', 'OpenSource', '--autocrop'])
+    def test_maketextlogo_args_autocrop(self):
+        """Verify logo command correctly passes arguments to SVGLogo."""
+        Cli()
+        self.mock_svg.assert_called_with(name='OpenSource')
+        self.mock_svg.return_value.autocrop.assert_called()
 
     @patch('sys.argv', ['cli.py', '--silent', 'validatedata', 'test.yml'])
     def test_validatedata_subprocess(self):
@@ -141,5 +155,9 @@ class TestCli(unittest.TestCase):
         Cli()
         mock_help.assert_called_once()
 
-if __name__ == '__main__':
-    unittest.main()
+    @patch('sys.argv', ['cli.py', '--silent', 'build_projects'])
+    def test_run_static(self):
+        """Verify build_projects command triggers the LFXProjects pipeline."""
+        Cli.run()
+        # Ensure LFXProjects was initialized
+        self.mock_projects.assert_called()

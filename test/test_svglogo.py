@@ -24,7 +24,7 @@ from lfx_landscape_tools.lfxprojects import LFXProjects
 from lfx_landscape_tools.tacagendaproject import TACAgendaProject
 
 class TestSVGLogo(unittest.TestCase):
-    
+
     logging.basicConfig(
         level=logging.DEBUG,
         format="%(asctime)s [%(levelname)s] %(message)s",
@@ -32,10 +32,10 @@ class TestSVGLogo(unittest.TestCase):
             logging.FileHandler("debug.log",mode="w"),
         ]
     )
-    
+
     def setUp(self):
         logging.getLogger().debug("Running {}".format(unittest.TestCase.id(self)))
-   
+
     def testPassInContents(self):
         self.assertEqual(str(SVGLogo(contents="This is a test")),"This is a test")
 
@@ -64,7 +64,7 @@ class TestSVGLogo(unittest.TestCase):
 
         with unittest.mock.patch("lfx_landscape_tools.svglogo.open", unittest.mock.mock_open(read_data="data")) as mock_file:
             self.assertEqual(str(SVGLogo(url="https://someurl.com/boom.svg").filename('privée')),'privee.svg')
-    
+
     @responses.activate
     def testHostLogoNonASCII(self):
         responses.add(
@@ -75,14 +75,14 @@ class TestSVGLogo(unittest.TestCase):
 
         with unittest.mock.patch("lfx_landscape_tools.svglogo.open", unittest.mock.mock_open(read_data="data")) as mock_file:
             self.assertEqual(str(SVGLogo(url="https://someurl.com/boom.svg").filename('北京数悦铭金技术有限公司')),'bei_jing_shu_yue_ming_jin_ji_zhu_you_xian_gong_si.svg')
-        
+
     def testHostLogoContainsPNG(self):
         self.assertFalse(SVGLogo(contents="this is image data data:image/png;base64 dfdfdf").isValid())
 
     @responses.activate
     def testHostLogoContainsText(self):
         self.assertFalse(SVGLogo(contents="this is image data <text /> dfdfdf").isValid())
-    
+
     @responses.activate(registry=responses.registries.OrderedRegistry)
     def testHostLogoRetriesOnChunkedEncodingErrorException(self):
         responses.add(
@@ -108,7 +108,7 @@ class TestSVGLogo(unittest.TestCase):
             url='https://someurl.com/boom.jpg',
             body=UnicodeDecodeError('funnycodec', b'\x00\x00', 1, 2, 'This is just a fake reason!')
             )
-        
+
         self.assertEqual(str(SVGLogo(url="https://someurl.com/boom.jpg")),"")
 
     @responses.activate
@@ -125,7 +125,7 @@ class TestSVGLogo(unittest.TestCase):
     def testSaveLogo(self):
         with tempfile.TemporaryDirectory() as tempdir:
             self.assertEqual(SVGLogo(contents="this is a file").save('dog',tempdir),'dog.svg')
-    
+
     @responses.activate
     def testAutocropLogo(self):
         responses.add(
@@ -149,9 +149,9 @@ class TestSVGLogo(unittest.TestCase):
         with self.assertRaises(RuntimeError) as cm:
             logo = SVGLogo(contents="this is a dog")
             logo.autocrop()
-        
+
         self.assertEqual(str(cm.exception),'Autocrop failed: this is a file')
-    
+
     @responses.activate
     def testCaptionLogo(self):
         responses.add(
@@ -175,7 +175,7 @@ class TestSVGLogo(unittest.TestCase):
         with self.assertRaises(RuntimeError) as cm:
             logo = SVGLogo(contents="this is a dog")
             logo.addCaption("Dog")
-        
+
         self.assertEqual(str(cm.exception),'Adding caption failed: this is a file')
 
 if __name__ == '__main__':
