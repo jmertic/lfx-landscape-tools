@@ -129,7 +129,7 @@ class Member:
     def _fetch_best_repo_via_api(self, org_name):
         """Extracted helper to handle GitHub API search and rate limiting."""
         token = os.environ.get('GITHUB_TOKEN')
-        auth = Auth.Token(token) if token else None
+        auth = token and Auth.Token(token)
         g = Github(auth=auth, per_page=1000)
 
         while True:
