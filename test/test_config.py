@@ -23,7 +23,7 @@ from lfx_landscape_tools.lfxprojects import LFXProjects
 from lfx_landscape_tools.tacagendaproject import TACAgendaProject
 
 class TestConfig(unittest.TestCase):
-    
+
     logging.basicConfig(
         level=logging.DEBUG,
         format="%(asctime)s [%(levelname)s] %(message)s",
@@ -31,7 +31,7 @@ class TestConfig(unittest.TestCase):
             logging.FileHandler("debug.log",mode="w"),
         ]
     )
-    
+
     def setUp(self):
         logging.getLogger().debug("Running {}".format(unittest.TestCase.id(self)))
 
@@ -85,7 +85,7 @@ missingcsvfile: foo.csv
             self.assertEqual(config.missingcsvfile,"foo.csv")
 
         os.unlink(tmpfilename.name)
-    
+
     def testLoadConfigDefaults(self):
         testconfigfilecontents = """
 project: a09410000182dD2AAI # Academy Software Foundation
@@ -193,7 +193,6 @@ missingcsvfile: missing.csv
 
         with open(tmpfilename.name) as fp:
             config = Config(fp,view='undefined')
-            
             self.assertEqual(config.view,Config.view)
 
         os.unlink(tmpfilename.name)

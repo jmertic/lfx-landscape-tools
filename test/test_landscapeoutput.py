@@ -24,7 +24,7 @@ from lfx_landscape_tools.lfxprojects import LFXProjects
 from lfx_landscape_tools.tacagendaproject import TACAgendaProject
 
 class TestLandscapeOutput(unittest.TestCase):
-    
+
     logging.basicConfig(
         level=logging.DEBUG,
         format="%(asctime)s [%(levelname)s] %(message)s",
@@ -32,10 +32,10 @@ class TestLandscapeOutput(unittest.TestCase):
             logging.FileHandler("debug.log",mode="w"),
         ]
     )
-    
+
     def setUp(self):
         logging.getLogger().debug("Running {}".format(unittest.TestCase.id(self)))
-        with open("{}/data.yml".format(os.path.dirname(__file__)), 'r', encoding="utf8", errors='ignore') as fileobject:   
+        with open("{}/data.yml".format(os.path.dirname(__file__)), 'r', encoding="utf8", errors='ignore') as fileobject:
             responses.get('https://raw.githubusercontent.com/cncf/landscape2/refs/heads/main/docs/config/data.yml', body=fileobject.read())
         responses.add(
             method=responses.GET,

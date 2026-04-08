@@ -23,7 +23,7 @@ from lfx_landscape_tools.lfxprojects import LFXProjects
 from lfx_landscape_tools.tacagendaproject import TACAgendaProject
 
 class TestLFXMembers(unittest.TestCase):
-    
+
     logging.basicConfig(
         level=logging.DEBUG,
         format="%(asctime)s [%(levelname)s] %(message)s",
@@ -31,10 +31,10 @@ class TestLFXMembers(unittest.TestCase):
             logging.FileHandler("debug.log",mode="w"),
         ]
     )
-    
+
     def setUp(self):
         logging.getLogger().debug("Running {}".format(unittest.TestCase.id(self)))
-        with open("{}/data.yml".format(os.path.dirname(__file__)), 'r', encoding="utf8", errors='ignore') as fileobject:   
+        with open("{}/data.yml".format(os.path.dirname(__file__)), 'r', encoding="utf8", errors='ignore') as fileobject:
             responses.get('https://raw.githubusercontent.com/cncf/landscape2/refs/heads/main/docs/config/data.yml', body=fileobject.read())
         responses.add(
             method=responses.GET,
@@ -94,7 +94,7 @@ class TestLFXMembers(unittest.TestCase):
             url=LFXMembers.endpointURL.format('aswf'),
             body='[{"ID":"0014100000Te1TUAAZ","Name":"ConsenSys AG","CNCFLevel":"","OrganizationDescription":"this org is cool","LinkedInURL":"dog.com","CrunchBaseURL":"https://crunchbase.com/organization/consensus-systems--consensys-","Logo":"https://lf-master-organization-logos-prod.s3.us-east-2.amazonaws.com/consensys_ag.svg","Membership":{"Family":"Membership","ID":"01t41000002735aAAA","Name":"Premier Membership","Status":"Active"},"Slug":"hyp","StockTicker":"","ProjectName":"Academy Software Foundation (ASWF)","Twitter":"","Website":"consensys.net"}]'
             )
-        
+
         config = Config()
         config.project = 'tlf2'
         with unittest.mock.patch('requests_cache.CachedSession', requests.Session):
@@ -116,7 +116,7 @@ class TestLFXMembers(unittest.TestCase):
         self.assertEqual(members.members[1].homepage_url,"https://hitachi-systems.com/")
         self.assertIsNone(members.members[1].twitter)
         self.assertNotIn('Project Membership / Academy Software Foundation (ASWF)',members.members[1].second_path)
-    
+
     @responses.activate
     def testLoadData(self):
         responses.add(
@@ -129,7 +129,7 @@ class TestLFXMembers(unittest.TestCase):
             url=LFXMembers.endpointURL.format('aswf'),
             body='[{"ID":"0014100000Te1TUAAZ","Name":"ConsenSys AG","CNCFLevel":"","OrganizationDescription":"this org is cool","LinkedInURL":"dog.com","CrunchBaseURL":"https://crunchbase.com/organization/consensus-systems--consensys-","Logo":"https://lf-master-organization-logos-prod.s3.us-east-2.amazonaws.com/consensys_ag.svg","Membership":{"Family":"Membership","ID":"01t41000002735aAAA","Name":"Premier Membership","Status":"Active"},"Slug":"hyp","StockTicker":"","ProjectName":"Academy Software Foundation (ASWF)","Twitter":"","Website":"consensys.net"}]'
             )
-        
+
         config = Config()
         config.project = 'tlf2'
         config.addOtherProjectMemberships = True
@@ -152,7 +152,7 @@ class TestLFXMembers(unittest.TestCase):
         self.assertEqual(members.members[1].homepage_url,"https://hitachi-systems.com/")
         self.assertIsNone(members.members[1].twitter)
         self.assertNotIn('Project Membership / Academy Software Foundation (ASWF)',members.members[1].second_path)
-    
+
     @responses.activate
     def testLoadDataMissingLogo(self):
         config = Config()

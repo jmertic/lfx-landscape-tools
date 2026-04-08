@@ -16,6 +16,7 @@ from lfx_landscape_tools.tacagendaproject import TACAgendaProject
 
 from datetime import datetime
 from argparse import ArgumentParser,FileType
+import argparse
 import os
 import subprocess
 from os import path
@@ -40,7 +41,7 @@ class Cli:
 
         lfx_parent = ArgumentParser(add_help=False)
         lfx_parent.add_argument("-c", "--config", dest="configfile", default=self._defaultconfigfile,
-                                type=FileType('r'), help="name of YAML config file")
+                                help="name of YAML config file")
         lfx_parent.add_argument("-d", "--dir", dest="basedir", default=".",
                                 type=self._dir_path, help="path to where landscape directory is")
 
