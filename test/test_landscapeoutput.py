@@ -218,7 +218,7 @@ landscape:
         member.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society'
         member.repo_url = "https://github.com/foo/bar"
         members.members.append(member)
-        
+
         landscape = LandscapeOutput(config=Config())
         with unittest.mock.patch('lfx_landscape_tools.svglogo.SVGLogo.save') as mock_svglogo_save:
             mock_svglogo_save.return_value = 'Gold.svg'
@@ -235,7 +235,7 @@ landscape:
 
     def testSyncItemInLandscape(self):
         members = LFXProjects(loadData=False,config=Config())
-        
+
         member = Member()
         member.name = 'test'
         member.homepage_url = 'https://foo.com'

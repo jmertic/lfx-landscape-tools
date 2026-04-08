@@ -334,65 +334,87 @@ class Member:
 
         self.__extra = endextra
 
-    def toLandscapeItemAttributes(self):
-        returnentry = {'item': None}
+    def _get_nested_attr(self, key, subkey=None, subsubkey=None):
+        """Helper to safely fetch nested attributes from the object."""
+        data = getattr(self, key, {})
+        if not data or not isinstance(data, dict):
+            return None
 
-        logging.getLogger().debug("Processing into landscape item attributes")
-        for key,value in self.itemschema.items():
-            if key == 'name':
-                returnentry['name'] = "{}{}".format(self.name,self.entrysuffix)
-            elif key == 'logo' and isinstance(self.__logo,SVGLogo):
-                returnentry['logo'] = self.__logo.filename(self.name)
-            elif not getattr(self,key,None):
+        val = data.get(subkey)
+        if subsubkey and isinstance(val, dict):
+            return val.get(subsubkey)
+        return val
+
+    def _map_schema_item(self, key, value):
+        """Maps a single top-level schema key to its value."""
+        if key == 'name':
+            return f"{self.name}{self.entrysuffix}"
+        if key == 'logo' and isinstance(self.__logo, SVGLogo):
+            return self.__logo.filename(self.name)
+
+        attr_val = getattr(self, key, None)
+        if not attr_val:
+            return None
+
+        # Handle nested dictionary mapping (Recursion or Helpers)
+        if isinstance(value, dict):
+            return self._build_nested_attributes(key, value)
+
+        return attr_val
+
+    def _build_nested_attributes(self, key, schema_dict):
+        """Handles the nested dictionary logic (previously 3 loops deep)."""
+        result = {}
+        for subkey, subvalue in schema_dict.items():
+            val = self._get_nested_attr(key, subkey)
+            if not val:
                 continue
-            elif isinstance(value,dict):
-                returnentry[key] = {}
-                for subkey, subvalue in value.items():
-                    if getattr(self,key,[]).get(subkey):
-                        if isinstance(subvalue,dict) and subkey not in ['annotations']:
-                            returnentry[key][subkey] = {}
-                            for subsubkey, subsubvalue in subvalue.items():
-                                if getattr(self,key,[]).get(subkey).get(subsubkey):
-                                    returnentry[key][subkey][subsubkey] = getattr(self,key,[]).get(subkey).get(subsubkey)
-                        else:
-                            returnentry[key][subkey] = getattr(self,key,[]).get(subkey)
-                if returnentry[key] == {}:
-                    del returnentry[key]
+
+            # Handle 3rd level depth (subsubkeys)
+            if isinstance(subvalue, dict) and subkey != 'annotations':
+                sub_result = {ss_k: self._get_nested_attr(key, subkey, ss_k)
+                             for ss_k in subvalue.keys()
+                             if self._get_nested_attr(key, subkey, ss_k)}
+                if sub_result:
+                    result[subkey] = sub_result
             else:
-                returnentry[key] = getattr(self,key)
-            logging.getLogger().debug("Setting '{}' to '{}'".format(key,returnentry.get(key)))
+                result[subkey] = val
+        return result or None
+
+    def toLandscapeItemAttributes(self):
+        """Converts the member object attributes into the format that would go into the landscape file entry."""
+        logging.getLogger().debug("Processing into landscape item attributes")
+
+        returnentry = {k: self._map_schema_item(k, v) for k, v in self.itemschema.items()}
+        returnentry = {'item': None} | {k: v for k, v in returnentry.items() if v is not None}
 
         if self.project_org:
-            additional_repos = [] #returnentry.get('additional_repos',[])
-            for repo_url in self._getPinnedGithubReposFromGithubOrg(self.project_org):
-                if repo_url != self.repo_url:
-                    additional_repos.append({'repo_url':repo_url})
-            returnentry['additional_repos'] = additional_repos
-            logging.getLogger().debug("Setting 'additional_repos' to '{}' for '{}'".format(returnentry.get('additional_repos'),self.name))
-            # Put the project_org in annotations
-            if not returnentry.get('extra'):
-                returnentry['extra'] = {}
-            if not returnentry['extra'].get('annotations'):
-                returnentry['extra']['annotations'] = {}
-            returnentry['extra']['annotations']['project_org'] = self.project_org
-            logging.getLogger().debug("Setting 'extra.annotations.project_org' to '{}' for '{}'".format(returnentry.get('extra',{}).get('annotations',{}).get('project_org'),self.name))
+            pinned = self._getPinnedGithubReposFromGithubOrg(self.project_org)
+            returnentry['additional_repos'] = [{'repo_url': u} for u in pinned if u != self.repo_url]
+            # Use a helper to set deep extra.annotations
+            self._set_extra_annotation(returnentry, 'project_org', self.project_org)
 
         if not self.crunchbase:
-            logging.getLogger().debug("No Crunchbase entry for '{}' - specifying name instead".format(self.name))
-            returnentry['organization'] = {}
-            returnentry['organization']['name'] = self.name
+            returnentry.pop('crunchbase', None)
+            returnentry['organization'] = {'name': self.name}
             if self.linkedin:
                 returnentry['organization']['linkedin'] = self.linkedin
-            if returnentry.get('crunchbase'):
-                del returnentry['crunchbase']
 
         if self.linkedin:
-            logging.getLogger().debug("Setting 'extra.linkedin_url' to '{}' for '{}'".format(self.linkedin,self.name))
-            if not returnentry.get('extra'):
-                returnentry['extra'] = {}
-            returnentry['extra']['linkedin_url'] = self.linkedin
+            self._set_extra_field(returnentry, 'linkedin_url', self.linkedin)
 
         return returnentry
+
+    def _set_extra_annotation(self, entry, key, value):
+        """Helper to handle the messy dictionary nesting for annotations."""
+        extra = entry.setdefault('extra', {})
+        annotations = extra.setdefault('annotations', {})
+        annotations[key] = value
+
+    def _set_extra_field(self, entry, key, value):
+        """Helper to set a field directly in the extra dict."""
+        extra = entry.setdefault('extra', {})
+        extra[key] = value
 
     def isValidLandscapeItem(self):
         return self.homepage_url and self.logo and self.name
@@ -408,61 +430,57 @@ class Member:
 
         return invalidAttributes
 
-    def overlay(self, membertooverlay: Self, onlykeys: list = [], skipkeys: list = []):
+    def _update_nested_dict(self, attr_key, current_dict, overlay_dict):
+        """Helper to handle the deep dictionary and list logging/merging."""
+        logger = logging.getLogger()
+        for skey, sval in overlay_dict.items():
+            curr_sval = current_dict.get(skey, 'empty')
+            logger.debug(f"Checking for overlay '{attr_key}.{skey}' - current '{curr_sval}' - overlay '{sval}'")
+
+            if isinstance(sval, dict):
+                # Handle 3rd level depth
+                sub_dict = current_dict.setdefault(skey, {})
+                for s_skey, s_sval in sval.items():
+                    curr_ssval = sub_dict.get(s_skey, 'empty')
+                    logger.debug(f"Checking for overlay '{attr_key}.{skey}.{s_skey}' - current '{curr_ssval}' - overlay '{s_sval}'")
+                    if s_sval is not None and curr_ssval != s_sval:
+                        logger.debug(f"...Overlay '{attr_key}.{skey}.{s_skey}'\n.....Old: '{curr_ssval}'\n.....New: '{s_sval}'")
+                        sub_dict[s_skey] = s_sval
+            elif isinstance(sval, list):
+                new_list = self._combine_and_deduplicate(sval, current_dict.get(skey, []))
+                logger.debug(f"...Overlay '{attr_key}.{skey}'\n.....Old: '{current_dict.get(skey, [])}'\n.....New: '{new_list}'")
+                current_dict[skey] = new_list
+            elif sval is not None and curr_sval != sval:
+                logger.debug(sval)
+                logger.debug(f"...Overlay '{attr_key}.{skey}'\n.....Old: '{curr_sval}'\n.....New: '{sval}'")
+                current_dict[skey] = sval
+
+    def overlay(self, membertooverlay: 'Member', onlykeys: list = [], skipkeys: list = []):
         '''
-        Overlay another Member data onto this Member, overriding this Member's values with those 
+        Overlay another Member data onto this Member, overriding this Member's values with those
         from the other Member, and setting other Member's value in this Member if they aren't set
         '''
+        logger = logging.getLogger()
         for key in dir(membertooverlay):
-            if ( onlykeys and key not in onlykeys) or (skipkeys and key in skipkeys):
+            if key.startswith('__') or (onlykeys and key not in onlykeys) or (skipkeys and key in skipkeys):
                 continue
-            value = getattr(membertooverlay,key,None)
-            logging.getLogger().debug("Checking for overlay '{}' - current value '{}' - overlay value '{}'".format(key,getattr(self,key,None),value))
-            if isinstance(value,dict):
-                for subkey, subvalue in value.items():
-                    logging.getLogger().debug("Checking for overlay '{}.{}' - current value '{}' - overlay value '{}'".format(key,subkey,getattr(self,key,{}).get(subkey,'empty'),subvalue))
-                    if isinstance(subvalue,dict):
-                        for subsubkey, subsubvalue in subvalue.items():
-                            logging.getLogger().debug("Checking for overlay '{}.{}.{}' - current value '{}' - overlay value '{}'"
-                                    .format(key,subkey,subsubkey,getattr(self,key,{}).get(subkey,{}).get(subsubkey,'empty'),subsubvalue))
-                            if subsubvalue != None and getattr(self,key,{}).get(subkey,{}).get(subsubkey,None) != subsubvalue:
-                                logging.getLogger().debug("...Overlay '{}.{}.{}'".format(key,subkey,subsubkey))
-                                logging.getLogger().debug(".....Old Value - '{}'".format(getattr(self,key,{}).get(subkey,{}).get(subsubkey,'empty')))
-                                logging.getLogger().debug(".....New Value - '{}'".format(subsubvalue))
-                                if getattr(self,key,{}).get(subkey,False):
-                                    getattr(self,key)[subkey][subsubkey] = subsubvalue
-                                else:
-                                    setattr(self,key,{subkey:{subsubkey:subsubvalue}})
-                    elif isinstance(subvalue,list):
-                        if subvalue != []:
-                            logging.getLogger().debug("...Overlay '{}.{}'".format(key,subkey))
-                            logging.getLogger().debug(".....Old Value - '{}'".format(getattr(self,key,{}).get(subkey,[])))
-                            logging.getLogger().debug(".....New Value - '{}'".format(self._combine_and_deduplicate(subvalue,getattr(self,key,{}).get(subkey,[]))))
-                            if getattr(self,key,False):
-                                getattr(self,key)[subkey] = self._combine_and_deduplicate(subvalue,getattr(self,key,{}).get(subkey,[]))
-                            else:
-                                setattr(self,key,{subkey:self._combine_and_deduplicate(subvalue,getattr(self,key,{}).get(subkey,[]))})
-                    else:
-                        if subvalue != None and getattr(self,key,{}).get(subkey,None) != subvalue:
-                            logging.getLogger().debug("...Overlay '{}.{}'".format(key,subkey))
-                            logging.getLogger().debug(".....Old Value - '{}'".format(getattr(self,key,{}).get(subkey,'empty')))
-                            logging.getLogger().debug(".....New Value - '{}'".format(subvalue))
-                            if getattr(self,key,False):
-                                getattr(self,key)[subkey] = subvalue
-                            else:
-                                setattr(self,key,{subkey:subvalue})
-            elif isinstance(value,list):
-                if value != []:
-                    logging.getLogger().debug("...Overlay '{}'".format(key))
-                    logging.getLogger().debug(".....Old Value - '{}'".format(sorted(getattr(self,key,[]))))
-                    logging.getLogger().debug(".....New Value - '{}'".format(self._combine_and_deduplicate(value,getattr(self,key,[]))))
-                    setattr(self,key,self._combine_and_deduplicate(value,getattr(self,key,[])))
-            elif value != None and value != getattr(self,key,None):
-                logging.getLogger().debug("...Overlay '{}'".format(key))
-                logging.getLogger().debug(".....Old Value - '{}'".format(getattr(self,key,None)))
-                logging.getLogger().debug(".....New Value - '{}'".format(value))
-                setattr(self,key,value)
 
+            val = getattr(membertooverlay, key, None)
+            curr = getattr(self, key, None)
+            logger.debug(f"Checking for overlay '{key}' - current '{curr}' - overlay '{val}'")
+
+            if isinstance(val, dict):
+                base = curr if isinstance(curr, dict) else {}
+                self._update_nested_dict(key, base, val)
+                setattr(self, key, base)
+            elif isinstance(val, list):
+                logger.debug(f"...Overlay '{key}'\n.....Old: '{sorted(getattr(self, key, []))}'")
+                new_list = self._combine_and_deduplicate(val, getattr(self, key, []))
+                logger.debug(f".....New: '{new_list}'")
+                setattr(self, key, new_list)
+            elif val is not None and val != curr:
+                logger.debug(f"...Overlay '{key}'\n.....Old: '{curr}'\n.....New: '{val}'")
+                setattr(self, key, val)
 
     def _combine_and_deduplicate(self, list1, list2):
         """Combines two lists (potentially containing dictionaries) and removes duplicates."""
