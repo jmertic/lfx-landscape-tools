@@ -11,13 +11,14 @@ from urllib.parse import urlparse
 import logging
 import socket
 from typing import Self
+import time
 
 ## third party modules
 from url_normalize import url_normalize
 import validators
 import requests
 import requests_cache
-from github import Github, GithubException, RateLimitExceededException, Auth
+from github import Github, GithubException, RateLimitExceededException, Auth, UnknownObjectException
 import ruamel.yaml
 from bs4 import BeautifulSoup
 
@@ -144,7 +145,7 @@ class Member:
                 logging.debug(f"Organization or Repository not found: {org_name}")
                 return False
             except RateLimitExceededException:
-                sleep_time = g.rate_limiting_resettime - now()
+                sleep_time = g.rate_limiting_resettime - int(time.time())
                 logging.info(f"Rate limit hit. Sleeping for {sleep_time} seconds...")
                 time.sleep(max(sleep_time, 1))
             except GithubException as e:

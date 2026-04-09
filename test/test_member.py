@@ -6,12 +6,17 @@
 # encoding=utf8
 
 import unittest
+from unittest.mock import patch, MagicMock, PropertyMock
 import tempfile
 import os
 import responses
 import requests
 import requests_cache
 import logging
+import socket
+
+import ruamel.yaml
+from github import GithubException, UnknownObjectException, RateLimitExceededException
 
 from lfx_landscape_tools.config import Config
 from lfx_landscape_tools.cli import Cli
@@ -37,7 +42,7 @@ class TestMember(unittest.TestCase):
     def setUp(self):
         logging.getLogger().debug("Running {}".format(unittest.TestCase.id(self)))
         requests_cache.uninstall_cache()
-        with open("{}/data.yml".format(os.path.dirname(__file__)), 'r', encoding="utf8", errors='ignore') as fileobject:   
+        with open("{}/data.yml".format(os.path.dirname(__file__)), 'r', encoding="utf8", errors='ignore') as fileobject:
             responses.get('https://raw.githubusercontent.com/cncf/landscape2/refs/heads/main/docs/config/data.yml', body=fileobject.read())
         with open("{}/github_openassetio_response.html".format(os.path.dirname(__file__)), 'r', encoding="utf8", errors='ignore') as fileobject:
             responses.get("https://github.com/OpenAssetIO",body=fileobject.read())
@@ -93,6 +98,91 @@ class TestMember(unittest.TestCase):
         member.crunchbase = ''
         self.assertIsNone(member.crunchbase)
 
+    @patch('lfx_landscape_tools.member.Github')
+    def test_fetch_repo_404(self, mock_github):
+        """Test Path: Organization does not exist (404)."""
+        # Setup: Mock the search to raise UnknownObjectException
+        mock_instance = mock_github.return_value
+        mock_instance.search_repositories.side_effect = UnknownObjectException(404, "Not Found")
+
+        result = Member()._fetch_best_repo_via_api("fake-org")
+
+        self.assertFalse(result)
+        mock_instance.search_repositories.assert_called_once()
+
+    @patch('lfx_landscape_tools.member.time.time')
+    @patch('lfx_landscape_tools.member.time.sleep')
+    @patch('lfx_landscape_tools.member.Github')
+    def test_fetch_repo_rate_limit(self, mock_github, mock_sleep, mock_time):
+        """Test Path: Rate limit hit, then success."""
+        mock_instance = mock_github.return_value
+        mock_instance.rate_limiting_resettime = 100
+        mock_time.return_value = 90.0
+
+        mock_repo = MagicMock()
+        mock_repo.html_url = "https://github.com/org/repo"
+
+        mock_instance.search_repositories.side_effect = [
+            RateLimitExceededException(403, "Rate Limit"),
+            [mock_repo]
+        ]
+
+        result = Member()._fetch_best_repo_via_api("org")
+
+        self.assertEqual(result, "https://github.com/org/repo")
+        mock_sleep.assert_called_with(10)
+        self.assertEqual(mock_instance.search_repositories.call_count, 2)
+
+    @patch('lfx_landscape_tools.member.Github')
+    def test_fetch_repo_retry_on_502(self, mock_github):
+        """Test Path: Server error 502 triggers a retry."""
+        mock_instance = mock_github.return_value
+
+        # Create a mock exception with status 502
+        error_502 = GithubException(502, {"message": "bad gateway"})
+
+        mock_repo = MagicMock()
+        mock_repo.html_url = "https://github.com/org/repo"
+
+        # 502 error then success
+        mock_instance.search_repositories.side_effect = [error_502, [mock_repo]]
+
+        result = Member()._fetch_best_repo_via_api("org")
+
+        self.assertEqual(result, "https://github.com/org/repo")
+        self.assertEqual(mock_instance.search_repositories.call_count, 2)
+
+    @patch('lfx_landscape_tools.member.Github')
+    @patch('logging.getLogger')
+    def test_fetch_repo_github_exception_generic(self, mock_get_logger, mock_github):
+        """Test Path: GithubException with non-502 status (e.g., 403 or 422)."""
+        mock_instance = mock_github.return_value
+
+        error_data = {"message": "Resource not accessible by integration"}
+        generic_error = GithubException(status=403, data=error_data, headers={})
+
+        mock_instance.search_repositories.side_effect = generic_error
+
+        result = Member()._fetch_best_repo_via_api("org")
+
+        self.assertIsNone(result)
+        mock_get_logger.return_value.warning.assert_called_with(error_data)
+
+    @patch('lfx_landscape_tools.member.Github')
+    def test_fetch_repo_network_error(self, mock_github):
+        """Test Path: Network timeout triggers a retry."""
+        mock_instance = mock_github.return_value
+
+        mock_instance.search_repositories.side_effect = [
+            socket.timeout("Timeout"),
+            [] # Empty list (no repos found)
+        ]
+
+        result = Member()._fetch_best_repo_via_api("org")
+
+        self.assertEqual(result, '') # Returns empty string per your logic
+        self.assertEqual(mock_instance.search_repositories.call_count, 2)
+
     def testSetRepoNotValidOnEmpty(self):
         member = Member()
         member.name = 'test'
@@ -133,6 +223,67 @@ class TestMember(unittest.TestCase):
             attributes = member.toLandscapeItemAttributes()
             self.assertEqual(attributes['extra']['annotations']['project_org'],'https://github.com/OpenAssetIO')
             self.assertEqual(attributes['additional_repos'],[])
+
+    @patch.object(Member, '_isGitHubOrg', return_value=True)
+    @patch.object(Member, '_getPrimaryGitHubRepoFromGitHubOrg')
+    def test_repo_url_else_path(self, mock_get_repo, mock_is_org):
+        """Tests the 'else' logic (when found_repo_url is None/False)."""
+        mock_get_repo.return_value = None
+
+        member = Member()
+        member.repo_url = "https://github.com/cncf"
+
+        self.assertIsNone(member.repo_url)
+        self.assertIsNone(member.project_org)
+
+    @patch.object(Member, '_isGitHubOrg', return_value=True)
+    @patch.object(Member, '_getPrimaryGitHubRepoFromGitHubOrg')
+    def test_repo_url_except_path(self, mock_get_repo, mock_is_org):
+        """Tests the 'except ValueError' path."""
+        mock_get_repo.side_effect = ValueError("API Error")
+
+        with self.assertLogs(level='WARNING') as cm:
+            member = Member()
+            member.repo_url = "https://github.com/cncf"
+
+            # Verify
+            self.assertIn("No public repositories found", cm.output[0])
+            self.assertIsNone(member.project_org)
+
+    @patch.object(Member, '_isGitHubOrg', return_value=False)
+    def test_get_primary_repo_not_an_org(self, mock_is_org):
+        """Test Path 1: Not a GitHub Org (Line 162 fix)."""
+        test_url = "https://gitlab.com/something"
+
+        result = Member()._getPrimaryGitHubRepoFromGitHubOrg(test_url)
+
+        self.assertEqual(result, test_url)
+
+    @patch.object(Member, '_isGitHubOrg', return_value=False)
+    def test_get_pinned_not_an_org(self, mock_is_org):
+        """Test Path 1: Not a GitHub Org. Clears the 174 -> 175 jump."""
+        test_url = "https://gitlab.com/cncf"
+        result = Member()._getPinnedGithubReposFromGithubOrg(test_url)
+
+        self.assertIsInstance(result, list)
+        self.assertEqual(result[0], 'h')
+
+    @patch.object(Member, '_isGitHubOrg', return_value=True)
+    @patch('requests_cache.CachedSession.get')
+    @patch('logging.getLogger')
+    def test_get_pinned_http_error(self, mock_get_logger, mock_get, mock_is_org):
+        """Test Path 3: Handle RequestException (Pathological Path)."""
+        # Setup: Force raise_for_status to fail
+        mock_response = MagicMock()
+        mock_response.raise_for_status.side_effect = requests.exceptions.HTTPError("404 Client Error")
+        mock_get.return_value = mock_response
+
+        # Execute
+        result = Member()._getPinnedGithubReposFromGithubOrg("https://github.com/cncf")
+
+        # Verify
+        self.assertEqual(result, [])
+        mock_get_logger.return_value.error.assert_called()
 
     def testSetCrunchbaseNotValid(self):
         invalidCrunchbaseURLs = [
@@ -588,5 +739,64 @@ class TestMember(unittest.TestCase):
         self.assertIsNone(member.extra.get("reddit_url"))
         self.assertIsNone(member.extra.get("youtube_url"))
 
-if __name__ == '__main__':
-    unittest.main()
+    @patch('requests_cache.CachedSession.get')
+    @patch('logging.getLogger')
+    def test_init_request_exception(self, mock_get_logger, mock_get):
+        """Test Path 1: GitHub is down or URL is 404."""
+        mock_get.side_effect = requests.exceptions.RequestException("Connection Timeout")
+
+        Member()
+
+        mock_get_logger.return_value.error.assert_called()
+        args = mock_get_logger.return_value.error.call_args[0][0]
+        self.assertIn("Cannot load data file schema", args)
+        self.assertIn("Connection Timeout", args)
+
+    @patch('requests_cache.CachedSession.get')
+    @patch('ruamel.yaml.YAML.load')
+    @patch('logging.getLogger')
+    def test_init_yaml_exception(self, mock_get_logger, mock_yaml_load, mock_get):
+        """Test Path 2: File loads but the YAML is malformed."""
+        mock_response = MagicMock()
+        mock_response.text = "invalid: yaml: : :"
+        mock_get.return_value = mock_response
+
+        mock_yaml_load.side_effect = ruamel.yaml.YAMLError("Scanner Error")
+
+        Member()
+
+        mock_get_logger.return_value.error.assert_called()
+        args = mock_get_logger.return_value.error.call_args[0][0]
+        self.assertIn("is not valid YAML", args)
+        self.assertIn("Scanner Error", args)
+
+    @patch('requests_cache.CachedSession.get')
+    def test_init_success_path(self, mock_get):
+        """Test Path 3: The 'else' block (Success)."""
+        # Setup: Mock a valid response structure
+        mock_response = MagicMock()
+        mock_response.text = "valid yaml"
+        mock_get.return_value = mock_response
+
+        # Mock the nested dict structure expected in the 'else' block
+        valid_schema = {
+            'categories': [{
+                'subcategories': [{
+                    'items': [{'key': 'value'}]
+                }]
+            }]
+        }
+
+        with patch('ruamel.yaml.YAML.load', return_value=valid_schema):
+            m = Member()
+            self.assertEqual(m.itemschema, {'key': 'value'})
+
+    def test_sanitize_links_not_a_list(self):
+        """Test Path 1: Input is not a list (Clears 294 -> 295)."""
+        self.assertEqual(Member()._sanitize_links(None), [])
+        self.assertEqual(Member()._sanitize_links("not a list"), [])
+        self.assertEqual(Member()._sanitize_links({"name": "test"}), [])
+
+    def test_get_nested_attr_invalid_base(self):
+        """Test Path 1: Base attribute is missing or not a dict (Clears 341 -> 342)."""
+        self.assertIsNone(Member()._get_nested_attr('non_existent_key'))
