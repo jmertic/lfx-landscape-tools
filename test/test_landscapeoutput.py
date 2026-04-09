@@ -128,7 +128,7 @@ landscape:
         name: Bad
         items: []
 """)
-    
+
     @responses.activate
     def testLoadAndSaveLandscape(self):
         testlandscape = """
@@ -161,12 +161,12 @@ landscape:
             landscape = LandscapeOutput(config=config)
             landscapemembers = LandscapeMembers(config=config,loadData=False)
             with unittest.mock.patch('requests_cache.CachedSession', requests.Session):
-                landscapemembers.loadData()    
+                landscapemembers.loadData()
             with unittest.mock.patch('lfx_landscape_tools.svglogo.SVGLogo.save') as mock_svglogo_save:
                 mock_svglogo_save.return_value = 'here_global_b_v.svg'
                 landscape.load(members=landscapemembers)
             landscape.save()
-            
+
             with open(tmpfilename.name) as fp:
                 self.maxDiff = None
                 self.assertEqual(fp.read(),"""landscape:
@@ -189,7 +189,7 @@ landscape:
 
     def testAddItemToLandscape(self):
         members = LFXMembers(loadData=False,config=Config())
-        
+
         member = Member()
         member.name = 'test'
         member.homepage_url = 'https://foo.com'
@@ -199,7 +199,7 @@ landscape:
         member.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society'
         member.repo_url = "https://github.com/foo/bar"
         members.members.append(member)
-        
+
         member = Member()
         member.name = 'test2'
         member.homepage_url = 'https://foo.com'

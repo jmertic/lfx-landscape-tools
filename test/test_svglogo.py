@@ -6,6 +6,7 @@
 # encoding=utf8
 
 import unittest
+from unittest.mock import patch, mock_open, MagicMock
 import tempfile
 import responses
 import requests
@@ -78,6 +79,32 @@ class TestSVGLogo(unittest.TestCase):
 
     def testHostLogoContainsPNG(self):
         self.assertFalse(SVGLogo(contents="this is image data data:image/png;base64 dfdfdf").isValid())
+
+    @patch('builtins.open', new_callable=mock_open, read_data="svg_content_here")
+    @patch('lfx_landscape_tools.svglogo.logging.getLogger')
+    def test_load_from_file_success(self, mock_get_logger, mock_file):
+        """Test successful file loading and attribute setting."""
+        logo = SVGLogo.__new__(SVGLogo)
+        test_path = "/path/to/my_logo.svg"
+
+        logo._load_from_file(test_path)
+
+        self.assertEqual(logo._SVGLogo__contents, "svg_content_here")
+        self.assertEqual(logo._SVGLogo__filename, "my_logo.svg")
+
+        mock_get_logger.return_value.debug.assert_called_with("Filename loaded 'my_logo.svg'")
+        mock_file.assert_called_once_with(test_path, 'r')
+
+    @patch('builtins.open', side_effect=FileNotFoundError)
+    @patch('lfx_landscape_tools.svglogo.logging.getLogger')
+    def test_load_from_file_not_found(self, mock_get_logger, mock_file):
+        """Test behavior when the file does not exist."""
+        logo = SVGLogo.__new__(SVGLogo)
+        test_path = "non_existent.svg"
+
+        logo._load_from_file(test_path)
+
+        mock_get_logger.return_value.warning.assert_called_with(f"Logo '{test_path}' not found")
 
     @responses.activate
     def testHostLogoContainsText(self):
@@ -178,5 +205,39 @@ class TestSVGLogo(unittest.TestCase):
 
         self.assertEqual(str(cm.exception),'Adding caption failed: this is a file')
 
-if __name__ == '__main__':
-    unittest.main()
+    @patch('os.path.isdir')
+    @patch('os.makedirs')
+    @patch('builtins.open', new_callable=mock_open)
+    def test_save_creates_directory_if_missing(self, mock_file, mock_makedirs, mock_isdir):
+        """Test path 1: Directory doesn't exist, must be created."""
+        # Setup
+        logo = SVGLogo.__new__(SVGLogo)
+        logo._SVGLogo__contents = "<svg>data</svg>"
+        mock_isdir.return_value = False # Force the 'if' block to trigger
+
+        # Execute
+        result = logo.save("test_logo", path="./new_folder")
+
+        # Verify
+        mock_isdir.assert_called_with("./new_folder")
+        mock_makedirs.assert_called_once_with("./new_folder")
+        mock_file.assert_called_once()
+        self.assertEqual(result, logo.filename("test_logo"))
+
+    @patch('os.path.isdir')
+    @patch('builtins.open', side_effect=FileNotFoundError)
+    @patch('logging.getLogger')
+    def test_save_handles_file_not_found_error(self, mock_get_logger, mock_file, mock_isdir):
+        """Test path 2: Directory exists, but saving fails (FileNotFoundError)."""
+        # Setup
+        logo = SVGLogo.__new__(SVGLogo)
+        logo._SVGLogo__contents = "data"
+        mock_isdir.return_value = True # Skip makedirs
+
+        # Execute
+        logo.save("test_logo", path="./readonly_dir")
+
+        # Verify
+        mock_get_logger.return_value.error.assert_called_with(
+            "Cannot save 'test_logo.svg' in './readonly_dir'"
+        )

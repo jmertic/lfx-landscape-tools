@@ -58,7 +58,6 @@ class Config:
             data_loaded = ruamel.yaml.YAML(typ='safe', pure=True).load(config_file)
             self.view = view if self._isValidViewOption(view) else Config.view
             self.basedir = data_loaded.get('basedir',os.path.dirname(os.path.normpath(config_file.name)))
-            logging.getLogger().debug(data_loaded.get('slug'))
             self.slug = data_loaded.get('slug',self._lookupSlugFromProject(data_loaded.get('project')))
             self.project = data_loaded.get('project',self._lookupProjectFromSlug(self.slug))
             if not self.slug or not self.project:
