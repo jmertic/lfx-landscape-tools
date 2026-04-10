@@ -14,6 +14,7 @@ from contextlib import suppress
 
 ## third party modules
 import ruamel.yaml
+from ruamel.yaml.scalarstring import LiteralScalarString, FoldedScalarString
 
 from lfx_landscape_tools.config import Config
 from lfx_landscape_tools.members import Members
@@ -163,9 +164,9 @@ class LandscapeOutput:
 
     def _str_presenter(self, dumper, data):
         if '\n' in data:
-            return dumper.represent_literal_scalarstring(data)
+            return dumper.represent_literal_scalarstring(LiteralScalarString(data))
         if len(data.splitlines()) > 1:  # check for multiline string
-            return dumper.represent_folded_scalarstring(data)
+            return dumper.represent_folded_scalarstring(FoldedScalarString(data))
         return dumper.represent_str(data)
 
     def _none_representer(self, dumper, data):
