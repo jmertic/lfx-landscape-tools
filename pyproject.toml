@@ -17,7 +17,7 @@ ruamel-yaml = "^0.19.1"
 url-normalize = "^2.2.1"
 urllib3 = "^2.6.3"
 validators = "^0.35.0"
-click = "^8.3.1"
+click = "^8.3.2"
 check-jsonschema = "^0.37.1"
 beautifulsoup4 = "^4.14.3"
 
