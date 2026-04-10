@@ -41,7 +41,7 @@ class Cli:
 
         lfx_parent = ArgumentParser(add_help=False)
         lfx_parent.add_argument("-c", "--config", dest="configfile", default=self._defaultconfigfile,
-                                help="name of YAML config file")
+                                type=FileType('r'), help="name of YAML config file")
         lfx_parent.add_argument("-d", "--dir", dest="basedir", default=".",
                                 type=self._dir_path, help="path to where landscape directory is")
 
@@ -91,7 +91,7 @@ class Cli:
         try:
             args.func(args)
         except Exception as e:
-            logging.getLogger().debug(e)
+            logging.getLogger().debug(e, exc_info=True)
             parser.print_help()
 
         logging.getLogger().info("This took {} seconds".format(datetime.now() - self._starttime))
