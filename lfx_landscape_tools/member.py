@@ -62,7 +62,7 @@ class Member:
         except ruamel.yaml.YAMLError as e:
             logging.getLogger().error("Data file at {} is not valid YAML - error message '{}'".format(schemaURL,e))
         else:
-            self.itemschema = dataschema.get('categories',{})[0].get('subcategories',{})[0].get('items',{})[0]
+            self.itemschema = dataschema.get('categories',[])[0].get('subcategories',[])[0].get('items',[])[0]
 
     def __dir__(self):
         returnvalue = list(self.itemschema.keys())
@@ -323,7 +323,7 @@ class Member:
                 continue
 
             # 3. Categorize as Annotation or Extra
-            if key not in self.itemschema['extra']:
+            if key not in self.itemschema.get('extra',[]):
                 logger.debug(f"Moving Member.extra.{key} for '{self.name}' under 'annotations'")
                 endannotations[key] = value
             else:
