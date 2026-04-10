@@ -6,8 +6,12 @@
 # encoding=utf8
 
 import unittest
+from unittest.mock import patch, MagicMock
 import responses
 import logging
+
+import requests
+import ruamel.yaml
 
 from lfx_landscape_tools.config import Config
 from lfx_landscape_tools.cli import Cli
@@ -190,5 +194,3 @@ class TestMembers(unittest.TestCase):
         self.assertEqual(members1.members[1].name,'test2')
         self.assertEqual(members1.members[2].name,'test3')
 
-if __name__ == '__main__':
-    unittest.main()

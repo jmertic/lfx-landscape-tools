@@ -33,7 +33,7 @@ class Config:
     ]
     landscapeProjectsCategory = 'Projects'
     landscapeProjectsSubcategories = [
-       {"name": "All", "category": "All"} 
+       {"name": "All", "category": "All"}
     ]
     basedir = "."
     landscapefile = 'landscape.yml'
@@ -52,7 +52,7 @@ class Config:
     tacAgendaProjectUrl = None
     artworkRepoUrl = None
     addOtherProjectMemberships = False
-    
+
     def __init__(self, config_file: io.TextIOWrapper = None, view = None):
         if config_file:
             data_loaded = ruamel.yaml.YAML(typ='safe', pure=True).load(config_file)
@@ -87,33 +87,35 @@ class Config:
             self.addOtherProjectMemberships = data_loaded.get('addOtherProjectMemberships',Config.addOtherProjectMemberships)
 
     def _isValidViewOption(self,view):
-        return view in ['projects','members'] 
+        return view in ['projects','members']
 
     @property
     def landscapeCategory(self):
-        if self.view == 'projects':
-            return self.landscapeProjectsCategory
-        elif self.view == 'members':
-            return self.landscapeMembersCategory
+        mapping = {
+            'projects': self.landscapeProjectsCategory,
+            'members': self.landscapeMembersCategory
+        }
+        return mapping.get(self.view)
 
     @property
     def landscapeSubcategories(self):
-        if self.view == 'projects':
-            return self.landscapeProjectsSubcategories
-        elif self.view == 'members':
-            return self.landscapeMembersSubcategories
+        mapping = {
+            'projects': self.landscapeProjectsSubcategories,
+            'members': self.landscapeMembersSubcategories
+        }
+        return mapping.get(self.view)
 
     def _lookupProjectFromSlug(self, slug):
-        singleSlugEndpointURL = 'https://api-gw.platform.linuxfoundation.org/project-service/v1/public/projects?slug={}' 
+        singleSlugEndpointURL = 'https://api-gw.platform.linuxfoundation.org/project-service/v1/public/projects?slug={}'
         session = requests_cache.CachedSession()
         if slug:
             with session.get(singleSlugEndpointURL.format(slug)) as endpointResponse:
                 parentProject = endpointResponse.json()
-                if len(parentProject.get('Data')) > 0: 
+                if len(parentProject.get('Data')) > 0:
                     return parentProject.get('Data')[0].get("ProjectID")
-        
-        logging.getLogger().warning("Couldn't find project for slug '{}'".format(slug)) 
-        
+
+        logging.getLogger().warning("Couldn't find project for slug '{}'".format(slug))
+
         return None
 
     def _lookupSlugFromProject(self,project):
@@ -122,11 +124,11 @@ class Config:
         if project:
             with session.get(singleProjectEndpointURL.format(project)) as endpointResponse:
                 parentProject = endpointResponse.json()
-                if len(parentProject.get('Data')) > 0: 
+                if len(parentProject.get('Data')) > 0:
                     return parentProject.get('Data',[])[0].get("Slug")
-        
-        logging.getLogger().warning("Couldn't find slug for project '{}'".format(project)) 
-        
+
+        logging.getLogger().warning("Couldn't find slug for project '{}'".format(project))
+
         return None
 
     def _getlandscapeProjectsSubcategoriesFromLevels(self):

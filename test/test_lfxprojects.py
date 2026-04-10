@@ -40,22 +40,9 @@ class TestLFXProjects(unittest.TestCase):
             responses.get("https://github.com/OpenAssetIO",body=fileobject.read())
         with open("{}/github_openassetio_search_repo.json".format(os.path.dirname(__file__)), 'r', encoding="utf8", errors='ignore') as fileobject:
             responses.get("https://api.github.com:443/search/repositories?sort=stars&order=desc&q=org%3AOpenAssetIO&per_page=1000",body=fileobject.read())
-
-    @responses.activate
-    def testLoadData(self):
-        config = Config()
-        config.slug = 'aswf'
-        config.projectsAddTechnologySector = True
-        config.projectsAddIndustrySector = True
-        config.projectsAddPMOManagedStatus = True
-        config.projectsAddParentProject = True
-        config.artworkRepoUrl = "https://artwork.aswf.io/projects/{slug}"
-        members = LFXProjects(config=config,loadData=False)
-
-
         responses.add(
             method=responses.GET,
-            url=members.singleSlugEndpointUrl.format(slug='aswfs'),
+            url=LFXProjects.singleSlugEndpointUrl.format(slug='aswfs'),
             json={
               "Data": [ ],
               "Metadata": {
@@ -66,7 +53,7 @@ class TestLFXProjects(unittest.TestCase):
             })
         responses.add(
             method=responses.GET,
-            url=members.singleSlugEndpointUrl.format(slug=members.project),
+            url=LFXProjects.singleSlugEndpointUrl.format(slug="aswf"),
             json={
                 "Data": [
                     {
@@ -102,7 +89,7 @@ class TestLFXProjects(unittest.TestCase):
             })
         responses.add(
             method=responses.GET,
-            url=members.endpointURL.format(members.project),
+            url=LFXProjects.endpointURL.format("aswf"),
             json={
                 "Data": [
                     {
@@ -520,7 +507,6 @@ class TestLFXProjects(unittest.TestCase):
                     "comments_url": "https://api.github.com/repos/OpenAssetIO/OpenAssetIO/comments{/number}",
                     "issue_comment_url": "https://api.github.com/repos/OpenAssetIO/OpenAssetIO/issues/comments{/number}",
                     "contents_url": "https://api.github.com/repos/OpenAssetIO/OpenAssetIO/contents/{+path}",
-                    "compare_url": "https://api.github.com/repos/OpenAssetIO/OpenAssetIO/compare/{base}...{head}",
                     "merges_url": "https://api.github.com/repos/OpenAssetIO/OpenAssetIO/merges",
                     "archive_url": "https://api.github.com/repos/OpenAssetIO/OpenAssetIO/{archive_format}{/ref}",
                     "downloads_url": "https://api.github.com/repos/OpenAssetIO/OpenAssetIO/downloads",
@@ -751,6 +737,17 @@ class TestLFXProjects(unittest.TestCase):
                 }
             )
 
+    @responses.activate
+    def testLoadData(self):
+        config = Config()
+        config.slug = 'aswf'
+        config.projectsAddTechnologySector = True
+        config.projectsAddIndustrySector = True
+        config.projectsAddPMOManagedStatus = True
+        config.projectsAddParentProject = True
+        config.artworkRepoUrl = "https://artwork.aswf.io/projects/{slug}"
+        members = LFXProjects(config=config,loadData=False)
+
         with unittest.mock.patch('requests_cache.CachedSession', requests.Session):
             members.loadData()
         self.assertEqual(members.members[0].name,"OpenCue")
@@ -761,6 +758,7 @@ class TestLFXProjects(unittest.TestCase):
         self.assertEqual(members.members[0].extra["reddit_url"],"https://www.reddit.com/r/vfx/")
         self.assertEqual(members.members[0].extra["pinterest_url"],"https://www.pinterest.com/linuxfoundation/")
         self.assertEqual(members.members[0].extra["youtube_url"],"https://www.youtube.com/user/TheLinuxFoundation")
+        self.assertEqual(members.members[0].extra["artwork_url"],"https://artwork.aswf.io/projects/opencue")
         self.assertEqual(members.members[0].logo.filename(members.members[0].name),"opencue.svg")
         self.assertEqual(members.members[0].membership,"All")
         self.assertEqual(members.members[0].homepage_url,"https://opencue.io/")
@@ -773,6 +771,8 @@ class TestLFXProjects(unittest.TestCase):
         self.assertEqual(members.members[1].membership,"All")
         self.assertEqual(members.members[1].repo_url,"https://github.com/PixarAnimationStudios/OpenTimelineIO")
         self.assertEqual(members.members[1].homepage_url,"https://github.com/PixarAnimationStudios/OpenTimelineIO")
+        self.assertIn("Technology Sector / Visual Effects", members.members[1].second_path)
+        self.assertIn("Technology Sector / Web & Application Development", members.members[1].second_path)
         self.assertIsNone(members.members[1].twitter)
         self.assertIn("PMO Managed / All", members.members[1].second_path)
         self.assertNotIn("Project Group / Academy Software Foundation (ASWF)",members.members[1].second_path)
@@ -785,12 +785,30 @@ class TestLFXProjects(unittest.TestCase):
         self.assertEqual(members.members[3].extra["lfx_slug"],"openassetio")
         self.assertEqual(members.members[3].repo_url,"https://github.com/OpenAssetIO/OpenAssetIO")
         self.assertIsNone(members.members[3].twitter)
+        self.assertEqual(members.members[3].project,"sandbox")
+        self.assertEqual(members.members[3].membership,"Sandbox")
+        self.assertIn("Technology Sector / Visual Effects", members.members[3].second_path)
         self.assertEqual(len(members.members),4)
+
+    @responses.activate
+    def testLoadDataNoAddCategoryNoAddParentProjectNoAddTechnologySectorNoArtwork(self):
+        config = Config()
+        config.slug = 'aswf'
+        config.projectsAddCategory = False
+        members = LFXProjects(config=config,loadData=False)
+
+        with unittest.mock.patch('requests_cache.CachedSession', requests.Session):
+            members.loadData()
+        self.assertIsNone(members.members[0].extra.get("artwork_url"))
+        self.assertNotIn("Project Group / Academy Software Foundation (ASWF)",members.members[0].second_path)
+        self.assertIsNone(members.members[3].project)
+        self.assertEqual(members.members[3].membership,"All")
+        self.assertNotIn("Technology Sector / Visual Effects", members.members[3].second_path)
 
     @responses.activate
     def testLoadDataSkippedRecords(self):
         config = Config()
-        config.slug = 'aswf'
+        config.slug = 'aswf2'
         config.projectsAddTechnologySector = True
         config.projectsAddIndustrySector = True
         config.projectsAddPMOManagedStatus = True
@@ -798,7 +816,7 @@ class TestLFXProjects(unittest.TestCase):
         members = LFXProjects(config=config,loadData=False)
         responses.add(
             method=responses.GET,
-            url=members.endpointURL.format(members.project),
+            url=LFXProjects.endpointURL.format("aswf2"),
             json={
                 "Data": [
                     {
@@ -812,7 +830,7 @@ class TestLFXProjects(unittest.TestCase):
                         "IndustrySector": "Motion Pictures",
                         "Name": "OpenCue",
                         "ParentID": "a09410000182dD2AAI",
-                        "ParentSlug": "aswf",
+                        "ParentSlug": "aswf2",
                         "ProjectID": "a092M00001IV3znQAD",
                         "ProjectLogo": "https://lf-master-project-logos-prod.s3.us-east-2.amazonaws.com/opencue.svg",
                         "ProjectType": "Project",
@@ -835,7 +853,7 @@ class TestLFXProjects(unittest.TestCase):
                         "IndustrySector": "Motion Pictures",
                         "Name": "OpenCue",
                         "ParentID": "a09410000182dD2AAI",
-                        "ParentSlug": "aswf",
+                        "ParentSlug": "aswf2",
                         "ProjectID": "a092M00001IV3znQAD",
                         "ProjectLogo": "https://lf-master-project-logos-prod.s3.us-east-2.amazonaws.com/opencue.svg",
                         "ProjectType": "Project",
@@ -858,7 +876,7 @@ class TestLFXProjects(unittest.TestCase):
                         "IndustrySector": "Motion Pictures",
                         "Name": "OpenTimelineIO",
                         "ParentID": "a09410000182dD2AAI",
-                        "ParentSlug": "aswf",
+                        "ParentSlug": "aswf2",
                         "ProjectID": "a092M00001If9uZQAR",
                         "ProjectLogo": "https://lf-master-project-logos-prod.s3.us-east-2.amazonaws.com/open-timeline-io.svg",
                         "ProjectType": "Project",
@@ -894,7 +912,7 @@ class TestLFXProjects(unittest.TestCase):
                         "ProjectLogo": "https://lf-master-project-logos-prod.s3.us-east-2.amazonaws.com/aswf.svg",
                         "ProjectType": "Project Group",
                         "RepositoryURL": "https://github.com/academysoftwarefoundation",
-                        "Slug": "aswf",
+                        "Slug": "aswf2",
                         "StartDate": "2018-08-10",
                         "Status": "Active",
                         "TechnologySector": "Visual Effects",
@@ -913,5 +931,6 @@ class TestLFXProjects(unittest.TestCase):
             members.loadData()
         self.assertEqual(members.members,[])
 
-if __name__ == '__main__':
-    unittest.main()
+    def testLookupParentProjectBySlugEmptySlug(self):
+        members = LFXProjects(config=Config(),loadData=False)
+        self.assertFalse(members.lookupParentProjectBySlug(None))

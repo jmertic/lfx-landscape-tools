@@ -29,7 +29,7 @@ class LandscapeMembers(Members):
     ]
     landscapefile = 'landscape.yml'
     memberSuffix = ''
-    
+
     def processConfig(self, config: type[Config]):
         self.landscapeCategory = config.landscapeCategory
         self.landscapeSubcategories = config.landscapeSubcategories
@@ -44,7 +44,7 @@ class LandscapeMembers(Members):
         landscape = {}
 
         try:
-            with open(self.landscapefile, 'r', encoding="utf8", errors='ignore') as fileobject: 
+            with open(self.landscapefile, 'r', encoding="utf8", errors='ignore') as fileobject:
                 logging.getLogger().debug("Successfully opened landscape file '{}'".format(self.landscapefile))
                 landscape = ruamel.yaml.YAML().load(fileobject)
                 logging.getLogger().debug("Successfully parsed yaml output in landscape file '{}'".format(self.landscapefile))

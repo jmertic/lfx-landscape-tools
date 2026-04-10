@@ -11,13 +11,14 @@ from urllib.parse import urlparse
 import logging
 import socket
 from typing import Self
+import time
 
 ## third party modules
 from url_normalize import url_normalize
 import validators
 import requests
 import requests_cache
-from github import Github, GithubException, RateLimitExceededException, Auth
+from github import Github, GithubException, RateLimitExceededException, Auth, UnknownObjectException
 import ruamel.yaml
 from bs4 import BeautifulSoup
 
@@ -61,7 +62,7 @@ class Member:
         except ruamel.yaml.YAMLError as e:
             logging.getLogger().error("Data file at {} is not valid YAML - error message '{}'".format(schemaURL,e))
         else:
-            self.itemschema = dataschema.get('categories',{})[0].get('subcategories',{})[0].get('items',{})[0]
+            self.itemschema = dataschema.get('categories',[])[0].get('subcategories',[])[0].get('items',[])[0]
 
     def __dir__(self):
         returnvalue = list(self.itemschema.keys())
@@ -144,7 +145,7 @@ class Member:
                 logging.debug(f"Organization or Repository not found: {org_name}")
                 return False
             except RateLimitExceededException:
-                sleep_time = g.rate_limiting_resettime - now()
+                sleep_time = g.rate_limiting_resettime - int(time.time())
                 logging.info(f"Rate limit hit. Sleeping for {sleep_time} seconds...")
                 time.sleep(max(sleep_time, 1))
             except GithubException as e:
@@ -322,7 +323,7 @@ class Member:
                 continue
 
             # 3. Categorize as Annotation or Extra
-            if key not in self.itemschema['extra']:
+            if key not in self.itemschema.get('extra',[]):
                 logger.debug(f"Moving Member.extra.{key} for '{self.name}' under 'annotations'")
                 endannotations[key] = value
             else:

@@ -13,7 +13,7 @@
 # List of categories in the landscape (required) (this field can also be named `landscape`).
 categories:
   - # Name of the category (required).
-    name: My category
+    name: My category2
 
     # List of subcategories in this category (required).
     subcategories:

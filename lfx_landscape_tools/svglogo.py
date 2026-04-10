@@ -24,60 +24,73 @@ class SVGLogo:
     __contents = ''
     __filename = None
 
-    def __init__(self, contents = None, filename = None, url = None, name = None):
+    def __init__(self, contents=None, filename=None, url=None, name=None):
+        self.__contents = ''
+        self.__filename = None
+
         if contents:
             self.__contents = contents
         elif filename:
-            try:
-                with open(filename,'r') as f:
-                    self.__contents = f.read()
-                    self.__filename = os.path.basename(filename)
-            except FileNotFoundError:
-                logging.getLogger().warning(f"Logo '{filename}' not found")
+            self._load_from_file(filename)
         elif url:
-            session = requests.Session()
-            retry = Retry(backoff_factor=0.5)
-            adapter = HTTPAdapter(max_retries=retry)
-            session.mount('http://', adapter)
-            session.mount('https://', adapter)
-            while True:
-                try:
-                    r = session.get(url, allow_redirects=True)
-                    if r.status_code == 200:
-                        self.__contents = r.content.decode('utf-8')
-                    break
-                except requests.exceptions.ConnectionError:
-                    logging.getLogger().warning(f"ConnectionError with '{url}'")
-                    break
-                except requests.exceptions.ChunkedEncodingError:
-                    pass
-                except UnicodeDecodeError:
-                    logging.getLogger().warning(f"UnicodeDecodeError with '{url}'")
-                    break
+            self._load_from_url(url)
         elif name:
-           width = len(max(name.split(" "),key=len)) * 34
-           height = len(name.split(" ")) * 65
-           with tempfile.TemporaryFile() as fp:
-                with cairo.SVGSurface(fp, width, height) as surface:
-                    context = cairo.Context(surface)
-                    context.set_source_rgb(0,0,0)
-                    context.set_font_size(60)
-                    context.select_font_face(
-                        "cairo:monospace", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
-                    context.move_to(0,50)
-                    parts = name.split(" ")
-                    n = 2
-                    for part in parts:
-                        context.show_text(part)
-                        context.move_to(0,n*60)
-                        n += 1
-                    context.stroke()
-                    context.save()
-                fp.seek(0)
-                self.__contents = fp.read().decode('utf-8')
+            self._generate_from_name(name)
+
+    def _load_from_file(self, filename):
+        """Helper to handle file IO complexity."""
+        try:
+            with open(filename, 'r') as f:
+                self.__contents = f.read()
+                self.__filename = os.path.basename(filename)
+                logging.getLogger().debug(f"Filename loaded '{self.__filename}'")
+        except FileNotFoundError:
+            logging.getLogger().warning(f"Logo '{filename}' not found")
+
+    def _load_from_url(self, url):
+        """Helper to handle HTTP request and retry complexity."""
+        session = requests.Session()
+        session.mount('http://', HTTPAdapter(max_retries=Retry(backoff_factor=0.5)))
+        session.mount('https://', HTTPAdapter(max_retries=Retry(backoff_factor=0.5)))
+
+        while True:
+            try:
+                r = session.get(url, allow_redirects=True, timeout=10)
+                if r.status_code == 200:
+                    self.__contents = r.content.decode('utf-8')
+                    logging.getLogger().debug(f"URL loaded '{url}'")
+                break
+            except requests.exceptions.ChunkedEncodingError:
+                pass
+            except (requests.exceptions.RequestException, UnicodeDecodeError) as e:
+                logging.getLogger().warning(f"Failed to load logo from URL '{url}': {e}")
+                break
+
+    def _generate_from_name(self, name):
+        """Helper to handle Cairo SVG generation complexity."""
+        parts = name.split(" ")
+        width = len(max(parts, key=len)) * 34
+        height = len(parts) * 65
+
+        with tempfile.TemporaryFile() as fp:
+            with cairo.SVGSurface(fp, width, height) as surface:
+                ctx = cairo.Context(surface)
+                ctx.set_source_rgb(0, 0, 0)
+                ctx.set_font_size(60)
+                ctx.select_font_face("cairo:monospace", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
+
+                for n, part in enumerate(parts, start=1):
+                    ctx.move_to(0, n * 50)
+                    ctx.show_text(part)
+
+                ctx.stroke()
+                ctx.save()
+            fp.seek(0)
+            logging.getLogger().debug(f"Generated logo from name {name}")
+            self.__contents = fp.read().decode('utf-8')
 
     def __str__(self):
-        return self.__contents
+        return str(self.__contents or '')
 
     def filename(self, name):
         return self.__filename if self.__filename else "{}.svg".format(slugify(os.path.splitext(name)[0],separator='_'))
