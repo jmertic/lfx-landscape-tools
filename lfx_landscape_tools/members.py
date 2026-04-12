@@ -44,7 +44,7 @@ class Members(ABC):
 
         normalizedname = self.normalizeName(name)
         normalizedhomepage_url = self.normalizeURL(homepage_url)
-        normalizedrepo_url = self.normalizeURL(homepage_url)
+        normalizedrepo_url = self.normalizeURL(repo_url)
 
         logger = logging.getLogger()
         logger.debug("Looking for '{}'".format(normalizedname))

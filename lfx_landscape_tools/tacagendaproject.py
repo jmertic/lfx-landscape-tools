@@ -105,11 +105,11 @@ query($org: String!, $number: Int!) {
             return None
 
         csvRows = []
+        project_data = ''
         try:
             project_data = json.loads(result.stdout)
-        except Exception as e:
-            logger.debug(e)
-            logger.error("Invalid json: '{}'".format(json_project_data))
+        except json.decoder.JSONDecodeError as e:
+            logger.error("Invalid json: '{}'".format(project_data))
             return None
 
         logger.info('Found {} records'.format(len(project_data)))
@@ -133,27 +133,33 @@ query($org: String!, $number: Int!) {
             if self.assignSIGs and projectdetailsfromlfxcommittee.get('category') != 'SIG':
                 member.second_path = ['SIG / {}'.format(item.get('custom_fields',{}).get('SIG','No SIG'))]
             extra['lfx_slug'] = projectdetailsfromlfxcommittee.get('slug')
-            session = requests_cache.CachedSession()
-            chair = []
-            if projectdetailsfromlfxcommittee.get('project_id') and projectdetailsfromlfxcommittee.get('committee_id'):
-                with session.get(self.pcc_committee_url.format(
-                        project_id=projectdetailsfromlfxcommittee.get('project_id'), \
-                        committee_id=projectdetailsfromlfxcommittee.get('committee_id'))) \
-                        as endpointResponse:
-                    try:
-                        memberList = endpointResponse.json()
-                        for record in memberList.get('Data',[]):
-                            if record.get('Role') in ['Chair','Vice Chair']:
-                                logger.info("Found '{} {}' for the role '{}".format(record.get('FirstName').title(),record.get('LastName').title(),record.get('Role')))
-                                chair.append('{} {}'.format(record.get('FirstName').title(),record.get('LastName').title()))
-                            elif record.get('Role') == 'TAC/TOC Representative':
-                                annotations["TAC_representative"] = '{} {}'.format(record.get('FirstName').title(),record.get('LastName').title())
-                    except Exception as e:
-                        logger.error("Couldn't load TSC Committee data for '{project}' - {error}".format(project=member.name,error=e))
-            annotations['chair'] = ", ".join(chair)
-            extra['annotations'] = annotations
+            extra['annotations'] = annotations | self._lookupprojectdetailsfromlfxcommittee(projectdetailsfromlfxcommittee,member.name)
             member.extra = extra
             self.members.append(member)
+
+    def _lookupprojectdetailsfromlfxcommittee(self, projectdetailsfromlfxcommittee, project_name = ''):
+        logger = logging.getLogger()
+        session = requests_cache.CachedSession()
+        annotations = {}
+        chair = []
+        if projectdetailsfromlfxcommittee.get('project_id') and projectdetailsfromlfxcommittee.get('committee_id'):
+            with session.get(self.pcc_committee_url.format(
+                    project_id=projectdetailsfromlfxcommittee.get('project_id'), \
+                    committee_id=projectdetailsfromlfxcommittee.get('committee_id'))) \
+                    as endpointResponse:
+                try:
+                    memberList = endpointResponse.json()
+                    for record in memberList.get('Data',[]):
+                        if record.get('Role') in ['Chair','Vice Chair']:
+                            logger.info("Found '{} {}' for the role '{}".format(record.get('FirstName').title(),record.get('LastName').title(),record.get('Role')))
+                            chair.append('{} {}'.format(record.get('FirstName').title(),record.get('LastName').title()))
+                        elif record.get('Role') == 'TAC/TOC Representative':
+                            annotations["TAC_representative"] = '{} {}'.format(record.get('FirstName').title(),record.get('LastName').title())
+                except Exception as e:
+                    logger.error(f"Couldn't load TSC Committee data for '{project_name}' - {e}")
+        annotations['chair'] = ", ".join(chair)
+
+        return annotations
 
     def _lookupProjectAndCommitteeDetailsByLFXURL(self,url):
         urlparts = urlparse(url).path.split('/')

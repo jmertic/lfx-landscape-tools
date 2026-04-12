@@ -6,10 +6,12 @@
 # encoding=utf8
 
 import unittest
+from unittest.mock import patch, mock_open, MagicMock
 import responses
 import requests
 import logging
 import os
+import json
 
 from lfx_landscape_tools.config import Config
 from lfx_landscape_tools.cli import Cli
@@ -443,5 +445,91 @@ class TestTACAgendaProjects(unittest.TestCase):
         self.assertIsNone(members.gh_org)
         self.assertIsNone(members.gh_project_id)
 
-if __name__ == '__main__':
-    unittest.main()
+    @patch('subprocess.run')
+    @patch('requests_cache.CachedSession.get')
+    def test_loadData_committee_processing_exception(self, mock_get, mock_run):
+        """Covers line 151: Exception during Committee data processing."""
+
+        # 1. Mock GH CLI to return one project
+        mock_run.return_value = MagicMock(
+            returncode=0,
+            stdout=json.dumps([{
+                'title': 'Test Project',
+                'created': '2023-01-01Z',
+                'custom_fields': {
+                    'PCC TSC Committee URL': 'https://pc.lfx.dev/project/1/collaboration/committees/2'
+                }
+            }])
+        )
+
+        # 2. Mock the LFX Project lookup to succeed
+        # 3. Mock the Committee API to return invalid data structure (e.g., None)
+        #    This will cause memberList.get('Data', []) to throw an AttributeError
+        mock_response = MagicMock()
+        mock_response.json.return_value = None # This triggers the Exception on line 154
+        mock_response.__enter__.return_value = mock_response
+
+        # Use side_effect to handle the two different GET calls in this method
+        def side_effect_logic(url, **kwargs):
+            if "project-service" in url:
+                m = MagicMock()
+                m.json.return_value = {'Data': [{'Slug': 's', 'Category': 'P'}]}
+                m.__enter__.return_value = m
+                return m
+            return mock_response # Return the "bad" response for the committee URL
+
+        mock_get.side_effect = side_effect_logic
+
+        # 4. Execute - This will hit line 161 (the logger.error for the exception)
+        config = Config()
+        config.tacAgendaProjectUrl = 'https://github.com/orgs/AcademySoftwareFoundation/projects/19/views/1'
+        tap = TACAgendaProject(config,loadData=False)
+        with self.assertLogs(level='ERROR') as cm:
+            with unittest.mock.patch('requests_cache.CachedSession', requests.Session):
+                tap._lookupprojectdetailsfromlfxcommittee({'project_id': 1, 'committee_id': 2})
+
+        # 5. Verify
+        self.assertTrue(any("Couldn't load TSC Committee data" in msg for msg in cm.output))
+
+    @patch('subprocess.run')
+    def test_loadData_json_parse_error(self, mock_run):
+        """Covers the except block for json.loads(result.stdout)"""
+        # Simulate valid return code but corrupted/non-json output
+        mock_run.return_value = MagicMock(
+            returncode=0,
+            stdout="Internal Server Error (Not JSON)"
+        )
+        config = Config()
+        config.tacAgendaProjectUrl = 'https://github.com/orgs/AcademySoftwareFoundation/projects/19/views/1'
+        tap = TACAgendaProject(config,loadData=False)
+
+        with self.assertLogs(level='ERROR') as cm:
+            with unittest.mock.patch('requests_cache.CachedSession', requests.Session):
+                result = tap.loadData()
+
+        self.assertIsNone(result)
+        print(cm.output)
+        self.assertTrue(any("Invalid json" in msg for msg in cm.output))
+
+    @patch('requests_cache.CachedSession.get')
+    def test_lookup_lfx_details_empty_data(self, mock_get):
+        """Clears 171 -> 174: URL is valid format, but API returns no projects."""
+        # 1. Setup the mock response to return an empty Data list
+        mock_response = MagicMock()
+        mock_response.json.return_value = {'Data': []}
+        mock_response.__enter__.return_value = mock_response
+        mock_get.return_value = mock_response
+
+        # 2. Use a URL that passes the 'if' parts check
+        url = 'https://pc.lfx.dev/project/123/collaboration/committees/456'
+
+        config = Config()
+        config.tacAgendaProjectUrl = 'https://github.com/orgs/AcademySoftwareFoundation/projects/19/views/1'
+        tap = TACAgendaProject(config,loadData=False)
+        with self.assertLogs(level='WARNING') as cm:
+            result = tap._lookupProjectAndCommitteeDetailsByLFXURL(url)
+
+        # 3. Verify it skipped line 171 and hit line 174
+        self.assertEqual(result, {})
+        self.assertTrue(any("Couldn't find project information" in msg for msg in cm.output))
+

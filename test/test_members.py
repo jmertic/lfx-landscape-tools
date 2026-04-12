@@ -133,6 +133,35 @@ class TestMembers(unittest.TestCase):
         self.assertFalse(members.find('dog','https://bar.com',repo_url='https://github.com/bar/foo'))
 
     @unittest.mock.patch("lfx_landscape_tools.members.Members.__abstractmethods__", set())
+    def test_find_complete_coverage(self):
+        # Setup one member in the list
+        mock_member = MagicMock()
+        mock_member.name = "Linux Foundation"
+        mock_member.homepage_url = "https://linuxfoundation.org"
+        mock_member.membership = "Silver"
+        mock_member.repo_url = "https://github.com/linuxfoundation"
+        mock_member.extra = {}
+        members_obj = Members(Config())
+        members_obj.members = [mock_member]
+
+        # --- Clear 66 -> 67 ---
+        # Provide name and URL, but NO slug/membership/repo_url.
+        # Forces entry into line 66 and makes it TRUE.
+        found_members = members_obj.find(name="Linux Foundation", homepage_url="https://linuxfoundation.org")
+        self.assertEqual("Linux Foundation",found_members[0].name)
+
+        # --- Clear 70 -> 53 ---
+        # Provide ONLY name. Forces logic to line 70.
+        # Case A: Name does NOT match (Clears the False branch of line 70)
+        self.assertEqual(members_obj.find(name="NonExistent Corp", homepage_url=None),[])
+        self.assertEqual(members_obj.find(name=None, homepage_url=None),[])
+
+        # --- Clear 71 -> 53 ---
+        # Case B: Name DOES match (Clears the True branch of line 70 and line 71)
+        found_members = members_obj.find(name="Linux Foundation", homepage_url=None)
+        self.assertEqual("Linux Foundation",found_members[0].name)
+
+    @unittest.mock.patch("lfx_landscape_tools.members.Members.__abstractmethods__", set())
     def testNormalizeNameEmptyOrg(self):
         members = Members(Config(),loadData=False)
         self.assertEqual(members.normalizeName(None),'')
