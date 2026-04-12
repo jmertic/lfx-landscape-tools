@@ -109,7 +109,7 @@ query($org: String!, $number: Int!) {
         try:
             project_data = json.loads(result.stdout)
         except json.decoder.JSONDecodeError as e:
-            logger.error("Invalid json: '{}'".format(project_data))
+            logger.error(f"Invalid json: '{project_data}' - Error: '{e}'")
             return None
 
         logger.info('Found {} records'.format(len(project_data)))
