@@ -800,3 +800,164 @@ class TestMember(unittest.TestCase):
     def test_get_nested_attr_invalid_base(self):
         """Test Path 1: Base attribute is missing or not a dict (Clears 341 -> 342)."""
         self.assertIsNone(Member()._get_nested_attr('non_existent_key'))
+
+    def test_get_nested_attr_triple_depth(self):
+        member = Member()
+        # Mock schema so 'level1' is recognized as a valid extra field, not an annotation
+        member.itemschema = {'extra': ['level1']}
+
+        # Set the data
+        member.extra = {'level1': {'level2': 'target_value'}}
+
+        # Trigger the 3rd level depth check (subsubkey)
+        # This will now find self.extra['level1']['level2']
+        result = member._get_nested_attr('extra', 'level1', 'level2')
+        self.assertEqual(result, 'target_value')
+
+    def test_build_nested_attributes_complex_schema(self):
+        member = Member()
+        member.name = "Test"
+
+        # 1. Provide a valid Crunchbase to keep the mapper from overwriting 'organization'
+        member.crunchbase = "https://www.crunchbase.com/organization/test"
+
+        # 2. Define the 3-level schema
+        member.itemschema = {
+            'organization': {
+                'custom': {
+                    'sub_custom': None
+                }
+            }
+        }
+
+        # 3. Populate the data
+        member.organization = {
+            'custom': {
+                'sub_custom': 'found_it'
+            }
+        }
+
+        # 4. Process
+        result = member.toLandscapeItemAttributes()
+
+        # 5. Assertions
+        # Now result['organization'] should contain the mapped nested data
+        self.assertIn('organization', result)
+        self.assertIn('custom', result['organization'])
+        self.assertEqual(result['organization']['custom']['sub_custom'], 'found_it')
+
+    @patch('requests_cache.CachedSession.get')
+    def test_final_branch_coverage_379(self, mock_get):
+        # 1. Mock the initial schema fetch so Member() doesn't crash or hit the web
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        # This minimal YAML satisfies the [0] indexing in Member.__init__
+        mock_resp.text = "categories: [{subcategories: [{items: [{}]}]}]"
+        mock_get.return_value = mock_resp
+
+        member = Member()
+        member.name = "TestProject"
+
+        # CRITICAL: Set a crunchbase so the 'if not self.crunchbase'
+        # block doesn't overwrite your organization dict later.
+        member.crunchbase = "https://www.crunchbase.com/organization/test"
+
+        # 2. Setup the itemschema to force the loop cycle.
+        # The key 'organization' triggers _build_nested_attributes.
+        # Inside that, we need TWO keys.
+        # The FIRST must be a dict (to hit 379).
+        # The SECOND must exist to force the loop back to the top (369).
+        member.itemschema = {
+            'organization': {
+                'nested_dict': {'deep_key': None}, # Hits line 379
+                'second_item': None                # Forces jump 379 -> 369
+            }
+        }
+
+        # 3. Provide the data that matches the schema
+        member.organization = {
+            'nested_dict': {'deep_key': 'value_1'},
+            'second_item': 'value_2'
+        }
+
+        # 4. Run the method
+        result = member.toLandscapeItemAttributes()
+
+        # 5. Verify the results to ensure the loop actually processed both
+        self.assertIn('organization', result)
+        self.assertEqual(result['organization']['nested_dict']['deep_key'], 'value_1')
+        self.assertEqual(result['organization']['second_item'], 'value_2')
+
+    def test_build_nested_attributes_or_none(self):
+        """Clears the 'or None' branch on line 383."""
+        member = Member()
+        # Call with a schema but no matching data in the member object
+        # result will be {} so it returns None
+        res = member._build_nested_attributes('organization', {'missing': {'key': None}})
+        self.assertIsNone(res)
+
+    def test_build_nested_attributes_full_loop_cycle(self):
+        """Clears 379 -> 369 by forcing the loop to continue after a sub_result match."""
+        member = Member()
+        member.name = "Test Member"
+        member.crunchbase = "https://www.crunchbase.com/organization/test"
+
+        # We need a schema with multiple items where the FIRST item
+        # triggers the sub_result logic to prove the loop continues.
+        member.itemschema = {
+            'organization': {
+                'deep_item': {      # Item 1: Triggers line 379
+                    'field_a': None
+                },
+                'shallow_item': None, # Item 2: Forces loop jump from 379 back to 369
+                'empty_item': None    # Item 3: Ensures loop can handle a skip
+            }
+        }
+
+        # Data for the member
+        member.organization = {
+            'deep_item': {
+                'field_a': 'value_a'
+            },
+            'shallow_item': 'value_b'
+            # 'empty_item' is missing to exercise the 'if not val: continue' on line 371
+        }
+
+        # Trigger the mapper
+        result = member.toLandscapeItemAttributes()
+
+        # Assertions to ensure all paths were exercised
+        org_res = result['organization']
+        self.assertEqual(org_res['deep_item']['field_a'], 'value_a')
+        self.assertEqual(org_res['shallow_item'], 'value_b')
+        self.assertNotIn('empty_item', org_res)
+
+    def test_build_nested_attributes_completion_loop(self):
+        """
+        Clears 379 -> 369 specifically.
+        Forces the interpreter to return to the loop header after line 379.
+        """
+        member = Member()
+        member.name = "CoverageTest"
+
+        # We use a dummy attribute to avoid all property logic
+        member.test_data = {
+            'first_nested': {'inner_key': 'value_1'}, # Item 1: Hits line 379
+            'second_item': 'value_2'                  # Item 2: Forces loop jump
+        }
+
+        # The schema MUST have two items, and the nested one MUST be first.
+        # We use collections.OrderedDict if you're on an old Python,
+        # but standard dicts work in 3.7+
+        test_schema = {
+            'first_nested': {'inner_key': None},
+            'second_item': None
+        }
+
+        # Execute the helper directly
+        result = member._build_nested_attributes('test_data', test_schema)
+
+        # If both items are in the result, the loop MUST have returned to 369
+        # after processing 'first_nested' at line 379.
+        self.assertEqual(result['first_nested']['inner_key'], 'value_1')
+        self.assertEqual(result['second_item'], 'value_2')
