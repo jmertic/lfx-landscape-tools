@@ -42,6 +42,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "chore: release ${{ steps.meta.outputs.VERSION }}"
+          base: main # Explicitly target the protected branch
           branch: "release-updates-${{ steps.meta.outputs.VERSION }}"
           title: "Release Updates for ${{ steps.meta.outputs.VERSION }}"
           body: |
