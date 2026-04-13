@@ -41,6 +41,7 @@ jobs:
           sed -i "s|uses: jmertic/lfx-landscape-tools@.* # .*|uses: jmertic/lfx-landscape-tools@${{ steps.meta.outputs.SHA }} # ${{ steps.meta.outputs.VERSION }}|" README.md
 
       - name: Create Pull Request
+        id: cpr
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -48,6 +49,7 @@ jobs:
           base: main # Explicitly target the protected branch
           branch: "release-updates-${{ steps.meta.outputs.VERSION }}"
           title: "Release Updates for ${{ steps.meta.outputs.VERSION }}"
+          signoff: true
           body: |
             Automated version updates for release ${{ steps.meta.outputs.VERSION }}.
             - Updated pyproject.toml
@@ -55,3 +57,11 @@ jobs:
           labels: |
             automated-pr
             release
+      - name: Enable Pull Request Automerge
+        if: steps.cpr.outputs.pull-request-number != ''
+        shell: bash
+        run: |
+          if [ "$(gh api repos/lfx-landscape-tools --jq '.allow_auto_merge')" = "true" ]; then
+            gh pr merge --squash --auto "${{ steps.cpr.outputs.pull-request-number }}" \
+            || gh pr merge --squash "${{ steps.cpr.outputs.pull-request-number }}"
+          fi
