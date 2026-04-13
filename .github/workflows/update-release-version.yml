@@ -37,10 +37,17 @@ jobs:
           # Replaces with the new SHA and current date
           sed -i "s|uses: jmertic/lfx-landscape-tools@.* # .*|uses: jmertic/lfx-landscape-tools@${{ steps.meta.outputs.SHA }} # ${{ steps.meta.outputs.VERSION }}|" README.md
 
-      - name: Commit and Push
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add pyproject.toml README.md
-          git commit -m "chore: release ${{ steps.meta.outputs.VERSION }} [skip ci]"
-          git push origin HEAD:${{ github.event.release.target_commitish }}
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: release ${{ steps.meta.outputs.VERSION }}"
+          branch: "release-updates-${{ steps.meta.outputs.VERSION }}"
+          title: "Release Updates for ${{ steps.meta.outputs.VERSION }}"
+          body: |
+            Automated version updates for release ${{ steps.meta.outputs.VERSION }}.
+            - Updated pyproject.toml
+            - Updated README.md SHA and Date
+          labels: |
+            automated-pr
+            release
