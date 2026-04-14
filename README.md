@@ -57,7 +57,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: jmertic/lfx-landscape-tools@3bb8e9399293d1c5ca59d247995d431064c043da # 20260413
+      - uses: jmertic/lfx-landscape-tools@ # 
         with:
           project_processing: skip # see options in action.yml
         env:
