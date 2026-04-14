@@ -1,7 +1,6 @@
 name: Update Release Version
 
 on:
-  workflow_dispatch:
   release:
     types: [published]
 
@@ -23,28 +22,14 @@ jobs:
       - name: Get Release Metadata
         id: meta
         run: |
-          run: |
-          # 1. Get the Tag Name
-          if [ "${{ github.event_name }}" = "release" ]; then
-            TAG_NAME="${{ github.event.release.tag_name }}"
-          else
-            # Fallback for manual runs: get the latest tag from git
-            TAG_NAME=$(git describe --tags --abbrev=0)
-          fi
-
-          # 2. Strip the 'v' for the VERSION output
-          VERSION=${TAG_NAME#v}
+          VERSION=${{ github.event.release.tag_name }}
+          echo "VERSION=${VERSION#v}" >> $GITHUB_OUTPUT
           
-          # 3. Get the SHA of that tag
-          SHA=$(git rev-parse $TAG_NAME)
-
-          # 4. Save to outputs
-          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
-          echo "SHA=$SHA" >> $GITHUB_OUTPUT
-          echo "TAG=$TAG_NAME" >> $GITHUB_OUTPUT
+          # The SHA that was actually tagged for the release
+          echo "SHA=$(git rev-parse ${{ github.event.release.tag_name }})" >> $GITHUB_OUTPUT
           
           # Debugging: This will show up in your Action logs so you can verify
-          echo "Processing Tag: $TAG_NAME (Version: $VERSION, SHA: $SHA)"
+          echo "Processing Version: $VERSION, SHA: $SHA"
 
       - name: Update pyproject.toml
         run: |
