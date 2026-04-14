@@ -71,10 +71,10 @@ class LFXMembers(Members):
                 member.membership = membership_name
                 member.homepage_url = record.get('Website')
                 member.description = record.get('OrganizationDescription')
-                member.logo = record.get('Logo') or SVGLogo(name=name)
-
-                if not record.get('Logo'):
+                member.logo = record.get('Logo')
+                if not member.logo:
                     logger.info(f"Creating text logo for '{name}'")
+                    member.logo = SVGLogo(name=name)
 
                 member.crunchbase = record.get('CrunchBaseURL')
                 member.twitter = record.get('Twitter')

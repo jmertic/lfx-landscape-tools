@@ -253,7 +253,7 @@ class Member:
     def logo(self, logo):
         if logo is None or logo == '':
             self.__logo = None
-            logging.getLogger().warning("Member.logo must be not be blank for '{name}'".format(name=self.name))
+            logging.getLogger().warning(f"Member.logo must be not be blank for '{self.name}'")
             return
         elif type(logo) is SVGLogo:
             self.__logo = logo
@@ -264,7 +264,7 @@ class Member:
 
         if not self.__logo.isValid():
             self.__logo = None
-            logging.getLogger().warning("Member.logo for '{name}' invalid format".format(name=self.name))
+            logging.getLogger().warning(f"Member.logo for '{self.name}' invalid format")
 
     def hostLogo(self, path = "./"):
         self.__logo.save(self.name,path)
