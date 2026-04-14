@@ -714,6 +714,42 @@ class TestMember(unittest.TestCase):
         with unittest.mock.patch("lfx_landscape_tools.svglogo.open", unittest.mock.mock_open(read_data="data")) as mock_file:
             membertooverlay.overlay(member)
 
+    def testExtraIsolationBetweenInstances(self):
+        # Regression: writing extras via overlay on one Member must not
+        # leak to other Member instances through a shared class-level dict.
+        a = Member()
+        a.name = 'a'
+        a.homepage_url = 'https://a.example/'
+
+        b = Member()
+        b.name = 'b'
+        b.homepage_url = 'https://b.example/'
+
+        source = Member()
+        source.name = 'a'
+        source.extra = {'annotations': {'contact': 'a@example.com'}}
+        a.overlay(source)
+
+        self.assertEqual(a.extra.get('annotations', {}).get('contact'), 'a@example.com')
+        self.assertEqual(b.extra, {})
+
+        c = Member()
+        c.name = 'c'
+        c.homepage_url = 'https://c.example/'
+        source2 = Member()
+        source2.name = 'c'
+        source2.extra = {'annotations': {'demo_url2': 'https://example.com/demo'}}
+        c.overlay(source2)
+
+        self.assertNotIn('contact', c.extra.get('annotations', {}))
+        self.assertEqual(c.extra.get('annotations', {}).get('demo_url2'), 'https://example.com/demo')
+
+        d = Member()
+        self.assertEqual(d.extra, {})
+        self.assertEqual(d.second_path, [])
+        self.assertEqual(d.organization, {})
+        self.assertEqual(d.additional_repos, [])
+
     @responses.activate
     def testHostLogo(self):
         with tempfile.TemporaryDirectory() as tempdir:

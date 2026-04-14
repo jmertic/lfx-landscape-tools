@@ -30,12 +30,8 @@ from lfx_landscape_tools.svglogo import SVGLogo
 class Member:
 
     membership = None
-    second_path = []
-    organization = {}
-    __extra = {}
     project = None
     project_org = None
-    additional_repos = []
     __name = None
     __homepage_url = None
     __logo = None
@@ -51,6 +47,15 @@ class Member:
     itemschema = []
 
     def __init__(self):
+        # Per-instance containers for mutable fields. Declaring these at
+        # class level would alias a single dict/list across every Member
+        # instance, causing values written to one member to surface on
+        # others (see sync_members leak symptoms).
+        self.second_path = []
+        self.organization = {}
+        self.__extra = {}
+        self.additional_repos = []
+
         # load in data schema from landscape2
         try:
             schemaURL = 'https://raw.githubusercontent.com/cncf/landscape2/refs/heads/main/docs/config/data.yml'
