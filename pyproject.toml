@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "lfx-landscape-tools"
-version = ""
+version = "20260414"
 description = "Collection of tools for automating the data management of a landscape from LFX"
 authors = ["John Mertic <jmertic@linuxfoundation.org>"]
 readme = "README.md"
