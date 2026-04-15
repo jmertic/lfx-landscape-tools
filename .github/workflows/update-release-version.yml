@@ -62,9 +62,12 @@ jobs:
         if: steps.cpr.outputs.pull-request-number != ''
         shell: bash
         run: |
-          if [ "$(gh api repos/lfx-landscape-tools --jq '.allow_auto_merge')" = "true" ]; then
-            gh pr merge --squash --auto "${{ steps.cpr.outputs.pull-request-number }}" \
-            || gh pr merge --squash "${{ steps.cpr.outputs.pull-request-number }}"
+          # Get the auto-merge setting using the full repository path
+          ALLOW_MERGE=$(gh api "repos/$GITHUB_REPOSITORY" --jq '.allow_auto_merge')
+
+          if [ "$ALLOW_MERGE" = "true" ]; then
+            # Attempt auto-merge, fallback to immediate squash merge if auto-merge fails to trigger
+            gh pr merge --squash --auto "${{ steps.cpr.outputs.pull-request-number }}" || gh pr merge --squash "${{ steps.cpr.outputs.pull-request-number }}"
           fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
