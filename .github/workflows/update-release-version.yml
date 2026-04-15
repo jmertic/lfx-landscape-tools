@@ -43,7 +43,7 @@ jobs:
 
       - name: Create Pull Request
         id: cpr
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8.1.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "chore: release ${{ steps.meta.outputs.VERSION }}"
@@ -66,3 +66,5 @@ jobs:
             gh pr merge --squash --auto "${{ steps.cpr.outputs.pull-request-number }}" \
             || gh pr merge --squash "${{ steps.cpr.outputs.pull-request-number }}"
           fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
