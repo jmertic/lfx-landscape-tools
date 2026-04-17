@@ -102,6 +102,58 @@ jobs:
 ```
 
 5) Run the `Build Landscape from LFX` GitHub Action following the instructions for [manually running a GitHub Action](https://docs.github.com/en/actions/managing-workflow-runs-and-deployments/managing-workflow-runs/manually-running-a-workflow) to test that it all works.
+6) (OPTIONAL BUT HIGHLY RECOMMENDED) Setup dependabot for keeping GitHub Actions updated automatically. Two files to add:
+
+First, `.github/dependabot.yml`.
+
+```yaml
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      all:
+        dependency-type: "production"
+```
+And second, `.github/workflows/dependabot-automerge.yml` ( dependent upon `GITHUB_TOKEN` being setup to automatically merge PRs as listed above ).
+
+```yaml
+name: Auto-merge Dependabot PRs
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  dependabot:
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        
+      - name: Approve PR
+        run: |
+          gh pr review --approve "${{ github.event.pull_request.number }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Enable auto-merge
+        run: |
+          gh pr merge \
+            --squash \
+            --auto \
+            "${{ github.event.pull_request.number }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
 
 ### Auto-merging landscape build changes
 
