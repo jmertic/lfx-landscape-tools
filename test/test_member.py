@@ -60,7 +60,6 @@ class TestMember(unittest.TestCase):
             member = Member()
             member.linkedin = validLinkedInURL
             self.assertEqual(member.linkedin,'https://www.linkedin.com/company/1nce')
-            self.assertEqual(member.toLandscapeItemAttributes().get('organization',{}).get('linkedin'),'https://www.linkedin.com/company/1nce')
 
     def testSetLinkedInNotValidOnEmpty(self):
         member = Member()
@@ -494,8 +493,6 @@ class TestMember(unittest.TestCase):
 
         self.assertEqual(dict.get('name'),member.name)
         self.assertEqual(dict.get('homepage_url'),member.homepage_url)
-        self.assertEqual(dict.get('organization',{}).get('name'),member.name)
-        self.assertEqual(dict.get('organization',{}).get('linkedin'),member.linkedin)
         self.assertIsNone(dict.get('logo'))
         self.assertIsNone(dict.get('item'))
         self.assertNotIn('crunchbase',dict)
@@ -599,7 +596,6 @@ class TestMember(unittest.TestCase):
         self.assertEqual(member.crunchbase, 'https://www.crunchbase.com/organization/visual-effects-society-bad')
         self.assertEqual(member.twitter,'https://twitter.com/mytwitter')
         self.assertIsNone(member.stock_ticker)
-        self.assertEqual(member.organization,{})
         self.assertEqual(member.extra['accepted'],"2023-05-14")
         self.assertEqual(member.extra['annotations']['bar'],'bar')
         self.assertEqual(member.extra['annotations']['foo'],'foo')
@@ -690,7 +686,6 @@ class TestMember(unittest.TestCase):
         self.assertEqual(member.crunchbase, 'https://www.crunchbase.com/organization/visual-effects-society')
         self.assertEqual(member.twitter,'https://twitter.com/mytwitter')
         self.assertIsNone(member.stock_ticker)
-        self.assertEqual(member.organization,{})
 
     def testOverlayItemThrowsException(self):
         membertooverlay = Member()
@@ -701,7 +696,6 @@ class TestMember(unittest.TestCase):
         membertooverlay.membership = 'Gold'
 
         membertooverlay.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society-bad'
-        membertooverlay.organization = {'name':'foo'}
 
         member = Member()
         member.name = 'test'
@@ -747,7 +741,6 @@ class TestMember(unittest.TestCase):
         d = Member()
         self.assertEqual(d.extra, {})
         self.assertEqual(d.second_path, [])
-        self.assertEqual(d.organization, {})
         self.assertEqual(d.additional_repos, [])
 
     @responses.activate

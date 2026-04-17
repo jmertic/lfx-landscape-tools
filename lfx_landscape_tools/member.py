@@ -52,7 +52,6 @@ class Member:
         # instance, causing values written to one member to surface on
         # others (see sync_members leak symptoms).
         self.second_path = []
-        self.organization = {}
         self.__extra = {}
         self.additional_repos = []
 
@@ -399,12 +398,6 @@ class Member:
             returnentry['additional_repos'] = [{'repo_url': u} for u in pinned if u != self.repo_url]
             # Use a helper to set deep extra.annotations
             self._set_extra_annotation(returnentry, 'project_org', self.project_org)
-
-        if not self.crunchbase:
-            returnentry.pop('crunchbase', None)
-            returnentry['organization'] = {'name': self.name}
-            if self.linkedin:
-                returnentry['organization']['linkedin'] = self.linkedin
 
         if self.linkedin:
             self._set_extra_field(returnentry, 'linkedin_url', self.linkedin)
