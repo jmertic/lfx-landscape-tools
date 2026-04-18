@@ -480,7 +480,7 @@ class Member:
                 self._update_nested_dict(key, base, val)
                 setattr(self, key, base)
             elif isinstance(val, list):
-                logger.debug(f"...Overlay '{key}'\n.....Old: '{sorted(getattr(self, key, []))}'")
+                logger.debug(f"...Overlay '{key}'\n.....Old: '{sorted(getattr(self, key, []), key=lambda x: str(x))}'")
                 new_list = self._combine_and_deduplicate(val, getattr(self, key, []))
                 logger.debug(f".....New: '{new_list}'")
                 setattr(self, key, new_list)
