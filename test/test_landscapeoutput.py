@@ -532,3 +532,42 @@ landscape:
         lo.save()
         # Logic should reset landscape structure
         self.assertEqual(len(lo.landscapeItems), len(config.landscapeSubcategories))
+
+    def test_remove_extrawhitespace(self):
+        with tempfile.NamedTemporaryFile(mode='w') as tmpfilename:
+            config = Config()
+            config.landscapeMembersCategory = 'test me'
+            config.landscapeMembersSubcategories = [
+                {"name": "Bad Membership", "category": "Bad"}
+                ]
+            config.landscapefile = tmpfilename.name
+
+            members = LFXMembers(loadData=False,config=config)
+            member = Member()
+            member.name = "   bad string    "
+            member.membership = 'Bad Membership'
+            member.homepage_url = "https://foo.com"
+            member.logo = "something.svg"
+            members.members.append(member)
+
+            landscape = LandscapeOutput(config=config)
+            with unittest.mock.patch("lfx_landscape_tools.svglogo.open", unittest.mock.mock_open(read_data="data")) as mock_file:
+                members.members[0].logo = 'Gold.svg'
+            with unittest.mock.patch('lfx_landscape_tools.svglogo.SVGLogo.save') as mock_svglogo_save:
+                mock_svglogo_save.return_value = 'here_global_b_v.svg'
+                landscape.load(members)
+            landscape.save()
+
+            with open(tmpfilename.name) as fp:
+                self.maxDiff = None
+                self.assertEqual(fp.read(),"""categories:
+  - name: test me
+    subcategories:
+      - subcategory:
+        name: Bad
+        items:
+          - item:
+            name: bad string
+            homepage_url: https://foo.com/
+            logo: Gold.svg
+""")

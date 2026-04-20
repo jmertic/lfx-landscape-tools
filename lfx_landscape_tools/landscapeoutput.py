@@ -146,6 +146,7 @@ class LandscapeOutput:
             with open(self.landscapefile, 'w+', encoding="utf8", errors='ignore') as fileobject:
                 ryaml = ruamel.yaml.YAML(typ='rt')
                 ryaml.Representer.add_representer(str,self._str_presenter)
+                ryaml.Representer.add_representer(str,self._stripped_representer)
                 ryaml.Representer.add_representer(type(None),self._none_representer)
                 ryaml.indent(mapping=2, sequence=4, offset=2)
                 ryaml.default_flow_style = False
@@ -161,6 +162,9 @@ class LandscapeOutput:
             .replace('- subcategory: null','- subcategory:') \
             .replace('\u2028',' ') \
             .replace('\x95','')
+
+    def _stripped_representer(self, dumper, data):
+        return dumper.represent_plain_scalarstring(LiteralScalarString(data.strip()))
 
     def _str_presenter(self, dumper, data):
         if '\n' in data:
