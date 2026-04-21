@@ -545,6 +545,10 @@ landscape:
             members = LFXMembers(loadData=False,config=config)
             member = Member()
             member.name = "   bad string    "
+            member.description = """DreamWorks Animation SKG is devoted to producing high-quality family entertainment through the use of computer-generated (CG) animation.
+
+NOTE: Subsidiary of Comcast for LF membership
+"""
             member.membership = 'Bad Membership'
             member.homepage_url = "https://foo.com"
             member.logo = "something.svg"
@@ -570,4 +574,8 @@ landscape:
             name: bad string
             homepage_url: https://foo.com/
             logo: Gold.svg
+            description: |
+              DreamWorks Animation SKG is devoted to producing high-quality family entertainment through the use of computer-generated (CG) animation.
+
+              NOTE: Subsidiary of Comcast for LF membership
 """)
