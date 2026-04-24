@@ -37,14 +37,14 @@ lxml = ["lxml"]
 
 [[package]]
 name = "build"
-version = "1.4.3"
+version = "1.4.4"
 description = "A simple, correct Python build frontend"
 optional = false
 python-versions = ">=3.9"
 groups = ["dev"]
 files = [
-    {file = "build-1.4.3-py3-none-any.whl", hash = "sha256:1bc22b19b383303de8f2c8554c9a32894a58d3f185fe3756b0b20d255bee9a38"},
-    {file = "build-1.4.3.tar.gz", hash = "sha256:5aa4231ae0e807efdf1fd0623e07366eca2ab215921345a2e38acdd5d0fa0a74"},
+    {file = "build-1.4.4-py3-none-any.whl", hash = "sha256:8c3f48a6090b39edec1a273d2d57949aaf13723b01e02f9d518396887519f64d"},
+    {file = "build-1.4.4.tar.gz", hash = "sha256:f832ae053061f3fb524af812dc94b8b84bac6880cd587630e3b5d91a6a9c1703"},
 ]
 
 [package.dependencies]
