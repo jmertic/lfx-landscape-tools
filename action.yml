@@ -31,19 +31,12 @@ runs:
         repository: ${{ env.repository }}
         ref: ${{ env.ref }}
         path: landscape
-    - name: Get latest tag for lfx-landscape-tools
-      id: vars
-      uses: oprypin/find-latest-tag@dd2729fe78b0bb55523ae2b2a310c6773a652bd1 # v1.1.2
-      with:
-        repository: jmertic/lfx-landscape-tools
-        releases-only: true  # Only looks for tags associated with a GitHub Release
     - name: Checkout lfx-landscape-tools
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4.1.7
       with:
         token: ${{ env.token }}
         repository: jmertic/lfx-landscape-tools
         path: landscape-tools
-        ref: ${{ steps.vars.outputs.tag }}
     - name: Set up Python 3.x
       uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
       with:
