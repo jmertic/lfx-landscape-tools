@@ -19,6 +19,13 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Load App Token if set
+      if: ${{ secrets.APP_ID != '' && secrets.APP_PRIVATE_KEY != '' }}
+      id: app_token
+      uses: actions/create-github-app-token@v1
+      with:
+        app-id: ${{ secrets.APP_ID }}
+        private-key: ${{ secrets.APP_PRIVATE_KEY }}
     - name: Install cairo
       uses: awalsh128/cache-apt-pkgs-action@acb598e5ddbc6f68a970c5da0688d2f3a9f04d05 # v1.6.0
       with:
@@ -27,14 +34,14 @@ runs:
     - name: Checkout landscape
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4.1.7
       with:
-        token: ${{ env.token }}
+        token: ${{ steps.app_token.outputs.token || env.token || secrets.GITHUB_TOKEN }}
         repository: ${{ env.repository }}
         ref: ${{ env.ref }}
         path: landscape
     - name: Checkout landscape-tools
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4.1.7
       with:
-        token: ${{ env.token }}
+        token: ${{ steps.app_token.outputs.token || env.token || secrets.GITHUB_TOKEN }}
         repository: jmertic/lfx-landscape-tools
         path: landscape-tools
     - name: Set up Python 3.x
@@ -53,8 +60,8 @@ runs:
       shell: bash
       run: poetry run lfx_landscape -s -l debug --logfile $LOGFILE build_members  -c ../landscape/$CONFIGFILE
       env:
-        GITHUB_TOKEN: ${{ env.token }}
-        GH_TOKEN: ${{ env.token }}
+        GITHUB_TOKEN: ${{ steps.app_token.outputs.token || env.token || secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ steps.app_token.outputs.token || env.token || secrets.GITHUB_TOKEN }}
         CONFIGFILE: ${{ inputs.configfile }}
         LOGFILE: ${{ inputs.logfile }}
     - name: Sync members from LFX
@@ -63,8 +70,8 @@ runs:
       shell: bash
       run: poetry run lfx_landscape -s -l debug --logfile $LOGFILE sync_members  -c ../landscape/$CONFIGFILE
       env:
-        GITHUB_TOKEN: ${{ env.token }}
-        GH_TOKEN: ${{ env.token }}
+        GITHUB_TOKEN: ${{ steps.app_token.outputs.token || env.token || secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ steps.app_token.outputs.token || env.token || secrets.GITHUB_TOKEN }}
         CONFIGFILE: ${{ inputs.configfile }}
         LOGFILE: ${{ inputs.logfile }}
     - name: Rebuild projects from LFX and other sources
@@ -73,8 +80,8 @@ runs:
       shell: bash
       run: poetry run lfx_landscape -s -l debug --logfile $LOGFILE build_projects -c ../landscape/$CONFIGFILE
       env:
-        GITHUB_TOKEN: ${{ env.token }}
-        GH_TOKEN: ${{ env.token }}
+        GITHUB_TOKEN: ${{ steps.app_token.outputs.token || env.token || secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ steps.app_token.outputs.token || env.token || secrets.GITHUB_TOKEN }}
         CONFIGFILE: ${{ inputs.configfile }}
         LOGFILE: ${{ inputs.logfile }}
     - name: Sync projects from LFX and other sources
@@ -83,8 +90,8 @@ runs:
       shell: bash
       run: poetry run lfx_landscape -s -l debug --logfile $LOGFILE sync_projects -c ../landscape/$CONFIGFILE
       env:
-        GITHUB_TOKEN: ${{ env.token }}
-        GH_TOKEN: ${{ env.token }}
+        GITHUB_TOKEN: ${{ steps.app_token.outputs.token || env.token || secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ steps.app_token.outputs.token || env.token || secrets.GITHUB_TOKEN }}
         CONFIGFILE: ${{ inputs.configfile }}
         LOGFILE: ${{ inputs.logfile }}
     - name: Rebuild LFEU projects from LFX and other sources
@@ -93,14 +100,14 @@ runs:
       shell: bash
       run: poetry run lfx_landscape -s -l debug --logfile $LOGFILE build_lfeuprojects -c ../landscape/$CONFIGFILE
       env:
-        GITHUB_TOKEN: ${{ env.token }}
-        GH_TOKEN: ${{ env.token }}
+        GITHUB_TOKEN: ${{ steps.app_token.outputs.token || env.token || secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ steps.app_token.outputs.token || env.token || secrets.GITHUB_TOKEN }}
         CONFIGFILE: ${{ inputs.configfile }}
         LOGFILE: ${{ inputs.logfile }}
     - name: Save logfiles file
       uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
-        name: ${{ inputs.logfile }} 
+        name: ${{ inputs.logfile }}
         path: ./landscape-tools/${{ inputs.logfile }}
         if-no-files-found: ignore
     - name: Validate landscape2 data
@@ -117,7 +124,7 @@ runs:
       id: cpr
       uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
       with:
-        token: ${{ env.token }}
+        token: ${{ steps.app_token.outputs.token || env.token || secrets.GITHUB_TOKEN }}
         branch-suffix: timestamp
         path: ./landscape
         title: "Update Landscape from LFX ${{ steps.date.outputs.time }}"
@@ -133,4 +140,4 @@ runs:
           || gh pr merge --squash "${{ steps.cpr.outputs.pull-request-number }}"
         fi
       env:
-        GH_TOKEN: ${{ env.token }}
+        GH_TOKEN: ${{ steps.app_token.outputs.token || env.token || secrets.GITHUB_TOKEN }}
