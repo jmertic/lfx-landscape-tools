@@ -181,4 +181,4 @@ You can then use the `lfx_landscape` command to run the various commands. Use `l
 
 ## Contributing
 
-Feel free to send [issues](https://github.com/jmertic/lfx-landscape-tools/issues) or [pull requests](https://github.com/jmertic/lfx-landscape-tools/pulls) ( with a DCO signoff of course :-) ) in accordance with the [contribution guidelines](CONTRIBUTING.md)
+Feel free to send [issues](https://github.com/jmertic/lfx-landscape-tools/issues) or [pull requests](https://github.com/jmertic/lfx-landscape-tools/pulls) ( with a [DCO](https://developercertificate.org/) signoff of course :-) ) in accordance with the [contribution guidelines](CONTRIBUTING.md)
