@@ -29,7 +29,6 @@ runs:
         token: ${{ env.token }}
         repository: ${{ env.repository }}
         ref: ${{ env.ref }}
-        # Checked out directly to the root workspace
     - name: Install lfx-landscape-tools via pipx
       shell: bash
       run: |
@@ -72,4 +71,49 @@ runs:
     - name: Sync projects from LFX and other sources
       if: ${{ inputs.project_processing == 'sync' }}
       shell: bash
-      run: lfx_landscape -s
+      run: lfx_landscape -s -l debug --logfile ${{ inputs.logfile }} sync_projects -c ${{ inputs.configfile }}
+      env:
+        GITHUB_TOKEN: ${{ env.token }}
+        GH_TOKEN: ${{ env.token }}
+    - name: Rebuild LFEU projects from LFX and other sources
+      if: ${{ inputs.project_processing == 'lfeu' }}
+      shell: bash
+      run: lfx_landscape -s -l debug --logfile ${{ inputs.logfile }} build_lfeuprojects -c ${{ inputs.configfile }}
+      env:
+        GITHUB_TOKEN: ${{ env.token }}
+        GH_TOKEN: ${{ env.token }}
+    - name: Save logfiles file
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      with:
+        name: ${{ inputs.logfile }} 
+        path: ./${{ inputs.logfile }}
+        if-no-files-found: ignore
+    - name: Validate landscape2 data
+      uses: cncf/landscape2-validate-action@6381e8747c73412e638670807b402ef2b863e9f8 # v2.0.1
+      with:
+        target_kind: data
+        target_path: ./${{ inputs.datafile }}
+    - name: Get current date
+      id: date
+      uses: Kaven-Universe/github-action-current-date-time@7c1d8465d1bfd7d35466d2ee82a8e460780561ae # v1.5.0
+      with:
+        format: "YYYY-MM-DD"
+    - name: Create Pull Request
+      id: cpr
+      uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+      with:
+        token: ${{ env.token }}
+        branch-suffix: timestamp
+        title: "Update Landscape from LFX ${{ steps.date.outputs.time }}"
+        commit-message: Update Landscape from LFX
+        signoff: true
+    - name: Enable Pull Request Automerge
+      if: steps.cpr.outputs.pull-request-number != ''
+      shell: bash
+      run: |
+        if [ "$(gh api repos/${{ env.repository }} --jq '.allow_auto_merge')" = "true" ]; then
+          gh pr merge --squash --auto "${{ steps.cpr.outputs.pull-request-number }}" \
+          || gh pr merge --squash "${{ steps.cpr.outputs.pull-request-number }}"
+        fi
+      env:
+        GH_TOKEN: ${{ env.token }}
