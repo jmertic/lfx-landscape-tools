@@ -1,5 +1,5 @@
 name: Update Landscape from LFX
-description: Update the given landscape from LFx
+description: Update the given landscape from LFX
 inputs:
   project_processing:
     description: "Indicate for project processing, if they should be 'rebuild' or 'sync' ( or 'skip' to not build projects )"
@@ -29,84 +29,70 @@ runs:
         token: ${{ env.token }}
         repository: ${{ env.repository }}
         ref: ${{ env.ref }}
-        path: landscape
-    - name: Checkout lfx-landscape-tools
-      uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v4.1.7
-      with:
-        token: ${{ env.token }}
-        repository: jmertic/lfx-landscape-tools
-        path: landscape-tools
-    - name: Set up Python 3.x
-      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
-      with:
-        python-version: '3.x'
-    - name: Install poetry
-      uses: abatilo/actions-poetry@3765cf608f2d4a72178a9fc5b918668e542b89b1 # v4.0.0
-    - name: Install dependencies
+    - name: Install lfx-landscape-tools via pipx
       shell: bash
-      working-directory: ./landscape-tools
-      run: poetry install
+      run: |
+        # 1. Try the action reference (works for tags/branches)
+        TARGET_VERSION="${{ github.action_ref }}"
+        
+        # 2. If blank, try to extract the checked-out SHA of this action from its path
+        if [ -z "$TARGET_VERSION" ] && [ -d "${{ github.action_path }}" ]; then
+          TARGET_VERSION=$(echo "${{ github.action_path }}" | grep -oE '[0-9a-f]{40}$')
+        fi
+        
+        # 3. Final fallback to main
+        if [ -z "$TARGET_VERSION" ]; then
+          TARGET_VERSION="main"
+        fi
+
+        echo "Installing lfx-landscape-tools at version: $TARGET_VERSION"
+        pipx install git+https://github.com/jmertic/lfx-landscape-tools.git@$TARGET_VERSION
     - name: Build members from LFX
       if: ${{ inputs.member_processing == 'build' }}
-      working-directory: ./landscape-tools
       shell: bash
-      run: poetry run lfx_landscape -s -l debug --logfile $LOGFILE build_members  -c ../landscape/$CONFIGFILE
+      run: lfx_landscape -s -l debug --logfile ${{ inputs.logfile }} build_members -c ${{ inputs.configfile }}
       env:
         GITHUB_TOKEN: ${{ env.token }}
         GH_TOKEN: ${{ env.token }}
-        CONFIGFILE: ${{ inputs.configfile }}
-        LOGFILE: ${{ inputs.logfile }}
     - name: Sync members from LFX
       if: ${{ inputs.member_processing == 'sync' }}
-      working-directory: ./landscape-tools
       shell: bash
-      run: poetry run lfx_landscape -s -l debug --logfile $LOGFILE sync_members  -c ../landscape/$CONFIGFILE
+      run: lfx_landscape -s -l debug --logfile ${{ inputs.logfile }} sync_members -c ${{ inputs.configfile }}
       env:
         GITHUB_TOKEN: ${{ env.token }}
         GH_TOKEN: ${{ env.token }}
-        CONFIGFILE: ${{ inputs.configfile }}
-        LOGFILE: ${{ inputs.logfile }}
     - name: Rebuild projects from LFX and other sources
       if: ${{ inputs.project_processing == 'rebuild' }}
-      working-directory: ./landscape-tools
       shell: bash
-      run: poetry run lfx_landscape -s -l debug --logfile $LOGFILE build_projects -c ../landscape/$CONFIGFILE
+      run: lfx_landscape -s -l debug --logfile ${{ inputs.logfile }} build_projects -c ${{ inputs.configfile }}
       env:
         GITHUB_TOKEN: ${{ env.token }}
         GH_TOKEN: ${{ env.token }}
-        CONFIGFILE: ${{ inputs.configfile }}
-        LOGFILE: ${{ inputs.logfile }}
     - name: Sync projects from LFX and other sources
       if: ${{ inputs.project_processing == 'sync' }}
-      working-directory: ./landscape-tools
       shell: bash
-      run: poetry run lfx_landscape -s -l debug --logfile $LOGFILE sync_projects -c ../landscape/$CONFIGFILE
+      run: lfx_landscape -s -l debug --logfile ${{ inputs.logfile }} sync_projects -c ${{ inputs.configfile }}
       env:
         GITHUB_TOKEN: ${{ env.token }}
         GH_TOKEN: ${{ env.token }}
-        CONFIGFILE: ${{ inputs.configfile }}
-        LOGFILE: ${{ inputs.logfile }}
     - name: Rebuild LFEU projects from LFX and other sources
       if: ${{ inputs.project_processing == 'lfeu' }}
-      working-directory: ./landscape-tools
       shell: bash
-      run: poetry run lfx_landscape -s -l debug --logfile $LOGFILE build_lfeuprojects -c ../landscape/$CONFIGFILE
+      run: lfx_landscape -s -l debug --logfile ${{ inputs.logfile }} build_lfeuprojects -c ${{ inputs.configfile }}
       env:
         GITHUB_TOKEN: ${{ env.token }}
         GH_TOKEN: ${{ env.token }}
-        CONFIGFILE: ${{ inputs.configfile }}
-        LOGFILE: ${{ inputs.logfile }}
     - name: Save logfiles file
       uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
         name: ${{ inputs.logfile }} 
-        path: ./landscape-tools/${{ inputs.logfile }}
+        path: ./${{ inputs.logfile }}
         if-no-files-found: ignore
     - name: Validate landscape2 data
       uses: cncf/landscape2-validate-action@6381e8747c73412e638670807b402ef2b863e9f8 # v2.0.1
       with:
         target_kind: data
-        target_path: ./landscape/${{ inputs.datafile }}
+        target_path: ./${{ inputs.datafile }}
     - name: Get current date
       id: date
       uses: Kaven-Universe/github-action-current-date-time@7c1d8465d1bfd7d35466d2ee82a8e460780561ae # v1.5.0
@@ -118,13 +104,11 @@ runs:
       with:
         token: ${{ env.token }}
         branch-suffix: timestamp
-        path: ./landscape
         title: "Update Landscape from LFX ${{ steps.date.outputs.time }}"
         commit-message: Update Landscape from LFX
         signoff: true
     - name: Enable Pull Request Automerge
       if: steps.cpr.outputs.pull-request-number != ''
-      working-directory: ./landscape
       shell: bash
       run: |
         if [ "$(gh api repos/${{ env.repository }} --jq '.allow_auto_merge')" = "true" ]; then
