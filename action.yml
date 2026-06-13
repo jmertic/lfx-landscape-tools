@@ -35,12 +35,12 @@ runs:
         # 1. Try the action reference (works for tags/branches)
         TARGET_VERSION="${{ github.action_ref }}"
         
-        # 2. If blank, try to extract the checked-out SHA of this action from its path
-        if [ -z "$TARGET_VERSION" ] && [ -d "${{ github.action_path }}" ]; then
-          TARGET_VERSION=$(echo "${{ github.action_path }}" | grep -oE '[0-9a-f]{40}$')
+        # 2. If blank, pull the folder name/SHA from the end of the action path
+        if [ -z "$TARGET_VERSION" ] && [ -n "${{ github.action_path }}" ]; then
+          TARGET_VERSION=$(basename "${{ github.action_path }}")
         fi
         
-        # 3. Final fallback to main
+        # 3. Final fallback to main just in case
         if [ -z "$TARGET_VERSION" ]; then
           TARGET_VERSION="main"
         fi
