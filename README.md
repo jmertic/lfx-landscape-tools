@@ -89,9 +89,13 @@ jobs:
         with:
           project_processing: skip # see options in action.yml
         env:
-          token: ${{ secrets.GITHUB_TOKEN }}
           repository: ${{ github.repository }}
           ref: ${{ github.ref }}
+          // Only include APP_ID and APP_PRIVATE_KEY if using a GitHub App
+          APP_ID: ${{ secrets.APP_ID }}
+          APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
+          // Skip token if usign a GitHub App 
+          token: ${{ secrets.GITHUB_TOKEN }}      
 ```
 
 Run the `Build Landscape from LFX` GitHub Action following the instructions for [manually running a GitHub Action](https://docs.github.com/en/actions/managing-workflow-runs-and-deployments/managing-workflow-runs/manually-running-a-workflow) to test that it all works.
