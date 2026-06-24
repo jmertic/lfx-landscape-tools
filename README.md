@@ -36,13 +36,13 @@ landscapeMemberCategory: AOUSD Members
 
 There are three options to pick from.
 
-#### GitHub App
+#### GitHub App (best option)
 
 You can create a [GitHub App](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app) for your organization, with the permissions as listed below.
     - Projects - Read-only
     - Contents - Read & Write
     - Pull requests - Read & Write
-    - Metadata - Read-onlyand add two Actions Secrets:
+    - Metadata - Read-only
 
 [Generate a Private Key](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/managing-private-keys-for-github-apps#generating-private-keys) and go to your repository where the workflow runs, and add two Actions Secrets:
 
