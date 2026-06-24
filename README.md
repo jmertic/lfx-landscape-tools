@@ -32,10 +32,37 @@ landscapeMemberCategory: AOUSD Members
 
 ## Setting up the GitHub Action
 
-1) Review the permissions for the `GITHUB_TOKEN` for your repository ( more details [here](https://docs.github.com/en/actions/security-for-github-actions/security-guides/automatic-token-authentication#permissions-for-the-github_token) ). Note that you need to ensure `GITHUB_TOKEN` has the permission to merge PRs (more [here](https://docs.github.com/en/organizations/managing-organization-settings/disabling-or-limiting-github-actions-for-your-organization#preventing-github-actions-from-creating-or-approving-pull-requests)).
-   - If you cannot set `GITHUB_TOKEN` permissions as stated, the fallback option is to add a [repository secret](https://docs.github.com/en/actions/reference/encrypted-secrets) for `PAT`, which is a [GitHub Personal Authorization Token](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) set for the `read:org`, `read:project`, and `repo` scope.
-2) [Add a new label](https://docs.github.com/en/github/managing-your-work-on-github/managing-labels#creating-a-label) - `automated-build`. This is for this workflow to work and shouldn't be used for anything else.
-3) Add the following code to a `build.yml` file in your landscape repo's `.github/workflows/` directory.
+### Setup a token for the app to use
+
+There are three options to pick from.
+
+#### GitHub App (best option)
+
+You can create a [GitHub App](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app) for your organization, with the permissions as listed below.
+
+- Organizations / Projects - Read-only
+- Repository / Contents - Read & Write
+- Repository / Pull requests - Read & Write
+- Repository / Metadata - Read-only
+
+[Generate a Private Key](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/managing-private-keys-for-github-apps#generating-private-keys) and go to your repository where the workflow runs, and add two Actions Secrets:
+
+- `APP_ID`: Found on your App's "General" page (a 6-7 digit number).
+- `APP_PRIVATE_KEY`: Open the .pem file you downloaded and paste the entire content (including the `-----BEGIN RSA PRIVATE KEY-----` lines).
+
+#### Personal Access Token (PAT)
+
+Add a [repository secret](https://docs.github.com/en/actions/reference/encrypted-secrets) for `PAT`, which is a [GitHub Personal Authorization Token](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) set for the `read:org`, `read:project`, and `repo` scope.
+
+#### Use the `GITHUB_TOKEN` token
+
+As a fallback, you can use the built in `GITHUB_TOKEN`. You have to review the permissions for the `GITHUB_TOKEN` for your repository ( more details [here](https://docs.github.com/en/actions/security-for-github-actions/security-guides/automatic-token-authentication#permissions-for-the-github_token) ). Note that you need to ensure `GITHUB_TOKEN` has the permission to merge PRs (more [here](https://docs.github.com/en/organizations/managing-organization-settings/disabling-or-limiting-github-actions-for-your-organization#preventing-github-actions-from-creating-or-approving-pull-requests)).
+
+### Worklfows
+
+#### `build.yml`
+
+Add the following code to a `build.yml` file in your landscape repo's `.github/workflows/` directory.
 
 ```yaml
 name: Build Landscape from LFX
@@ -62,12 +89,20 @@ jobs:
         with:
           project_processing: skip # see options in action.yml
         env:
-          token: ${{ secrets.GITHUB_TOKEN }}
           repository: ${{ github.repository }}
           ref: ${{ github.ref }}
+          // Only include APP_ID and APP_PRIVATE_KEY if using a GitHub App
+          APP_ID: ${{ secrets.APP_ID }}
+          APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
+          // Skip token if usign a GitHub App 
+          token: ${{ secrets.GITHUB_TOKEN }}      
 ```
 
-4) Add the following code to a `validate.yml` file in your landscape repo's `.github/workflows/` directory.
+Run the `Build Landscape from LFX` GitHub Action following the instructions for [manually running a GitHub Action](https://docs.github.com/en/actions/managing-workflow-runs-and-deployments/managing-workflow-runs/manually-running-a-workflow) to test that it all works.
+
+#### `validate.yml`
+
+Add the following code to a `validate.yml` file in your landscape repo's `.github/workflows/` directory.
 
 ```yaml
 name: Validate Landscape
@@ -101,8 +136,9 @@ jobs:
           target_path: ./landscape.yml
 ```
 
-5) Run the `Build Landscape from LFX` GitHub Action following the instructions for [manually running a GitHub Action](https://docs.github.com/en/actions/managing-workflow-runs-and-deployments/managing-workflow-runs/manually-running-a-workflow) to test that it all works.
-6) (OPTIONAL BUT HIGHLY RECOMMENDED) Setup dependabot for keeping GitHub Actions updated automatically. Two files to add:
+#### Dependabot setup
+
+(OPTIONAL BUT HIGHLY RECOMMENDED) Setup dependabot for keeping GitHub Actions updated automatically. Two files to add:
 
 First, `.github/dependabot.yml`.
 

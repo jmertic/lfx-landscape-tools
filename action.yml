@@ -19,6 +19,13 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Load App Token if set
+      if: ${{ env.APP_ID != '' && env.APP_PRIVATE_KEY != '' }}
+      id: app_token
+      uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+      with:
+        client-id: ${{ env.APP_ID }}
+        private-key: ${{ env.APP_PRIVATE_KEY }}
     - name: Install cairo
       uses: gerlero/apt-install@f4fa5265092af9e750549565d28c99aec7189639 # v1.3.11
       with:
@@ -26,7 +33,7 @@ runs:
     - name: Checkout landscape
       uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v4.1.7
       with:
-        token: ${{ env.token }}
+        token: ${{ steps.app_token.outputs.token || env.token }}
         repository: ${{ env.repository }}
         ref: ${{ env.ref }}
     - name: Install lfx-landscape-tools via pipx
@@ -52,36 +59,36 @@ runs:
       shell: bash
       run: lfx_landscape -s -l debug --logfile ${{ inputs.logfile }} build_members -c ${{ inputs.configfile }}
       env:
-        GITHUB_TOKEN: ${{ env.token }}
-        GH_TOKEN: ${{ env.token }}
+        GITHUB_TOKEN: ${{ steps.app_token.outputs.token || env.token }}
+        GH_TOKEN: ${{ steps.app_token.outputs.token || env.token }}
     - name: Sync members from LFX
       if: ${{ inputs.member_processing == 'sync' }}
       shell: bash
       run: lfx_landscape -s -l debug --logfile ${{ inputs.logfile }} sync_members -c ${{ inputs.configfile }}
       env:
-        GITHUB_TOKEN: ${{ env.token }}
-        GH_TOKEN: ${{ env.token }}
+        GITHUB_TOKEN: ${{ steps.app_token.outputs.token || env.token }}
+        GH_TOKEN: ${{ steps.app_token.outputs.token || env.token }}
     - name: Rebuild projects from LFX and other sources
       if: ${{ inputs.project_processing == 'rebuild' }}
       shell: bash
       run: lfx_landscape -s -l debug --logfile ${{ inputs.logfile }} build_projects -c ${{ inputs.configfile }}
       env:
-        GITHUB_TOKEN: ${{ env.token }}
-        GH_TOKEN: ${{ env.token }}
+        GITHUB_TOKEN: ${{ steps.app_token.outputs.token || env.token }}
+        GH_TOKEN: ${{ steps.app_token.outputs.token || env.token }}
     - name: Sync projects from LFX and other sources
       if: ${{ inputs.project_processing == 'sync' }}
       shell: bash
       run: lfx_landscape -s -l debug --logfile ${{ inputs.logfile }} sync_projects -c ${{ inputs.configfile }}
       env:
-        GITHUB_TOKEN: ${{ env.token }}
-        GH_TOKEN: ${{ env.token }}
+        GITHUB_TOKEN: ${{ steps.app_token.outputs.token || env.token }}
+        GH_TOKEN: ${{ steps.app_token.outputs.token || env.token }}
     - name: Rebuild LFEU projects from LFX and other sources
       if: ${{ inputs.project_processing == 'lfeu' }}
       shell: bash
       run: lfx_landscape -s -l debug --logfile ${{ inputs.logfile }} build_lfeuprojects -c ${{ inputs.configfile }}
       env:
-        GITHUB_TOKEN: ${{ env.token }}
-        GH_TOKEN: ${{ env.token }}
+        GITHUB_TOKEN: ${{ steps.app_token.outputs.token || env.token }}
+        GH_TOKEN: ${{ steps.app_token.outputs.token || env.token }}
     - name: Save logfiles file
       uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
@@ -102,7 +109,7 @@ runs:
       id: cpr
       uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
       with:
-        token: ${{ env.token }}
+        token: ${{ steps.app_token.outputs.token || env.token }}
         branch-suffix: timestamp
         title: "Update Landscape from LFX ${{ steps.date.outputs.time }}"
         commit-message: Update Landscape from LFX
@@ -116,4 +123,4 @@ runs:
           || gh pr merge --squash "${{ steps.cpr.outputs.pull-request-number }}"
         fi
       env:
-        GH_TOKEN: ${{ env.token }}
+        GH_TOKEN: ${{ steps.app_token.outputs.token || env.token }}
