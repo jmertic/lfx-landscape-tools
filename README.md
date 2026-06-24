@@ -40,15 +40,15 @@ There are three options to pick from.
 
 You can create a [GitHub App](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app) for your organization, with the permissions as listed below.
 
-    - Projects - Read-only
-    - Contents - Read & Write
-    - Pull requests - Read & Write
-    - Metadata - Read-only
+- Organizations / Projects - Read-only
+- Repository / Contents - Read & Write
+- Repository / Pull requests - Read & Write
+- Repository / Metadata - Read-only
 
 [Generate a Private Key](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/managing-private-keys-for-github-apps#generating-private-keys) and go to your repository where the workflow runs, and add two Actions Secrets:
 
-    - `APP_ID`: Found on your App's "General" page (a 6-7 digit number).
-    - `APP_PRIVATE_KEY`: Open the .pem file you downloaded and paste the entire content (including the `-----BEGIN RSA PRIVATE KEY-----` lines).
+- `APP_ID`: Found on your App's "General" page (a 6-7 digit number).
+- `APP_PRIVATE_KEY`: Open the .pem file you downloaded and paste the entire content (including the `-----BEGIN RSA PRIVATE KEY-----` lines).
 
 #### Personal Access Token (PAT)
 
