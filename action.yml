@@ -27,7 +27,7 @@ runs:
         client-id: ${{ env.APP_ID }}
         private-key: ${{ env.APP_PRIVATE_KEY }}
     - name: Install cairo
-      uses: gerlero/apt-install@f4fa5265092af9e750549565d28c99aec7189639 # v1.3.11
+      uses: gerlero/apt-install@c0fa73fe5c4a22deecf6d629565be92a15dd2026 # v1.3.12
       with:
         packages: libcairo2-dev pkg-config python3-dev
     - name: Checkout landscape
