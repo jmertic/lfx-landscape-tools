@@ -335,14 +335,14 @@ files = [
 
 [[package]]
 name = "check-jsonschema"
-version = "0.37.3"
+version = "0.37.4"
 description = "A jsonschema CLI and pre-commit hook"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "check_jsonschema-0.37.3-py3-none-any.whl", hash = "sha256:9557287e4d8670fde9480740a6190f913724722062030a85bbf7d859c0f66a6f"},
-    {file = "check_jsonschema-0.37.3.tar.gz", hash = "sha256:4d683589005c2b77a5f2dff41129ac5a6f92167e2f2ea0a8534446e3eddba239"},
+    {file = "check_jsonschema-0.37.4-py3-none-any.whl", hash = "sha256:e4d1647992674d6b1ed2ca46eee6697760d17a5cc0c167ba09c5b503b883d041"},
+    {file = "check_jsonschema-0.37.4.tar.gz", hash = "sha256:f933521f14cbeaaf113270751185b01379f453ac9ce9fb01d6190ce1352ccaa6"},
 ]
 
 [package.dependencies]
