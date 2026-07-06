@@ -48,7 +48,7 @@ class LandscapeMembers(Members):
                 logger.debug("Successfully parsed yaml output in landscape file '{}'".format(self.landscapefile))
                 return data
         except Exception as e:
-            logger.error("Error opening landscape file '{}' - will not load current landscape data - '{}'".format(self.landscapefile, e))
+            logger.exception("Error opening landscape file '{}' - will not load current landscape data - '{}'".format(self.landscapefile, e))
             return None
 
     def _process_member_item(self, item, subcategory_name):

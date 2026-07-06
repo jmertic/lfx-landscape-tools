@@ -204,7 +204,7 @@ class Member:
         elif linkedin.startswith('company'):
             self.__linkedin = "https://www.linkedin.com/{}".format(linkedin)
         # perhaps they forgot to add the https://
-        elif linkedin.startswith('www.linkedin.com') or linkedin.startswith('linkedin.com'):
+        elif linkedin.startswith(('www.linkedin.com','linkedin.com')):
             self.__linkedin = "https://www.linkedin.com{}".format(urlparse(url_normalize(linkedin)).path)
         # If it is a URL, make sure it's properly formed
         elif ( urlparse(linkedin).netloc == 'linkedin.com' or urlparse(linkedin).netloc == 'www.linkedin.com' ):
