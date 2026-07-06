@@ -282,7 +282,7 @@ class TestMember(unittest.TestCase):
 
         # Verify
         self.assertEqual(result, [])
-        mock_get_logger.return_value.error.assert_called()
+        mock_get_logger.return_value.exception.assert_called()
 
     def testSetCrunchbaseNotValid(self):
         invalidCrunchbaseURLs = [
@@ -776,8 +776,8 @@ class TestMember(unittest.TestCase):
 
         Member()
 
-        mock_get_logger.return_value.error.assert_called()
-        args = mock_get_logger.return_value.error.call_args[0][0]
+        mock_get_logger.return_value.exception.assert_called()
+        args = mock_get_logger.return_value.exception.call_args[0][0]
         self.assertIn("Cannot load data file schema", args)
         self.assertIn("Connection Timeout", args)
 
@@ -794,8 +794,8 @@ class TestMember(unittest.TestCase):
 
         Member()
 
-        mock_get_logger.return_value.error.assert_called()
-        args = mock_get_logger.return_value.error.call_args[0][0]
+        mock_get_logger.return_value.exception.assert_called()
+        args = mock_get_logger.return_value.exception.call_args[0][0]
         self.assertIn("is not valid YAML", args)
         self.assertIn("Scanner Error", args)
 

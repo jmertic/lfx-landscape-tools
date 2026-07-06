@@ -109,7 +109,7 @@ query($org: String!, $number: Int!) {
         try:
             project_data = json.loads(result.stdout)
         except json.decoder.JSONDecodeError as e:
-            logger.error(f"Invalid json: '{project_data}' - Error: '{e}'")
+            logger.exception(f"Invalid json: '{project_data}' - Error: '{e}'")
             return None
 
         logger.info('Found {} records'.format(len(project_data)))
@@ -156,7 +156,7 @@ query($org: String!, $number: Int!) {
                         elif record.get('Role') == 'TAC/TOC Representative':
                             annotations["TAC_representative"] = '{} {}'.format(record.get('FirstName').title(),record.get('LastName').title())
                 except Exception as e:
-                    logger.error(f"Couldn't load TSC Committee data for '{project_name}' - {e}")
+                    logger.exception(f"Couldn't load TSC Committee data for '{project_name}' - {e}")
         annotations['chair'] = ", ".join(chair)
 
         return annotations

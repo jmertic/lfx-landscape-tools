@@ -62,9 +62,9 @@ class Member:
             endpointResponse.raise_for_status()
             dataschema = ruamel.yaml.YAML().load(endpointResponse.text)
         except requests.exceptions.RequestException as e:
-            logging.getLogger().error("Cannot load data file schema at {} - error message '{}'".format(schemaURL,e))
+            logging.getLogger().exception("Cannot load data file schema at {} - error message '{}'".format(schemaURL,e))
         except ruamel.yaml.YAMLError as e:
-            logging.getLogger().error("Data file at {} is not valid YAML - error message '{}'".format(schemaURL,e))
+            logging.getLogger().exception("Data file at {} is not valid YAML - error message '{}'".format(schemaURL,e))
         else:
             self.itemschema = dataschema.get('categories',[])[0].get('subcategories',[])[0].get('items',[])[0]
 
@@ -184,7 +184,7 @@ class Member:
             orgPageResponse = requests_cache.CachedSession().get(url)
             orgPageResponse.raise_for_status()
         except requests.exceptions.RequestException as e:
-            logging.getLogger().error("Cannot load {} - error message '{}'".format(url,e))
+            logging.getLogger().exception("Cannot load {} - error message '{}'".format(url,e))
         else:
             soup = BeautifulSoup(orgPageResponse.text, 'html.parser')
             for item in soup.find_all("li",{"class": "js-pinned-item-list-item"}):
