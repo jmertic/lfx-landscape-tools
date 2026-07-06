@@ -116,7 +116,7 @@ class LandscapeOutput:
                     raise RuntimeError('Landscape file is empty')
                 logging.getLogger().debug("Successfully parsed yaml output in landscape file '{}'".format(self.landscapefile))
         except Exception as e:
-            logging.getLogger().error("Error opening landscape file '{}'; will reset file - error message is '{}'".format(self.landscapefile,e))
+            logging.getLogger().exception("Error opening landscape file '{}'; will reset file - error message is '{}'".format(self.landscapefile,e))
             landscape = {
                 'categories': [{
                     'name': self.landscapeCategory,

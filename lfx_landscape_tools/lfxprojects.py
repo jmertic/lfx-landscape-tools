@@ -135,8 +135,8 @@ class LFXProjects(Members):
         if slug:
             with session.get(self.singleSlugEndpointUrl.format(slug=slug)) as endpointResponse:
                 parentProject = endpointResponse.json()
-                if len(parentProject.get('Data',[])) > 0: 
+                if len(parentProject.get('Data',[])) > 0:
                     return parentProject['Data'][0]
-                logging.getLogger().warning("Couldn't find project for slug '{}'".format(slug)) 
-        
+                logging.getLogger().warning("Couldn't find project for slug '{}'".format(slug))
+
         return False

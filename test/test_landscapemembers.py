@@ -206,4 +206,4 @@ categories:
             {'category': 'Silver', 'name': 'Silver Member'}
         ]
         lm.loadData()
-        mock_get_logger.return_value.error.assert_called()
+        mock_get_logger.return_value.exception.assert_called()

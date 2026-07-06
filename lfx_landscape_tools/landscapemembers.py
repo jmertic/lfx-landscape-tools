@@ -49,7 +49,7 @@ class LandscapeMembers(Members):
                 landscape = ruamel.yaml.YAML().load(fileobject)
                 logging.getLogger().debug("Successfully parsed yaml output in landscape file '{}'".format(self.landscapefile))
         except Exception as e:
-            logging.getLogger().error("Error opening landscape file '{}' - will not load current landscape data - '{}'".format(self.landscapefile,e))
+            logging.getLogger().exception("Error opening landscape file '{}' - will not load current landscape data - '{}'".format(self.landscapefile,e))
         else:
             rootcategory = 'categories'
             if landscape.get('landscape'):
