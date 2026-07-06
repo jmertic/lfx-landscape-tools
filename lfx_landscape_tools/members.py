@@ -35,42 +35,54 @@ class Members(ABC):
     def loadData(self):
         pass
 
-    def find(self, name, homepage_url, slug = None, membership = None, repo_url = None):
-        '''
+    def find(self, name, homepage_url, slug=None, membership=None, repo_url=None):
+        """
         Find Member object in this Members object that match the criteria given.
-
         Matches in this order - slug, membership+name+homepage_url, repo_url+name+homepage_url, name+homepage_url
-        '''
-
-        normalizedname = self.normalizeName(name)
-        normalizedhomepage_url = self.normalizeURL(homepage_url)
-        normalizedrepo_url = self.normalizeURL(repo_url)
+        """
+        norm_name = self.normalizeName(name)
+        norm_homepage = self.normalizeURL(homepage_url)
+        norm_repo = self.normalizeURL(repo_url)
 
         logger = logging.getLogger()
-        logger.debug("Looking for '{}'".format(normalizedname))
+        logger.debug("Looking for '{}'".format(norm_name))
 
+        # 1. Determine the matching strategy ONCE outside the loop
+        if slug:
+            def is_match(m):
+                return m.extra and m.extra.get('lfx_slug') == slug
+            log_msg = lambda m: "Found '{}' by slug '{}'".format(m.name, m.extra.get('lfx_slug'))
+
+        elif membership and norm_name and norm_homepage:
+            def is_match(m):
+                return (self.normalizeName(m.name) == norm_name or m.homepage_url == norm_homepage) and m.membership == membership
+            log_msg = lambda m: "Found '{}' by membership '{}' and homepage_url '{}'".format(m.name, m.membership, m.homepage_url)
+
+        elif norm_repo and norm_name and norm_homepage:
+            def is_match(m):
+                return self.normalizeName(m.name) == norm_name or m.homepage_url == norm_homepage or m.repo_url == norm_repo
+            log_msg = lambda m: "Found '{}' by repo_url '{}' and homepage_url '{}'".format(m.name, m.repo_url, m.homepage_url)
+
+        elif norm_name and norm_homepage:
+            def is_match(m):
+                return self.normalizeName(m.name) == norm_name or m.homepage_url == norm_homepage
+            log_msg = lambda m: "Found '{}' by homepage_url '{}'".format(m.name, m.homepage_url)
+
+        elif norm_name:
+            def is_match(m):
+                return self.normalizeName(m.name) == norm_name
+            log_msg = lambda m: "Found '{}' by name".format(m.name)
+
+        else:
+            # If no valid combination of arguments is provided, return empty
+            return []
+
+        # 2. Iterate through members applying the single chosen strategy
         members = []
         for member in self.members:
-            if slug:
-                if member.extra.get('lfx_slug') and member.extra.get('lfx_slug') == slug:
-                    logger.debug("Found '{}' by slug '{}'".format(member.name,member.extra.get('lfx_slug')))
-                    members.append(member)
-            elif membership and normalizedname and normalizedhomepage_url:
-                if ( self.normalizeName(member.name) == normalizedname or member.homepage_url == normalizedhomepage_url ) and member.membership == membership:
-                    logger.debug("Found '{}' by membership '{}' and homepage_url '{}'".format(member.name,member.membership,member.homepage_url))
-                    members.append(member)
-            elif normalizedrepo_url and normalizedname and normalizedhomepage_url:
-                if ( self.normalizeName(member.name) == normalizedname or member.homepage_url == normalizedhomepage_url or member.repo_url == normalizedrepo_url):
-                    logger.debug("Found '{}' by repo_url '{}' and homepage_url '{}'".format(member.name,member.repo_url,member.homepage_url))
-                    members.append(member)
-            elif normalizedname and normalizedhomepage_url:
-                if ( self.normalizeName(member.name) == normalizedname or member.homepage_url == normalizedhomepage_url ):
-                    logger.debug("Found '{}' by homepage_url '{}'".format(member.name,member.homepage_url))
-                    members.append(member)
-            elif normalizedname:
-                if ( self.normalizeName(member.name) == normalizedname ):
-                    logger.debug("Found '{}' by name".format(member.name))
-                    members.append(member)
+            if is_match(member):
+                logger.debug(log_msg(member))
+                members.append(member)
 
         return members
 
