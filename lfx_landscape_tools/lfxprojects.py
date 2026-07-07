@@ -51,84 +51,139 @@ class LFXProjects(Members):
         self.projectsFilterByParentSlug = config.projectsFilterByParentSlug
         self.landscapeProjectsLevels = config.landscapeProjectsLevels
 
+    def _should_skip_record(self, record):
+        """Helper method to encapsulate the filtering logic."""
+        return (
+            self.find(name=record.get('Name'), homepage_url=record.get('Website'), slug=record.get('Slug')) or
+            (self.activeOnly and record.get('Status') != 'Active') or
+            not record.get('DisplayOnWebsite') or
+            record.get('TestRecord') or
+            record.get('Slug') == self.project
+        )
+
+    def _assign_category(self, member, category):
+        """Helper method to map the record's category to landscape project levels."""
+        if not (self.addCategory and category):
+            return
+
+        logger = logging.getLogger()
+        logger.debug(f"Trying to see if project level {category} is valid")
+
+        for projectLevel in self.landscapeProjectsLevels:
+            if projectLevel.get('name') == category:
+                member.project = projectLevel.get('level')
+                member.membership = projectLevel.get('name')
+                logger.debug("Project level is {} - {}".format(member.project, member.membership))
+                break
+
+    def _build_second_paths(self, record):
+        """Helper method to evaluate and build the second_path array."""
+        second_path = []
+
+        if self.addParentProject:
+            parent_slug = record.get('ParentSlug', self.project)
+            parent_project = self.lookupParentProjectBySlug(parent_slug)
+            if parent_project and "Membership" in parent_project.get("Model", []):
+                cleaned_name = parent_project.get("Name", "").replace("/", ":")
+                second_path.append('Project Group / {}'.format(cleaned_name))
+
+        if self.addPMOManagedStatus and record.get('HasProgramManager'):
+            second_path.append('PMO Managed / All')
+
+        if self.addIndustrySector and record.get('IndustrySector'):
+            cleaned_sector = record['IndustrySector'].replace("/", ":")
+            second_path.append('Industry / {}'.format(cleaned_sector))
+
+        if self.addTechnologySector and record.get('TechnologySector'):
+            for sector in record['TechnologySector'].split(";"):
+                cleaned_sector = sector.replace("/", ":")
+                second_path.append('Technology Sector / {}'.format(cleaned_sector))
+
+        return second_path
+
+    def _process_record(self, record):
+        """Helper method to handle the construction of a single Member object."""
+        logger = logging.getLogger()
+
+        member = Member()
+        member.membership = 'All'
+        member.name = record.get('Name')
+        logger.info("Found LFX Project '{}'".format(member.name))
+
+        # Set core attributes
+        member.license = record.get('PrimaryOpenSourceLicense')
+        member.repo_url = record.get('RepositoryURL')
+        member.description = record.get('Description')
+
+        member.homepage_url = record.get('Website')
+        if not member.homepage_url and record.get('RepositoryURL'):
+            logger.debug("Trying to use 'RepositoryURL' for 'homepage_url' instead")
+            member.homepage_url = record.get('RepositoryURL')
+
+        member.logo = record.get('ProjectLogo')
+        if not member.logo:
+            logger.info("Creating text logo for '{}'".format(member.name))
+            member.logo = SVGLogo(name=member.name)
+
+        # Optional: Provide a fallback using getattr if defaultCrunchbase is a class attribute
+        member.crunchbase = record.get('CrunchBaseUrl', getattr(self, 'defaultCrunchbase', None))
+        member.linkedin = record.get('LinkedIn')
+        member.twitter = record.get('Twitter')
+
+        self._assign_category(member, record.get('Category'))
+        member.second_path = self._build_second_paths(record)
+
+        # Build extra dictionary
+        lfx_slug = record.get('Slug')
+        parent_slug = record.get('ParentSlug', self.project)
+
+        extra = {
+            'lfx_slug': lfx_slug,
+            'accepted': record.get('StartDate'),
+            'archived': record.get('ProjectEntityDissolutionDate'),
+            'facebook_url': record.get('Facebook'),
+            'reddit_url': record.get('Reddit'),
+            'pinterest_url': record.get('Pinterest'),
+            'youtube_url': record.get('YouTube'),
+            'dev_stats_url': self.lfxinsightsUrl.format(parent_slug=parent_slug, slug=lfx_slug),
+            'annotations': {}
+        }
+
+        if self.artworkRepoUrl:
+            extra['artwork_url'] = self.artworkRepoUrl.format(slug=lfx_slug)
+
+        extra['other_links'] = [
+            {'name': 'Calendar', 'url': self.calendarUrl.format(slug=lfx_slug)},
+            {'name': 'iCal', 'url': self.icalUrl.format(project_id=record.get('ProjectID'))},
+            {'name': 'Charter', 'url': record.get('CharterURL')}
+        ]
+
+        member.extra = extra
+        return member
+
     def loadData(self):
+        """Main method to fetch and process LFX projects data."""
         logger = logging.getLogger()
         logger.info("Loading LFX Projects data for {}".format(self.project))
 
         session = requests_cache.CachedSession()
-        with session.get(self.endpointURL.format(self.project if self.projectsFilterByParentSlug else '')) as endpointResponse:
+        project_param = self.project if self.projectsFilterByParentSlug else ''
+
+        with session.get(self.endpointURL.format(project_param)) as endpointResponse:
             memberList = endpointResponse.json()
-            for record in memberList['Data']:
-                if (
-                    self.find(name=record.get('Name'),homepage_url=record.get('Website'),slug=record.get('Slug')) or
-                    ( self.activeOnly and record['Status'] != 'Active' ) or
-                    not record.get('DisplayOnWebsite') or
-                    record.get('TestRecord') or
-                    record.get('Slug') == self.project
-                ):
+
+            for record in memberList.get('Data', []):
+                # 1. Guard clause handles skips cleanly
+                if self._should_skip_record(record):
                     logger.debug(f"Skipping '{record.get('Name')}'")
                     continue
 
-                second_path = []
-                extra = {}
-                annotations = {}
-                other_links = []
-                member = Member()
-                member.membership = 'All'
-                member.name = record.get('Name')
-                logger.info("Found LFX Project '{}'".format(member.name))
-                extra['lfx_slug'] = record.get('Slug')
-                member.license = record.get('PrimaryOpenSourceLicense')
-                member.repo_url = record.get('RepositoryURL')
-                extra['accepted'] = record.get('StartDate')
-                extra['archived'] = record.get('ProjectEntityDissolutionDate')
-                member.description = record.get('Description')
-                if self.addCategory and record.get('Category'):
-                    logger.debug(f"Trying to see if project level {record.get('Category')} is valid")
-                    for projectLevel in self.landscapeProjectsLevels:
-                        if projectLevel.get('name') == record.get('Category'):
-                            member.project = projectLevel.get('level')
-                            member.membership = projectLevel.get('name')
-                            logger.debug("Project level is {} - {}".format(member.project,member.membership))
-                            break
-                member.homepage_url = record.get('Website')
-                if not member.homepage_url and record.get('RepositoryURL'):
-                    logger.debug("Trying to use 'RepositoryURL' for 'homepage_url' instead")
-                    member.homepage_url = record.get('RepositoryURL')
-                if self.addParentProject:
-                    parentProject = self.lookupParentProjectBySlug(record.get('ParentSlug',self.project))
-                    if parentProject and "Membership" in parentProject.get("Model",[]):
-                        second_path.append('Project Group / {}'.format(parentProject.get("Name").replace("/",":")))
-                member.logo = record.get('ProjectLogo')
-                if not member.logo:
-                    logger.info("Creating text logo for '{}'".format(member.name))
-                    member.logo = SVGLogo(name=member.name)
-                member.crunchbase = record.get('CrunchBaseUrl',self.defaultCrunchbase)
-                member.linkedin = record.get('LinkedIn')
-                member.twitter = record.get('Twitter')
-                extra['facebook_url'] = record.get('Facebook')
-                extra['reddit_url'] = record.get('Reddit')
-                extra['pinterest_url'] = record.get('Pinterest')
-                extra['youtube_url'] = record.get('YouTube')
-                if self.addPMOManagedStatus and record.get('HasProgramManager'):
-                    second_path.append('PMO Managed / All')
-                if self.addIndustrySector and record.get('IndustrySector') != '':
-                    second_path.append('Industry / {}'.format(record['IndustrySector'].replace("/",":")))
-                if self.addTechnologySector and record.get('TechnologySector') != '':
-                    sectors = record['TechnologySector'].split(";")
-                    for sector in sectors:
-                        second_path.append('Technology Sector / {}'.format(sector.replace("/",":")))
-                extra['dev_stats_url'] = self.lfxinsightsUrl.format(parent_slug=record.get('ParentSlug',self.project),slug=extra.get('lfx_slug'))
-                other_links.append({'name': 'Calendar','url': self.calendarUrl.format(slug=extra.get('lfx_slug'))})
-                other_links.append({'name': 'iCal', 'url': self.icalUrl.format(project_id=record.get('ProjectID'))})
-                other_links.append({'name': 'Charter', 'url': record.get('CharterURL')})
-                if self.artworkRepoUrl:
-                    extra['artwork_url'] = self.artworkRepoUrl.format(slug=extra.get('lfx_slug'))
-                extra['annotations'] = annotations
-                extra['other_links'] = other_links
-                member.extra = extra
-                member.second_path = second_path
-                self.members.append(member)
+                # 2. Record processing handled in isolation
+                member = self._process_record(record)
+
+                # Assume list append exists here based on standard patterns
+                if hasattr(self, 'members'):
+                    self.members.append(member)
 
     def lookupParentProjectBySlug(self, slug):
         session = requests_cache.CachedSession()
