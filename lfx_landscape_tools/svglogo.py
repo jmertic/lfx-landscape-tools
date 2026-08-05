@@ -128,10 +128,6 @@ class SVGLogo:
             raise RuntimeError("Adding caption failed: {}".format(response['error']))
 
     def autocrop(self, title=''):
-        postJson = {
-            'svg': self.__contents,
-            'title': title
-        }
         x = requests.post("https://autocrop.cncf.io/autocrop",
             json={
                 'svg': self.__contents,
