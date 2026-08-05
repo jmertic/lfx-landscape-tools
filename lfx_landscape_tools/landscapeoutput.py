@@ -31,8 +31,8 @@ class LandscapeOutput:
     hostedLogosDir = 'hosted_logos'
     memberSuffix = ''
 
-    _itemsProcessed = 0
-    _itemsErrors = 0
+    _items_processed = 0
+    _items_errors = 0
 
     def __init__(self, config: Config):
         self.landscapeItems = []
@@ -51,11 +51,11 @@ class LandscapeOutput:
                 self.landscapeItems.append(subcategory)
     @property
     def itemsProcessed(self):
-        return self._itemsProcessed
+        return self._items_processed
 
     @property
     def itemsErrors(self):
-        return self._itemsErrors
+        return self._items_errors
 
     def load(self, members: Members):
         """
@@ -81,18 +81,18 @@ class LandscapeOutput:
             # Guard Clause: Category not found
             if not target_subcat:
                 logger.error(f"Not adding '{member.name}' - SubCategory '{member.membership}' not found")
-                self._itemsErrors += 1
+                self._items_errors += 1
                 continue
 
             # Guard Clause: Validation check
             if not member.isValidLandscapeItem():
                 missing = ",".join(member.invalidLandscapeItemAttributes())
                 logger.error(f"Not adding '{member.name}' - Missing key attributes {missing}")
-                self._itemsErrors += 1
+                self._items_errors += 1
                 continue
 
             logger.info(f"Added '{member.name}' to Landscape in SubCategory '{member.membership}'")
-            self._itemsProcessed += 1
+            self._items_processed += 1
 
             member.hostLogo(self.hostedLogosDir)
 

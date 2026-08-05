@@ -104,7 +104,6 @@ query($org: String!, $number: Int!) {
             logger.error("Invalid response from gh client: '{}'".format(result.stderr))
             return None
 
-        csvRows = []
         project_data = ''
         try:
             project_data = json.loads(result.stdout)
@@ -148,8 +147,8 @@ query($org: String!, $number: Int!) {
                     committee_id=projectdetailsfromlfxcommittee.get('committee_id'))) \
                     as endpointResponse:
                 try:
-                    memberList = endpointResponse.json()
-                    for record in memberList.get('Data',[]):
+                    member_list = endpointResponse.json()
+                    for record in member_list.get('Data',[]):
                         if record.get('Role') in ['Chair','Vice Chair']:
                             logger.info("Found '{} {}' for the role '{}".format(record.get('FirstName').title(),record.get('LastName').title(),record.get('Role')))
                             chair.append('{} {}'.format(record.get('FirstName').title(),record.get('LastName').title()))
@@ -164,12 +163,12 @@ query($org: String!, $number: Int!) {
     def _lookupProjectAndCommitteeDetailsByLFXURL(self,url):
         urlparts = urlparse(url).path.split('/')
         if isinstance(urlparts,list) and len(urlparts) == 6 and urlparts[1] == 'project' and urlparts[3] == 'collaboration' and urlparts[4] == 'committees':
-            singleProjectEndpointURL = 'https://api-gw.platform.linuxfoundation.org/project-service/v1/public/projects?$filter=projectId%20eq%20{}'
+            single_project_endpoint_url = 'https://api-gw.platform.linuxfoundation.org/project-service/v1/public/projects?$filter=projectId%20eq%20{}'
             session = requests_cache.CachedSession()
-            with session.get(singleProjectEndpointURL.format(urlparts[2])) as endpointResponse:
-                parentProject = endpointResponse.json()
-                if len(parentProject.get('Data')) > 0:
-                    return {'project_id': urlparts[2],'committee_id': urlparts[5],'slug': parentProject.get('Data')[0]["Slug"],'category': parentProject.get('Data')[0].get('Category')}
+            with session.get(single_project_endpoint_url.format(urlparts[2])) as endpointResponse:
+                parent_project = endpointResponse.json()
+                if len(parent_project.get('Data')) > 0:
+                    return {'project_id': urlparts[2],'committee_id': urlparts[5],'slug': parent_project.get('Data')[0]["Slug"],'category': parent_project.get('Data')[0].get('Category')}
 
         logging.getLogger().warning("Couldn't find project information with LFX URL '{}'".format(url))
 
