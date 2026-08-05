@@ -35,6 +35,43 @@ class Members(ABC):
     def loadData(self):
         pass
 
+    def _get_search_strategy(self, slug, membership, norm_name, norm_homepage, norm_repo):
+        """
+        Helper method to determine the matching rule and logging message
+        based on the provided search arguments.
+        """
+        if slug:
+            return (
+                lambda m: m.extra and m.extra.get('lfx_slug') == slug,
+                lambda m: "Found '{}' by slug '{}'".format(m.name, m.extra.get('lfx_slug'))
+            )
+
+        if membership and norm_name and norm_homepage:
+            return (
+                lambda m: (self.normalizeName(m.name) == norm_name or m.homepage_url == norm_homepage) and m.membership == membership,
+                lambda m: "Found '{}' by membership '{}' and homepage_url '{}'".format(m.name, m.membership, m.homepage_url)
+            )
+
+        if norm_repo and norm_name and norm_homepage:
+            return (
+                lambda m: self.normalizeName(m.name) == norm_name or m.homepage_url == norm_homepage or m.repo_url == norm_repo,
+                lambda m: "Found '{}' by repo_url '{}' and homepage_url '{}'".format(m.name, m.repo_url, m.homepage_url)
+            )
+
+        if norm_name and norm_homepage:
+            return (
+                lambda m: self.normalizeName(m.name) == norm_name or m.homepage_url == norm_homepage,
+                lambda m: "Found '{}' by homepage_url '{}'".format(m.name, m.homepage_url)
+            )
+
+        if norm_name:
+            return (
+                lambda m: self.normalizeName(m.name) == norm_name,
+                lambda m: "Found '{}' by name".format(m.name)
+            )
+
+        return None, None
+
     def find(self, name, homepage_url, slug=None, membership=None, repo_url=None):
         """
         Find Member object in this Members object that match the criteria given.
@@ -47,37 +84,16 @@ class Members(ABC):
         logger = logging.getLogger()
         logger.debug("Looking for '{}'".format(norm_name))
 
-        # 1. Determine the matching strategy ONCE outside the loop
-        if slug:
-            def is_match(m):
-                return m.extra and m.extra.get('lfx_slug') == slug
-            log_msg = lambda m: "Found '{}' by slug '{}'".format(m.name, m.extra.get('lfx_slug'))
+        # 1. Fetch the matching strategy
+        is_match, log_msg = self._get_search_strategy(
+            slug, membership, norm_name, norm_homepage, norm_repo
+        )
 
-        elif membership and norm_name and norm_homepage:
-            def is_match(m):
-                return (self.normalizeName(m.name) == norm_name or m.homepage_url == norm_homepage) and m.membership == membership
-            log_msg = lambda m: "Found '{}' by membership '{}' and homepage_url '{}'".format(m.name, m.membership, m.homepage_url)
-
-        elif norm_repo and norm_name and norm_homepage:
-            def is_match(m):
-                return self.normalizeName(m.name) == norm_name or m.homepage_url == norm_homepage or m.repo_url == norm_repo
-            log_msg = lambda m: "Found '{}' by repo_url '{}' and homepage_url '{}'".format(m.name, m.repo_url, m.homepage_url)
-
-        elif norm_name and norm_homepage:
-            def is_match(m):
-                return self.normalizeName(m.name) == norm_name or m.homepage_url == norm_homepage
-            log_msg = lambda m: "Found '{}' by homepage_url '{}'".format(m.name, m.homepage_url)
-
-        elif norm_name:
-            def is_match(m):
-                return self.normalizeName(m.name) == norm_name
-            log_msg = lambda m: "Found '{}' by name".format(m.name)
-
-        else:
-            # If no valid combination of arguments is provided, return empty
+        # 2. Guard against invalid criteria combinations
+        if not is_match:
             return []
 
-        # 2. Iterate through members applying the single chosen strategy
+        # 3. Execute the search
         members = []
         for member in self.members:
             if is_match(member):

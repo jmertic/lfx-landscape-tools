@@ -57,14 +57,14 @@ class Member:
 
         # load in data schema from landscape2
         try:
-            schemaURL = 'https://raw.githubusercontent.com/cncf/landscape2/refs/heads/main/docs/config/data.yml'
-            endpointResponse = requests_cache.CachedSession().get(schemaURL)
-            endpointResponse.raise_for_status()
-            dataschema = ruamel.yaml.YAML().load(endpointResponse.text)
+            schema_url = 'https://raw.githubusercontent.com/cncf/landscape2/refs/heads/main/docs/config/data.yml'
+            endpoint_response = requests_cache.CachedSession().get(schema_url)
+            endpoint_response.raise_for_status()
+            dataschema = ruamel.yaml.YAML().load(endpoint_response.text)
         except requests.exceptions.RequestException as e:
-            logging.getLogger().exception("Cannot load data file schema at {} - error message '{}'".format(schemaURL,e))
+            logging.getLogger().exception("Cannot load data file schema at {} - error message '{}'".format(schema_url,e))
         except ruamel.yaml.YAMLError as e:
-            logging.getLogger().exception("Data file at {} is not valid YAML - error message '{}'".format(schemaURL,e))
+            logging.getLogger().exception("Data file at {} is not valid YAML - error message '{}'".format(schema_url,e))
         else:
             self.itemschema = dataschema.get('categories',[])[0].get('subcategories',[])[0].get('items',[])[0]
 
@@ -96,10 +96,10 @@ class Member:
             self.__repo_url = None
         elif repo_url is not None:
             repo_url = url_normalize(repo_url.rstrip("/"), default_scheme='https')
-            if self._isGitHubOrg(repo_url):
+            if self._is_github_org(repo_url):
                 logging.debug("{} is determined to be a GitHub Org for '{}' - finding related GitHub Repo".format(repo_url,self.name))
                 try:
-                    found_repo_url = self._getPrimaryGitHubRepoFromGitHubOrg(repo_url)
+                    found_repo_url = self._get_primary_github_repo_from_github_org(repo_url)
                     if found_repo_url:
                         self.project_org = "https://github.com/{}".format(urlparse(found_repo_url).path.split("/")[1])
                         self.__repo_url = found_repo_url
@@ -112,7 +112,7 @@ class Member:
                     self.project_org = None
                     self.__repo_url = None
                     logging.warning("No public repositories found in GitHub Org {} - not setting repo_url for '{}' - error message '{}'".format(self.project_org,self.name,e))
-            elif self._isGitHubRepo(repo_url) or self._isGitHubURL(repo_url):
+            elif self._is_github_repo(repo_url) or self.__is_github_url(repo_url):
                 # clean up to ensure it's a valid github repo url
                 x = urlparse(repo_url)
                 parts = x.path.split("/")
@@ -122,14 +122,14 @@ class Member:
                 logging.debug("{} is determined to be something else".format(repo_url))
                 self.__repo_url = repo_url
 
-    def _isGitHubURL(self, url):
+    def __is_github_url(self, url):
         return urlparse(url).netloc == 'www.github.com' or urlparse(url).netloc == 'github.com'
 
-    def _isGitHubRepo(self, url):
-        return self._isGitHubURL(url) and len(urlparse(url).path.split("/")) == 3
+    def _is_github_repo(self, url):
+        return self.__is_github_url(url) and len(urlparse(url).path.split("/")) == 3
 
-    def _isGitHubOrg(self, url):
-        return self._isGitHubURL(url) and len(urlparse(url).path.split("/")) == 2
+    def _is_github_org(self, url):
+        return self.__is_github_url(url) and len(urlparse(url).path.split("/")) == 2
 
     def _fetch_best_repo_via_api(self, org_name):
         """Extracted helper to handle GitHub API search and rate limiting."""
@@ -162,11 +162,11 @@ class Member:
                 logging.debug("Network error - retrying...")
                 continue
 
-    def _getPrimaryGitHubRepoFromGitHubOrg(self, url):
-        if not self._isGitHubOrg(url):
+    def _get_primary_github_repo_from_github_org(self, url):
+        if not self._is_github_org(url):
             return url # Removed list(url) as it likely intended to return the string
 
-        pinned = self._getPinnedGithubReposFromGithubOrg(url)
+        pinned = self._get_pinned_github_repos_from_github_org(url)
         if pinned:
             return pinned[0]
 
@@ -174,19 +174,19 @@ class Member:
         with requests_cache.enabled():
             return self._fetch_best_repo_via_api(org_name)
 
-    def _getPinnedGithubReposFromGithubOrg(self, url):
-        if not self._isGitHubOrg(url):
+    def _get_pinned_github_repos_from_github_org(self, url):
+        if not self._is_github_org(url):
             return list(url)
 
         repos = []
 
         try:
-            orgPageResponse = requests_cache.CachedSession().get(url)
-            orgPageResponse.raise_for_status()
+            org_page_response = requests_cache.CachedSession().get(url)
+            org_page_response.raise_for_status()
         except requests.exceptions.RequestException as e:
             logging.getLogger().exception("Cannot load {} - error message '{}'".format(url,e))
         else:
-            soup = BeautifulSoup(orgPageResponse.text, 'html.parser')
+            soup = BeautifulSoup(org_page_response.text, 'html.parser')
             for item in soup.find_all("li",{"class": "js-pinned-item-list-item"}):
                 repos.append("https://github.com{}".format(item.find("a").attrs['href']))
 
@@ -394,7 +394,7 @@ class Member:
         returnentry = {'item': None} | {k: v for k, v in returnentry.items() if v is not None}
 
         if self.project_org:
-            pinned = self._getPinnedGithubReposFromGithubOrg(self.project_org)
+            pinned = self._get_pinned_github_repos_from_github_org(self.project_org)
             returnentry['additional_repos'] = [{'repo_url': u} for u in pinned if u != self.repo_url]
             # Use a helper to set deep extra.annotations
             self._set_extra_annotation(returnentry, 'project_org', self.project_org)
@@ -419,15 +419,15 @@ class Member:
         return self.homepage_url and self.logo and self.name
 
     def invalidLandscapeItemAttributes(self):
-        invalidAttributes = []
+        invalid_attributes = []
         if not self.homepage_url:
-            invalidAttributes.append('homepage_url')
+            invalid_attributes.append('homepage_url')
         if not self.logo:
-            invalidAttributes.append('logo')
+            invalid_attributes.append('logo')
         if not self.name:
-            invalidAttributes.append('name')
+            invalid_attributes.append('name')
 
-        return invalidAttributes
+        return invalid_attributes
 
     def _update_nested_dict(self, attr_key, current_dict, overlay_dict):
         """Helper to handle the deep dictionary and list logging/merging."""

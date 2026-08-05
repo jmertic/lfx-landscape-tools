@@ -114,12 +114,13 @@ class SVGLogo:
         return self.__contents != '' and self.__contents.find('base64') == -1 and self.__contents.find('<text') == -1 and self.__contents.find('<image') == -1 and self.__contents.find('<tspan') == -1
 
     def addCaption(self, caption="", title=""):
-        postJson = {
-            'svg': self.__contents,
-            'title': title,
-            'caption': caption
-        }
-        x = requests.post("https://autocrop.cncf.io/autocrop", json=postJson)
+        x = requests.post("https://autocrop.cncf.io/autocrop",
+            json={
+                'svg': self.__contents,
+                'title': title,
+                'caption': caption
+            }
+        )
         response = x.json()
         if response['success']:
             self.__contents = response['result']
@@ -131,7 +132,12 @@ class SVGLogo:
             'svg': self.__contents,
             'title': title
         }
-        x = requests.post("https://autocrop.cncf.io/autocrop", json=postJson)
+        x = requests.post("https://autocrop.cncf.io/autocrop",
+            json={
+                'svg': self.__contents,
+                'title': title
+            }
+        )
         response = x.json()
         if response['success']:
             self.__contents = response['result']
