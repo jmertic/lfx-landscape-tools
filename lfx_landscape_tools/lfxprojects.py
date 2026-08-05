@@ -69,10 +69,10 @@ class LFXProjects(Members):
         logger = logging.getLogger()
         logger.debug(f"Trying to see if project level {category} is valid")
 
-        for projectLevel in self.landscapeProjectsLevels:
-            if projectLevel.get('name') == category:
-                member.project = projectLevel.get('level')
-                member.membership = projectLevel.get('name')
+        for project_level in self.landscapeProjectsLevels:
+            if project_level.get('name') == category:
+                member.project = project_level.get('level')
+                member.membership = project_level.get('name')
                 logger.debug("Project level is {} - {}".format(member.project, member.membership))
                 break
 
@@ -170,9 +170,9 @@ class LFXProjects(Members):
         project_param = self.project if self.projectsFilterByParentSlug else ''
 
         with session.get(self.endpointURL.format(project_param)) as endpointResponse:
-            memberList = endpointResponse.json()
+            member_list = endpointResponse.json()
 
-            for record in memberList.get('Data', []):
+            for record in member_list.get('Data', []):
                 # 1. Guard clause handles skips cleanly
                 if self._should_skip_record(record):
                     logger.debug(f"Skipping '{record.get('Name')}'")
@@ -189,9 +189,9 @@ class LFXProjects(Members):
         session = requests_cache.CachedSession()
         if slug:
             with session.get(self.singleSlugEndpointUrl.format(slug=slug)) as endpointResponse:
-                parentProject = endpointResponse.json()
-                if len(parentProject.get('Data',[])) > 0:
-                    return parentProject['Data'][0]
+                parent_project = endpointResponse.json()
+                if len(parent_project.get('Data',[])) > 0:
+                    return parent_project['Data'][0]
                 logging.getLogger().warning("Couldn't find project for slug '{}'".format(slug))
 
         return False

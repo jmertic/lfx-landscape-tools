@@ -223,8 +223,8 @@ class TestMember(unittest.TestCase):
             self.assertEqual(attributes['extra']['annotations']['project_org'],'https://github.com/OpenAssetIO')
             self.assertEqual(attributes['additional_repos'],[])
 
-    @patch.object(Member, '_isGitHubOrg', return_value=True)
-    @patch.object(Member, '_getPrimaryGitHubRepoFromGitHubOrg')
+    @patch.object(Member, '_is_github_org', return_value=True)
+    @patch.object(Member, '_get_primary_github_repo_from_github_org')
     def test_repo_url_else_path(self, mock_get_repo, mock_is_org):
         """Tests the 'else' logic (when found_repo_url is None/False)."""
         mock_get_repo.return_value = None
@@ -235,8 +235,8 @@ class TestMember(unittest.TestCase):
         self.assertIsNone(member.repo_url)
         self.assertIsNone(member.project_org)
 
-    @patch.object(Member, '_isGitHubOrg', return_value=True)
-    @patch.object(Member, '_getPrimaryGitHubRepoFromGitHubOrg')
+    @patch.object(Member, '_is_github_org', return_value=True)
+    @patch.object(Member, '_get_primary_github_repo_from_github_org')
     def test_repo_url_except_path(self, mock_get_repo, mock_is_org):
         """Tests the 'except ValueError' path."""
         mock_get_repo.side_effect = ValueError("API Error")
@@ -249,25 +249,25 @@ class TestMember(unittest.TestCase):
             self.assertIn("No public repositories found", cm.output[0])
             self.assertIsNone(member.project_org)
 
-    @patch.object(Member, '_isGitHubOrg', return_value=False)
+    @patch.object(Member, '_is_github_org', return_value=False)
     def test_get_primary_repo_not_an_org(self, mock_is_org):
         """Test Path 1: Not a GitHub Org (Line 162 fix)."""
         test_url = "https://gitlab.com/something"
 
-        result = Member()._getPrimaryGitHubRepoFromGitHubOrg(test_url)
+        result = Member()._get_primary_github_repo_from_github_org(test_url)
 
         self.assertEqual(result, test_url)
 
-    @patch.object(Member, '_isGitHubOrg', return_value=False)
+    @patch.object(Member, '_is_github_org', return_value=False)
     def test_get_pinned_not_an_org(self, mock_is_org):
         """Test Path 1: Not a GitHub Org. Clears the 174 -> 175 jump."""
         test_url = "https://gitlab.com/cncf"
-        result = Member()._getPinnedGithubReposFromGithubOrg(test_url)
+        result = Member()._get_pinned_github_repos_from_github_org(test_url)
 
         self.assertIsInstance(result, list)
         self.assertEqual(result[0], 'h')
 
-    @patch.object(Member, '_isGitHubOrg', return_value=True)
+    @patch.object(Member, '_is_github_org', return_value=True)
     @patch('requests_cache.CachedSession.get')
     @patch('logging.getLogger')
     def test_get_pinned_http_error(self, mock_get_logger, mock_get, mock_is_org):
@@ -278,7 +278,7 @@ class TestMember(unittest.TestCase):
         mock_get.return_value = mock_response
 
         # Execute
-        result = Member()._getPinnedGithubReposFromGithubOrg("https://github.com/cncf")
+        result = Member()._get_pinned_github_repos_from_github_org("https://github.com/cncf")
 
         # Verify
         self.assertEqual(result, [])
