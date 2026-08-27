@@ -72,7 +72,8 @@ on:
   schedule:
   - cron: "0 4 * * *"
 
-permissions: {}
+permissions:
+  contents: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -114,7 +115,8 @@ on:
       - main
       - master
 
-permissions: {}
+permissions:
+  contents: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
