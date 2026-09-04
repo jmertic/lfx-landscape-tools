@@ -1064,14 +1064,14 @@ yaml = ["pyyaml (>=6.0.1)"]
 
 [[package]]
 name = "responses"
-version = "0.26.2"
+version = "0.26.3"
 description = "A utility library for mocking out the `requests` Python library."
 optional = false
 python-versions = ">=3.8"
 groups = ["test"]
 files = [
-    {file = "responses-0.26.2-py3-none-any.whl", hash = "sha256:6fdfeabd58e5ec473b98dfe02e6d46d3173bd8dd573eff2ccccf1a05a5135364"},
-    {file = "responses-0.26.2.tar.gz", hash = "sha256:9c9259b46a8349197edebf43cfa68a87e1a2802ef503ff8b2fecbabc0b45afd8"},
+    {file = "responses-0.26.3-py3-none-any.whl", hash = "sha256:74474f799334ac4f37d93b6437ecc3bb1bb5c77a8d31780a338643be2dce0af8"},
+    {file = "responses-0.26.3.tar.gz", hash = "sha256:b0c11ca8131b8b227b8d5108e6ed39772222bd5aab030ed430e8f99057c4c409"},
 ]
 
 [package.dependencies]
@@ -1316,4 +1316,4 @@ crypto-eth-addresses = ["eth-hash[pycryptodome] (>=0.7.0)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">= 3.12"
-content-hash = "9515c72a63d2eb5f5b6a60354e48cbbab6a762723f731ff7e3c007c49d9244f9"
+content-hash = "1962e30a8fae7c64413166d17080a93d45d55d15f8c1029e0c497dd18144a7ff"
