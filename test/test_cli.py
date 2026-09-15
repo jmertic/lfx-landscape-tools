@@ -102,15 +102,17 @@ class TestCli(unittest.TestCase):
         self.mock_svg.assert_called_with(name='OpenSource')
         self.mock_svg.return_value.save.assert_called_with('logo.svg')
 
-    @patch('sys.argv', ['cli.py', 'maketextlogo', '--n', 'OpenSource'])
-    def test_maketextlogo_args_nofilename(self):
+    @patch('sys.stdout')
+    @patch('sys.argv', ['cli.py', 'maketextlogo', '--name', 'OpenSource'])
+    def test_maketextlogo_args_nofilename(self, mock_stdout):
         """Verify logo command correctly passes arguments to SVGLogo."""
         Cli()
         self.mock_svg.assert_called_with(name='OpenSource')
         self.mock_svg.return_value.save.assert_not_called()
 
+    @patch('sys.stdout')
     @patch('sys.argv', ['cli.py', 'maketextlogo', '--name', 'OpenSource', '--autocrop'])
-    def test_maketextlogo_args_autocrop(self):
+    def test_maketextlogo_args_autocrop(self, mock_stdout):
         """Verify logo command correctly passes arguments to SVGLogo."""
         Cli()
         self.mock_svg.assert_called_with(name='OpenSource')
@@ -147,14 +149,16 @@ class TestCli(unittest.TestCase):
             with self.assertRaises(argparse.ArgumentTypeError):
                 cli_manual._dir_path("/non/existent/path")
 
+    @patch('logging.Logger.debug')
     @patch('sys.argv', ['cli.py', '--log', 'debug', 'build_members'])
     @patch('lfx_landscape_tools.cli.LFXMembers', side_effect=Exception("Critical Failure"))
     @patch('argparse.ArgumentParser.print_help')
     @patch('builtins.open', new_callable=mock_open, read_data="--- \n # valid yaml content")
-    def test_error_handling_prints_help(self, mock_file, mock_help, _):
+    def test_error_handling_prints_help(self, mock_file, mock_help, mock_lfx, mock_log_debug):
         """Ensure that if a command fails, the help message is displayed."""
         Cli()
         mock_help.assert_called_once()
+        mock_log_debug.assert_called()
 
     @patch('sys.argv', ['cli.py', '--silent', 'build_projects'])
     @patch('builtins.open', new_callable=mock_open, read_data="--- \n # valid yaml content")
