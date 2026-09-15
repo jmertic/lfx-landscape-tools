@@ -57,7 +57,8 @@ class TestLandscapeOutput(unittest.TestCase):
 
         landscape = LandscapeOutput(config=config)
 
-        landscape.save()
+        with self.assertLogs(level='ERROR'):
+            landscape.save()
 
         with open(tmpfilename.name) as fp:
             self.assertEqual(fp.read(),"""categories:
@@ -194,7 +195,7 @@ landscape:
         member = Member()
         member.name = 'test'
         member.homepage_url = 'https://foo.com'
-        with unittest.mock.patch("lfx_landscape_tools.svglogo.open", unittest.mock.mock_open(read_data="data")) as mock_file:
+        with unittest.mock.patch("lfx_landscape_tools.svglogo.open", unittest.mock.mock_open(read_data="<svg></svg>")) as mock_file:
             member.logo = 'Gold.svg'
         member.membership = 'Premier Membership'
         member.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society'
@@ -204,7 +205,7 @@ landscape:
         member = Member()
         member.name = 'test2'
         member.homepage_url = 'https://foo.com'
-        with unittest.mock.patch("lfx_landscape_tools.svglogo.open", unittest.mock.mock_open(read_data="data")) as mock_file:
+        with unittest.mock.patch("lfx_landscape_tools.svglogo.open", unittest.mock.mock_open(read_data="<svg></svg>")) as mock_file:
             member.logo = 'Gold.svg'
         member.membership = 'Premiere Membership'
         member.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society'
@@ -213,7 +214,7 @@ landscape:
 
         member = Member()
         member.name = 'test3'
-        with unittest.mock.patch("lfx_landscape_tools.svglogo.open", unittest.mock.mock_open(read_data="data")) as mock_file:
+        with unittest.mock.patch("lfx_landscape_tools.svglogo.open", unittest.mock.mock_open(read_data="<svg></svg>")) as mock_file:
             member.logo = 'Gold.svg'
         member.membership = 'Premier Membership'
         member.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society'
@@ -223,7 +224,8 @@ landscape:
         landscape = LandscapeOutput(config=Config())
         with unittest.mock.patch('lfx_landscape_tools.svglogo.SVGLogo.save') as mock_svglogo_save:
             mock_svglogo_save.return_value = 'Gold.svg'
-            landscape.load(members)
+            with self.assertLogs(level='ERROR'):
+                landscape.load(members)
 
         self.assertEqual(landscape.landscapeItems[0]['name'],'Premier')
         self.assertEqual(landscape.landscapeItems[0]['items'][0]['name'],"test")
@@ -275,7 +277,7 @@ landscape:
 
             members.overlay(LandscapeMembers(config=config))
             landscape = LandscapeOutput(config=config)
-            with unittest.mock.patch("lfx_landscape_tools.svglogo.open", unittest.mock.mock_open(read_data="data")) as mock_file:
+            with unittest.mock.patch("lfx_landscape_tools.svglogo.open", unittest.mock.mock_open(read_data="<svg></svg>")) as mock_file:
                 members.members[0].logo = 'Gold.svg'
             with unittest.mock.patch('lfx_landscape_tools.svglogo.SVGLogo.save') as mock_svglogo_save:
                 mock_svglogo_save.return_value = 'Gold.svg'
@@ -364,7 +366,8 @@ landscape:
                 ]
             config.landscapefile = tmpfilename.name
 
-            landscape = LandscapeOutput(config=config).save()
+            with self.assertLogs(level='ERROR'):
+                landscape = LandscapeOutput(config=config).save()
 
             with open(tmpfilename.name) as fp:
                 self.maxDiff = None
@@ -529,7 +532,8 @@ landscape:
         config.memberSuffix = " (Member)"
         mock_yaml_load.side_effect = Exception("Format Error")
         lo = LandscapeOutput(config)
-        lo.save()
+        with self.assertLogs(level='ERROR'):
+            lo.save()
         # Logic should reset landscape structure
         self.assertEqual(len(lo.landscapeItems), len(config.landscapeSubcategories))
 
@@ -555,12 +559,13 @@ NOTE: Subsidiary of Comcast for LF membership
             members.members.append(member)
 
             landscape = LandscapeOutput(config=config)
-            with unittest.mock.patch("lfx_landscape_tools.svglogo.open", unittest.mock.mock_open(read_data="data")) as mock_file:
+            with unittest.mock.patch("lfx_landscape_tools.svglogo.open", unittest.mock.mock_open(read_data="<svg></svg>")) as mock_file:
                 members.members[0].logo = 'Gold.svg'
             with unittest.mock.patch('lfx_landscape_tools.svglogo.SVGLogo.save') as mock_svglogo_save:
                 mock_svglogo_save.return_value = 'here_global_b_v.svg'
                 landscape.load(members)
-            landscape.save()
+            with self.assertLogs(level='ERROR'):
+                landscape.save()
 
             with open(tmpfilename.name) as fp:
                 self.maxDiff = None

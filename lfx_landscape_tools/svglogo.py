@@ -12,6 +12,7 @@ from pathlib import Path
 from slugify import slugify
 from typing import Self
 import logging
+import xml.etree.ElementTree as ET
 
 ## third party modules
 import requests
@@ -110,8 +111,30 @@ class SVGLogo:
 
         return filename
 
-    def isValid(self):
-        return self.__contents != '' and self.__contents.find('base64') == -1 and self.__contents.find('<text') == -1 and self.__contents.find('<image') == -1 and self.__contents.find('<tspan') == -1
+    def isValid(self) -> bool:
+        # Treat empty, None, or whitespace-only contents as valid/clean
+        if not self.__contents or not str(self.__contents).strip():
+            return True
+
+        try:
+            root = ET.fromstring(self.__contents)
+        except ET.ParseError:
+            return False  # Return False if non-empty contents are invalid XML
+
+        for elem in root.iter():
+            # Strip XML namespace prefix (e.g., '{http://www.w3.org/2000/svg}text' -> 'text')
+            tag = elem.tag.split('}')[-1] if '}' in elem.tag else elem.tag
+
+            # 1. Reject text or image tags
+            if tag in ('text', 'tspan', 'textPath', 'image'):
+                return False
+
+            # 2. Reject data URIs embedded in attributes (href, xlink:href, style, etc.)
+            for val in elem.attrib.values():
+                if 'data:image/' in val:
+                    return False
+
+        return True
 
     def addCaption(self, caption="", title=""):
         x = requests.post("https://autocrop.cncf.io/autocrop",

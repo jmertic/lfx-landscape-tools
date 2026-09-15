@@ -402,7 +402,6 @@ class TestTACAgendaProjects(unittest.TestCase):
         members = TACAgendaProject(config=config,loadData=False)
         with unittest.mock.patch('requests_cache.CachedSession', requests.Session):
             members.loadData()
-        print(members.members)
         self.assertEqual(members.members[0].name,"D&I Working Group")
         self.assertEqual(members.members[0].extra.get('annotations',[]).get('chair'),'Carol Payne, Rachel Rose')
         self.assertEqual(members.members[0].extra.get('annotations',[]).get('TAC_representative'),'Bill Rose')
@@ -508,7 +507,6 @@ class TestTACAgendaProjects(unittest.TestCase):
                 result = tap.loadData()
 
         self.assertIsNone(result)
-        print(cm.output)
         self.assertTrue(any("Invalid json" in msg for msg in cm.output))
 
     @patch('requests_cache.CachedSession.get')

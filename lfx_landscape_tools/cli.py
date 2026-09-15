@@ -79,9 +79,17 @@ class Cli:
         }
         if args.verbose:
             args.loglevel = 'info'
+
         handlers = [logging.FileHandler(args.logfile,mode="w")]
         if not args.silent:
             handlers.append(logging.StreamHandler(sys.stdout))
+
+        # Clear existing handlers from previous instantiations (e.g. in test suites)
+        logger = logging.getLogger()
+        for h in logger.handlers[:]:
+            h.close()
+            logger.removeHandler(h)
+
         logging.basicConfig(
             level=levels.get(args.loglevel.lower()),
             format="%(asctime)s [%(levelname)s] %(message)s",
@@ -93,6 +101,11 @@ class Cli:
         except Exception as e:
             logging.getLogger().debug(e, exc_info=True)
             parser.print_help()
+        finally:
+            # Clean up logging handlers to release file descriptors and eliminate ResourceWarning
+            for handler in logging.getLogger().handlers[:]:
+                handler.close()
+                logging.getLogger().removeHandler(handler)
 
         logging.getLogger().info("This took {} seconds".format(datetime.now() - self._starttime))
 
