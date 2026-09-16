@@ -80,7 +80,7 @@ class Cli:
         if args.verbose:
             args.loglevel = 'info'
 
-        handlers = [logging.FileHandler(args.logfile,mode="w")]
+        handlers = [logging.FileHandler(args.logfile,mode="a")]
         if not args.silent:
             handlers.append(logging.StreamHandler(sys.stdout))
 
