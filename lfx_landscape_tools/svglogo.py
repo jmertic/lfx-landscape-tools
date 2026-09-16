@@ -121,6 +121,12 @@ class SVGLogo:
         except ET.ParseError:
             return False  # Return False if non-empty contents are invalid XML
 
+        # Remove top-level `<metadata>` elements so their entire subtree is ignored
+        for child in list(root):
+            tag = child.tag.split('}')[-1] if '}' in child.tag else child.tag
+            if tag == 'metadata':
+                root.remove(child)
+
         for elem in root.iter():
             # Strip XML namespace prefix (e.g., '{http://www.w3.org/2000/svg}text' -> 'text')
             tag = elem.tag.split('}')[-1] if '}' in elem.tag else elem.tag

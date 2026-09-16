@@ -115,6 +115,11 @@ class TestSVGLogo(unittest.TestCase):
         """Test for PR #1992"""
         self.assertTrue(SVGLogo(filename="testpr1992.svg").isValid())
 
+    @responses.activate
+    def testPr1994(self):
+        """Test for PR #1994"""
+        self.assertTrue(SVGLogo(filename="testpr1994.svg").isValid())
+
     @responses.activate(registry=responses.registries.OrderedRegistry)
     def testHostLogoRetriesOnChunkedEncodingErrorException(self):
         responses.add(
