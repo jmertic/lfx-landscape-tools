@@ -12,6 +12,7 @@ import responses
 import requests
 import logging
 import json
+import os
 
 from lfx_landscape_tools.config import Config
 from lfx_landscape_tools.cli import Cli
@@ -113,12 +114,14 @@ class TestSVGLogo(unittest.TestCase):
     @responses.activate
     def testPr1992(self):
         """Test for PR #1992"""
-        self.assertTrue(SVGLogo(filename="testpr1992.svg").isValid())
+        self.assertTrue(SVGLogo(filename="{}/testpr1992.svg".format(os.path.dirname(__file__))).isValid())
+        # contains data:image/
+        self.assertFalse(SVGLogo(filename="{}/testpr1992-2.svg".format(os.path.dirname(__file__))).isValid())
 
     @responses.activate
     def testPr1994(self):
         """Test for PR #1994"""
-        self.assertTrue(SVGLogo(filename="testpr1994.svg").isValid())
+        self.assertTrue(SVGLogo(filename="{}/testpr1994.svg".format(os.path.dirname(__file__))).isValid())
 
     @responses.activate(registry=responses.registries.OrderedRegistry)
     def testHostLogoRetriesOnChunkedEncodingErrorException(self):
