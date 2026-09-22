@@ -63,7 +63,7 @@ As a fallback, you can use the built in `GITHUB_TOKEN`. You have to review the p
 > [!NOTE]
 > If `project_processing` is set to `skip` or `rebuild` and `config.yml` option `tacAgendaProjectUrl` is set, you cannot use `GITHUB_TOKEN`; you must use a GitHub App or Personal Access Token (PAT).
 
-### Worklfows
+### Workflows
 
 #### `build.yml`
 
@@ -180,7 +180,9 @@ jobs:
 
 (OPTIONAL BUT HIGHLY RECOMMENDED) Setup dependabot for keeping GitHub Actions updated automatically. Two files to add:
 
-First, `.github/dependabot.yml`.
+##### `dependabot.yml`.
+
+Add the following to a file `.github/dependabot.yml`.
 
 ```yaml
 version: 2
@@ -193,7 +195,59 @@ updates:
       all:
         dependency-type: "production"
 ```
-And second, `.github/workflows/dependabot-automerge.yml` ( dependent upon `GITHUB_TOKEN` being setup to automatically merge PRs as listed above ).
+
+##### `dependabot-automerge.yml` 
+
+Add the one of the following blocks of code to a file `.github/workflows/dependabot-automerge.yml`
+
+###### GitHub App version
+
+```yaml
+name: Auto-merge Dependabot PRs
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  dependabot:
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]'
+
+    steps:
+      - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        id: app-token
+        with:
+          client-id: ${{ vars.APP_CLIENT_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          ref: ${{ github.head_ref }}
+          persist-credentials: false
+      - name: Approve PR
+        run: |
+          gh pr review --approve "${{ github.event.pull_request.number }}"
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+      - name: Enable auto-merge
+        run: |
+          gh pr merge \
+            --squash \
+            --auto \
+            "${{ github.event.pull_request.number }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
+##### Personal Access Token (PAT) or `GITHUB_TOKEN` token version
+
+If you are using a Personal Access Token (PAT), substitute `secrets.GITHUB_TOKEN` below with the secret name you are using ( i.e `secrets.PAT` ).
 
 ```yaml
 name: Auto-merge Dependabot PRs
@@ -213,14 +267,12 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2 
       - name: Approve PR
         run: |
           gh pr review --approve "${{ github.event.pull_request.number }}"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Enable auto-merge
         run: |
           gh pr merge \
