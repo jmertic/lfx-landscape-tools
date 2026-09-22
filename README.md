@@ -30,7 +30,9 @@ slug: alliance-for-open-usd-fund-aousdf
 landscapeMemberCategory: AOUSD Members
 ```
 
-## Setting up the GitHub Action
+## Installation (GitHub Action)
+
+Generally you will want to set this up as a GitHub Action in your landscape repository to automatically keep things updated.
 
 ### Setup a token for the app to use
 
@@ -57,6 +59,9 @@ Add a [repository secret](https://docs.github.com/en/actions/reference/encrypted
 #### Use the `GITHUB_TOKEN` token
 
 As a fallback, you can use the built in `GITHUB_TOKEN`. You have to review the permissions for the `GITHUB_TOKEN` for your repository ( more details [here](https://docs.github.com/en/actions/security-for-github-actions/security-guides/automatic-token-authentication#permissions-for-the-github_token) ). Note that you need to ensure `GITHUB_TOKEN` has the permission to merge PRs (more [here](https://docs.github.com/en/organizations/managing-organization-settings/disabling-or-limiting-github-actions-for-your-organization#preventing-github-actions-from-creating-or-approving-pull-requests)).
+
+> [!NOTE]
+> If `project_processing` is set to `skip` or `rebuild` and `config.yml` option `tacAgendaProjectUrl` is set, you cannot use `GITHUB_TOKEN`; you must use a GitHub App or Personal Access Token (PAT).
 
 ### Worklfows
 
@@ -234,7 +239,7 @@ If the build results in data that differs from the current data in the landscape
 - The pull request base must have a branch protection rule with at least one requirement enabled.
 - The pull request must be in a state where requirements have not yet been satisfied. If the pull request is in a state where it can already be merged, the action will merge it immediately without enabling auto-merge.
 
-## Local install
+## Installation (Local)
 
 You can install this tool on your local computer via [`pipx`](https://pipx.pypa.io).
 
