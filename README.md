@@ -30,7 +30,9 @@ slug: alliance-for-open-usd-fund-aousdf
 landscapeMemberCategory: AOUSD Members
 ```
 
-## Setting up the GitHub Action
+## Installation (GitHub Action)
+
+Generally you will want to set this up as a GitHub Action in your landscape repository to automatically keep things updated.
 
 ### Setup a token for the app to use
 
@@ -45,10 +47,10 @@ You can create a [GitHub App](https://docs.github.com/en/apps/creating-github-ap
 - Repository / Pull requests - Read & Write
 - Repository / Metadata - Read-only
 
-[Generate a Private Key](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/managing-private-keys-for-github-apps#generating-private-keys) and go to your repository where the workflow runs, and add two Actions Secrets:
+[Generate a Private Key](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/managing-private-keys-for-github-apps#generating-private-keys) and go to your repository where the workflow runs, and under Settings > Secrets and Variables > Actions set:
 
-- `APP_ID`: Found on your App's "General" page (a 6-7 digit number).
-- `APP_PRIVATE_KEY`: Open the .pem file you downloaded and paste the entire content (including the `-----BEGIN RSA PRIVATE KEY-----` lines).
+- Variable `APP_CLIENT_ID`: Found on your App's "General" page under "Client ID".
+- Secret `APP_PRIVATE_KEY`: Open the .pem file you downloaded and paste the entire content (including the `-----BEGIN RSA PRIVATE KEY-----` lines).
 
 #### Personal Access Token (PAT)
 
@@ -58,11 +60,16 @@ Add a [repository secret](https://docs.github.com/en/actions/reference/encrypted
 
 As a fallback, you can use the built in `GITHUB_TOKEN`. You have to review the permissions for the `GITHUB_TOKEN` for your repository ( more details [here](https://docs.github.com/en/actions/security-for-github-actions/security-guides/automatic-token-authentication#permissions-for-the-github_token) ). Note that you need to ensure `GITHUB_TOKEN` has the permission to merge PRs (more [here](https://docs.github.com/en/organizations/managing-organization-settings/disabling-or-limiting-github-actions-for-your-organization#preventing-github-actions-from-creating-or-approving-pull-requests)).
 
-### Worklfows
+> [!NOTE]
+> If `project_processing` is set to `skip` or `rebuild` and `config.yml` option `tacAgendaProjectUrl` is set, you cannot use `GITHUB_TOKEN`; you must use a GitHub App or Personal Access Token (PAT).
+
+### Workflows
 
 #### `build.yml`
 
-Add the following code to a `build.yml` file in your landscape repo's `.github/workflows/` directory.
+Add the one of the following blocks of code to a `build.yml` file in your landscape repo's `.github/workflows/` directory, depending upon whether you are using a GitHub App or a Token. Once done, run the `Build Landscape from LFX` GitHub Action following the instructions for [manually running a GitHub Action](https://docs.github.com/en/actions/managing-workflow-runs-and-deployments/managing-workflow-runs/manually-running-a-workflow) to test that it all works.
+
+##### GitHub App version
 
 ```yaml
 name: Build Landscape from LFX
@@ -72,8 +79,46 @@ on:
   schedule:
   - cron: "0 4 * * *"
 
-permissions:
-  contents: read
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        id: app-token
+        with:
+          client-id: ${{ vars.APP_CLIENT_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+      - uses: jmertic/lfx-landscape-tools@82186dce5715040b99f8bca79c5d59f19ef91a69 # 20260916
+        with:
+          project_processing: skip # see options in action.yml
+        env:
+          repository: ${{ github.repository }}
+          ref: ${{ github.ref }}
+          token: ${{ steps.app-token.outputs.token }}  
+```
+
+##### Personal Access Token (PAT) or `GITHUB_TOKEN` token version
+
+If you are using a Personal Access Token (PAT), substitute `secrets.GITHUB_TOKEN` below with the secret name you are using ( i.e `secrets.PAT` ).
+
+```yaml
+name: Build Landscape from LFX
+
+on:
+  workflow_dispatch:
+  schedule:
+  - cron: "0 4 * * *"
+
+permissions: {}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -91,15 +136,9 @@ jobs:
           project_processing: skip # see options in action.yml
         env:
           repository: ${{ github.repository }}
-          ref: ${{ github.ref }}
-          // Only include APP_ID and APP_PRIVATE_KEY if using a GitHub App
-          APP_ID: ${{ secrets.APP_ID }}
-          APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
-          // Skip token if usign a GitHub App 
-          token: ${{ secrets.GITHUB_TOKEN }}      
+          ref: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ steps.app-token.outputs.token }}  
 ```
-
-Run the `Build Landscape from LFX` GitHub Action following the instructions for [manually running a GitHub Action](https://docs.github.com/en/actions/managing-workflow-runs-and-deployments/managing-workflow-runs/manually-running-a-workflow) to test that it all works.
 
 #### `validate.yml`
 
@@ -115,8 +154,7 @@ on:
       - main
       - master
 
-permissions:
-  contents: read
+permissions: {}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -142,7 +180,9 @@ jobs:
 
 (OPTIONAL BUT HIGHLY RECOMMENDED) Setup dependabot for keeping GitHub Actions updated automatically. Two files to add:
 
-First, `.github/dependabot.yml`.
+##### `dependabot.yml`.
+
+Add the following to a file `.github/dependabot.yml`.
 
 ```yaml
 version: 2
@@ -155,7 +195,59 @@ updates:
       all:
         dependency-type: "production"
 ```
-And second, `.github/workflows/dependabot-automerge.yml` ( dependent upon `GITHUB_TOKEN` being setup to automatically merge PRs as listed above ).
+
+##### `dependabot-automerge.yml` 
+
+Add the one of the following blocks of code to a file `.github/workflows/dependabot-automerge.yml`
+
+###### GitHub App version
+
+```yaml
+name: Auto-merge Dependabot PRs
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  dependabot:
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]'
+
+    steps:
+      - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        id: app-token
+        with:
+          client-id: ${{ vars.APP_CLIENT_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          ref: ${{ github.head_ref }}
+          persist-credentials: false
+      - name: Approve PR
+        run: |
+          gh pr review --approve "${{ github.event.pull_request.number }}"
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+      - name: Enable auto-merge
+        run: |
+          gh pr merge \
+            --squash \
+            --auto \
+            "${{ github.event.pull_request.number }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
+##### Personal Access Token (PAT) or `GITHUB_TOKEN` token version
+
+If you are using a Personal Access Token (PAT), substitute `secrets.GITHUB_TOKEN` below with the secret name you are using ( i.e `secrets.PAT` ).
 
 ```yaml
 name: Auto-merge Dependabot PRs
@@ -175,14 +267,12 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2 
       - name: Approve PR
         run: |
           gh pr review --approve "${{ github.event.pull_request.number }}"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Enable auto-merge
         run: |
           gh pr merge \
@@ -201,7 +291,7 @@ If the build results in data that differs from the current data in the landscape
 - The pull request base must have a branch protection rule with at least one requirement enabled.
 - The pull request must be in a state where requirements have not yet been satisfied. If the pull request is in a state where it can already be merged, the action will merge it immediately without enabling auto-merge.
 
-## Local install
+## Installation (Local)
 
 You can install this tool on your local computer via [`pipx`](https://pipx.pypa.io).
 
