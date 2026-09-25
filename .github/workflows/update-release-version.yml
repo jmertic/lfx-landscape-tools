@@ -49,7 +49,7 @@ jobs:
           sed -i -E "s|uses: jmertic/lfx-tac-actions@[a-f0-9A-Za-z._-]+(\s*#[^\n]*)?|uses: jmertic/lfx-tac-actions@\({{ steps.meta.outputs.SHA }} #\){{ steps.meta.outputs.RAW_TAG }}|g" README.md
 
       - name: Update External Actions in README.md
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const fs = require('fs');
