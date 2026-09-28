@@ -145,9 +145,12 @@ class LFXProjects(Members):
             'reddit_url': record.get('Reddit'),
             'pinterest_url': record.get('Pinterest'),
             'youtube_url': record.get('YouTube'),
-            'dev_stats_url': self.lfxinsightsUrl.format(parent_slug=parent_slug, slug=lfx_slug),
             'annotations': {}
         }
+
+        # Don't set LFX Insights URL if there is not a repo in PCC
+        if member.repo_url:
+            extra['dev_stats_url'] = self.lfxinsightsUrl.format(parent_slug=parent_slug, slug=lfx_slug)
 
         if self.artworkRepoUrl:
             extra['artwork_url'] = self.artworkRepoUrl.format(slug=lfx_slug)
