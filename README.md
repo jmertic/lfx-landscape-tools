@@ -97,7 +97,7 @@ jobs:
         with:
           client-id: ${{ vars.APP_CLIENT_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
-      - uses: jmertic/lfx-landscape-tools@09c73c8bb7ddb3bcf96cbf28c24546a55b09418f # 20260923
+      - uses: jmertic/lfx-landscape-tools@b85674b10bfb017500b51b06d9ec5dad3cb55655 # 20260928
         with:
           project_processing: skip # see options in action.yml
         env:
@@ -131,7 +131,7 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - uses: jmertic/lfx-landscape-tools@09c73c8bb7ddb3bcf96cbf28c24546a55b09418f # 20260923
+      - uses: jmertic/lfx-landscape-tools@b85674b10bfb017500b51b06d9ec5dad3cb55655 # 20260928
         with:
           project_processing: skip # see options in action.yml
         env:
@@ -167,7 +167,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - uses: cncf/landscape2-validate-action@6381e8747c73412e638670807b402ef2b863e9f8 # v2.0.1
@@ -225,7 +225,7 @@ jobs:
           client-id: ${{ vars.APP_CLIENT_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           token: ${{ steps.app-token.outputs.token }}
           ref: ${{ github.head_ref }}
@@ -267,7 +267,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2 
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Approve PR
         run: |
           gh pr review --approve "${{ github.event.pull_request.number }}"
