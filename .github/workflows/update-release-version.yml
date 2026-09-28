@@ -29,14 +29,14 @@ jobs:
           VERSION="${RAW_TAG#v}"
           
           # Dereference the tag to retrieve the underlying 40-character commit SHA
-          SHA=\((git rev-parse "\){RAW_TAG}^{commit}")
+          SHA=$(git rev-parse "${RAW_TAG}^{commit}")
           
-          echo "RAW_TAG=\({RAW_TAG}" >>\)GITHUB_OUTPUT
-          echo "VERSION=\({VERSION}" >>\)GITHUB_OUTPUT
-          echo "SHA=\({SHA}" >>\)GITHUB_OUTPUT
+          echo "RAW_TAG=${RAW_TAG}" >>"$GITHUB_OUTPUT"
+          echo "VERSION=${VERSION}" >>"$GITHUB_OUTPUT"
+          echo "SHA=${SHA}" >>"$GITHUB_OUTPUT"
           
           # Debugging log output
-          echo "Processing Tag: \(RAW_TAG, Version:\)VERSION, SHA:$SHA"
+          echo "Processing Tag: $RAW_TAG, Version: $VERSION, SHA:$SHA"
 
       - name: Update pyproject.toml
         run: |
@@ -44,9 +44,9 @@ jobs:
 
       - name: Update README.md (Self Action Version)
         run: |
-          # Matches: uses: jmertic/lfx-tac-actions@ [optional # comment]
-          # Replaces with: uses: jmertic/lfx-tac-actions@ # 
-          sed -i -E "s|uses: jmertic/lfx-tac-actions@[a-f0-9A-Za-z._-]+(\s*#[^\n]*)?|uses: jmertic/lfx-tac-actions@\({{ steps.meta.outputs.SHA }} #\){{ steps.meta.outputs.RAW_TAG }}|g" README.md
+          # Matches: uses: jmertic/lfx-landscape-tools@ [optional # comment]
+          # Replaces with: uses: jmertic/lfx-landscape-tools@ #
+          sed -i -E "s|uses: jmertic/lfx-landscape-tools@[a-f0-9A-Za-z._-]+(\s*#[^\n]*)?|uses: jmertic/lfx-landscape-tools@${{ steps.meta.outputs.SHA }} # ${{ steps.meta.outputs.RAW_TAG }}|g" README.md
 
       - name: Update External Actions in README.md
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
@@ -63,7 +63,7 @@ jobs:
             let readme = fs.readFileSync('README.md', 'utf8');
 
             for (const { owner, repo } of deps) {
-              const fullRepo = `\({owner}/\){repo}`;
+              const fullRepo = `${owner}/${repo}`;
               
               // 1. Get latest release tag
               const release = await github.rest.repos.getLatestRelease({ owner, repo });
@@ -81,10 +81,10 @@ jobs:
 
               // 3. Update matches in README.md
               const regex = new RegExp(`uses: ${fullRepo}@[a-zA-Z0-9_.-]+(\\s*#[^\\n]*)?`, 'g');
-              const replacement = `uses: \({fullRepo}@\){sha} # ${tagName}`;
+              const replacement = `uses: ${fullRepo}@${sha} # ${tagName}`;
               
               readme = readme.replace(regex, replacement);
-              console.log(`Updated \({fullRepo} to\){sha} (# ${tagName})`);
+              console.log(`Updated ${fullRepo} to ${sha} (# ${tagName})`);
             }
 
             fs.writeFileSync('README.md', readme);
@@ -102,7 +102,7 @@ jobs:
           body: |
             Automated updates for release ${{ steps.meta.outputs.VERSION }}:
             - Updated `pyproject.toml` version
-            - Updated `jmertic/lfx-tac-actions` version/SHA in `README.md`
+            - Updated `jmertic/lfx-landscape-tools` version/SHA in `README.md`
             - Bumped third-party action SHAs (`actions/checkout`, `actions/setup-node`) in `README.md`
           labels: |
             automated-pr
@@ -112,10 +112,10 @@ jobs:
         if: steps.cpr.outputs.pull-request-number != ''
         shell: bash
         run: |
-          ALLOW_MERGE=\((gh api "repos/\)GITHUB_REPOSITORY" --jq '.allow_auto_merge')
+          ALLOW_MERGE=$(gh api "repos/$GITHUB_REPOSITORY" --jq '.allow_auto_merge')
 
           if [ "$ALLOW_MERGE" = "true" ]; then
-            gh pr merge --squash --auto "\({{ steps.cpr.outputs.pull-request-number }}" || gh pr merge --squash "\){{ steps.cpr.outputs.pull-request-number }}"
+            gh pr merge --squash --auto "${{ steps.cpr.outputs.pull-request-number }}" || gh pr merge --squash "${{ steps.cpr.outputs.pull-request-number }}"
           fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
