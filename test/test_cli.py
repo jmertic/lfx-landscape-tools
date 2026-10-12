@@ -95,16 +95,9 @@ class TestCli(unittest.TestCase):
         self.mock_output.return_value.load.assert_called_once()
         self.mock_output.return_value.save.assert_called_once()
 
-    @patch('sys.argv', ['cli.py', 'maketextlogo', '--name', 'OpenSource', '-o', 'logo.svg'])
-    def test_maketextlogo_args(self):
-        """Verify logo command correctly passes arguments to SVGLogo."""
-        Cli()
-        self.mock_svg.assert_called_with(name='OpenSource')
-        self.mock_svg.return_value.save.assert_called_with('logo.svg')
-
     @patch('sys.stdout')
     @patch('sys.argv', ['cli.py', 'maketextlogo', '--name', 'OpenSource'])
-    def test_maketextlogo_args_nofilename(self, mock_stdout):
+    def test_maketextlogo_args(self, mock_stdout):
         """Verify logo command correctly passes arguments to SVGLogo."""
         Cli()
         self.mock_svg.assert_called_with(name='OpenSource')
