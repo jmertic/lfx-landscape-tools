@@ -57,10 +57,9 @@ class Cli:
             sp = subparsers.add_parser(name, help=help_text, parents=[lfx_parent])
             sp.set_defaults(func=func)
 
-        logo_parser = subparsers.add_parser("maketextlogo", help="Create a text pure SVG logo")
+        logo_parser = subparsers.add_parser("maketextlogo", help="Create a text pure SVG logo. Streams file contents to sys.stdout")
         logo_parser.add_argument("-n", "--name", required=True, help="Name to appear in logo")
         logo_parser.add_argument("--autocrop", action='store_true', help="Process logo with autocrop")
-        logo_parser.add_argument("-o", "--output", dest="filename", help="Filename to save logo")
         logo_parser.set_defaults(func=self.maketextlogo)
 
         val_parser = subparsers.add_parser("validatedata", help="Validate landscape data file")
@@ -172,12 +171,8 @@ class Cli:
         if args.autocrop:
             svglogo.autocrop()
 
-        if args.filename:
-            svglogo.save(args.filename)
-        else:
-            print(svglogo)
-
-        return True
+        sys.stdout.buffer.write(svglogo.encode("utf-8"))
+        sys.stdout.buffer.flush()
 
     def validatedata(self,args):
         schema = "https://raw.githubusercontent.com/cncf/landscape2/refs/heads/main/docs/config/schema/data.schema.json"
