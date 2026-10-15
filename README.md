@@ -136,8 +136,8 @@ jobs:
           project_processing: skip # see options in action.yml
         env:
           repository: ${{ github.repository }}
-          ref: ${{ secrets.GITHUB_TOKEN }}
-          token: ${{ steps.app-token.outputs.token }}  
+          ref: ${{ github.ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 #### `validate.yml`
