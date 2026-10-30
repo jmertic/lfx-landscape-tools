@@ -18,7 +18,7 @@ url-normalize = ">=3.0.1,<4.0.0"
 urllib3 = "^2.8.0"
 validators = "^0.36.0"
 click = "^8.5.0"
-check-jsonschema = "^0.38.2"
+check-jsonschema = "^0.39.0"
 beautifulsoup4 = "^4.14.3"
 
 [tool.poetry.group.test.dependencies]
