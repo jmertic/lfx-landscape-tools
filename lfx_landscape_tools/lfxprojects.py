@@ -149,7 +149,7 @@ class LFXProjects(Members):
         }
 
         # Don't set LFX Insights URL if there is not a repo in PCC
-        if member.repo_url:
+        if member.repo_url and record.get('Category') != 'Working Group':
             extra['dev_stats_url'] = self.lfxinsightsUrl.format(parent_slug=parent_slug, slug=lfx_slug)
 
         if self.artworkRepoUrl:
