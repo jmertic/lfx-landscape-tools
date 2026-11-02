@@ -148,7 +148,7 @@ query($org: String!, $number: Int!) {
                     as endpointResponse:
                 try:
                     member_list = endpointResponse.json()
-                    for record in member_list.get('Data',[]):
+                    for record in member_list.get('Data',[]) or []:
                         if record.get('Role') in ['Chair','Vice Chair']:
                             logger.info("Found '{} {}' for the role '{}".format(record.get('FirstName').title(),record.get('LastName').title(),record.get('Role')))
                             chair.append('{} {}'.format(record.get('FirstName').title(),record.get('LastName').title()))
