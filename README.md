@@ -77,7 +77,7 @@ name: Build Landscape from LFX
 on:
   workflow_dispatch:
   schedule:
-  - cron: "0 4 * * *"
+  - cron: "0 4 * * *" # adjust to the time 1 hour before the landscape itself is rebuilt daily.
 
 permissions: {}
 
@@ -103,7 +103,7 @@ jobs:
         env:
           repository: ${{ github.repository }}
           ref: ${{ github.ref }}
-          token: ${{ steps.app-token.outputs.token }}  
+          token: ${{ steps.app-token.outputs.token }}
 ```
 
 ##### Personal Access Token (PAT) or `GITHUB_TOKEN` token version
@@ -116,7 +116,7 @@ name: Build Landscape from LFX
 on:
   workflow_dispatch:
   schedule:
-  - cron: "0 4 * * *"
+  - cron: "0 4 * * *" # adjust to the time 1 hour before the landscape itself is rebuilt daily.
 
 permissions: {}
 
@@ -196,7 +196,7 @@ updates:
         dependency-type: "production"
 ```
 
-##### `dependabot-automerge.yml` 
+##### `dependabot-automerge.yml`
 
 Add the one of the following blocks of code to a file `.github/workflows/dependabot-automerge.yml`
 
