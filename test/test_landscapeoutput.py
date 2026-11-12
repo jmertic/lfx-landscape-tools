@@ -433,7 +433,7 @@ landscape:
           - item:
             name: HERE Global B.V. (testme)
             homepage_url: https://here.com/
-            logo: here_global_b_v.svg
+            logo: here_global_b_v_testme.svg
             crunchbase: https://www.crunchbase.com/organization/here-technologies
             twitter: https://twitter.com/here
       - subcategory:

@@ -51,6 +51,7 @@ class Cli:
             ("build_lfeuprojects", "Replace current LF Europe projects with latest from LFX", self.buildlfeuprojects),
             ("sync_projects", "Sync current projects with latest from LFX", self.syncprojects),
             ("sync_members", "Sync current members with latest from LFX", self.syncmembers),
+            ("removestalelogos", "Remove any stale logos no longer used in the landscape", self.removestalelogos),
         ]
 
         for name, help_text, func in lfx_commands:
@@ -173,6 +174,35 @@ class Cli:
 
         sys.stdout.buffer.write(svglogo.encode("utf-8"))
         sys.stdout.buffer.flush()
+
+    def _extract_logos(self,data):
+        """Recursively traverse parsed YAML data to find all 'logo' values."""
+        logos = []
+        if isinstance(data, dict):
+            for key, value in data.items():
+                if key == "logo" and value is not None:
+                    logos.append(value)
+                else:
+                    logos.extend(self._extract_logos(value))
+        elif isinstance(data, list):
+            for item in data:
+                logos.extend(self._extract_logos(item))
+        return logos
+
+    def removestalelogos(self,args):
+        config = Config(args.configfile)
+        logos = self._extract_logos(LandscapeMembers(config,loadData=False).load_landscape_yaml())
+
+        with os.scandir(os.path.join(args.basedir,config.hostedLogosDir)) as hostedlogos:
+            for hostedlogo in hostedlogos:
+                if hostedlogo.name not in logos:
+                    logging.getLogger().info(f"`{hostedlogo.name}` not used in landscape - deleting.")
+                    try:
+                        os.remove(hostedlogo.path)
+                    except FileNotFoundError:
+                        logging.getLogger().warning("File was already deleted or does not exist.")
+                    except PermissionError:
+                        logging.getLogger().exception("Permission denied: file may be open or read-only.")
 
     def validatedata(self,args):
         schema = "https://raw.githubusercontent.com/cncf/landscape2/refs/heads/main/docs/config/schema/data.schema.json"
