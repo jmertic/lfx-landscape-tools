@@ -254,3 +254,8 @@ class TestSVGLogo(unittest.TestCase):
         mock_get_logger.return_value.error.assert_called_with(
             "Cannot save 'test_logo.svg' in './readonly_dir'"
         )
+
+    # Regression test for a crash found by fuzz/fuzz_svglogo_generate.py
+    def test_create_text_logo_with_nul_byte(self):
+        logo = SVGLogo(name="Foo\x00 Bar")
+        self.assertIn("<svg", str(logo))

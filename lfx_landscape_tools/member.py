@@ -7,7 +7,7 @@
 
 ## built in modules
 import os
-from urllib.parse import urlparse
+from urllib.parse import urlparse as _urlparse, ParseResult
 import logging
 import socket
 from typing import Self
@@ -93,13 +93,15 @@ class Member:
         if repo_url == '':
             self.__repo_url = None
         elif repo_url is not None:
-            repo_url = url_normalize(repo_url.rstrip("/"), default_scheme='https')
-            if self._is_github_org(repo_url):
+            repo_url = self._safe_url_normalize(repo_url.rstrip("/"), default_scheme='https')
+            if not repo_url:
+                self.__repo_url = None
+            elif self._is_github_org(repo_url):
                 logging.debug("{} is determined to be a GitHub Org for '{}' - finding related GitHub Repo".format(repo_url,self.name))
                 try:
                     found_repo_url = self._get_primary_github_repo_from_github_org(repo_url)
                     if found_repo_url:
-                        self.project_org = "https://github.com/{}".format(urlparse(found_repo_url).path.split("/")[1])
+                        self.project_org = "https://github.com/{}".format(self._urlparse(found_repo_url).path.split("/")[1])
                         self.__repo_url = found_repo_url
                         logging.debug("{} is determined to be the associated GitHub Repo for GitHub Org {} for '{}'".format(self.__repo_url,self.project_org,self.name))
                     else:
@@ -112,7 +114,7 @@ class Member:
                     logging.warning("No public repositories found in GitHub Org {} - not setting repo_url for '{}' - error message '{}'".format(self.project_org,self.name,e))
             elif self._is_github_repo(repo_url) or self.__is_github_url(repo_url):
                 # clean up to ensure it's a valid github repo url
-                x = urlparse(repo_url)
+                x = self._urlparse(repo_url)
                 parts = x.path.split("/")
                 self.__repo_url = "https://github.com/{}/{}".format(parts[1],parts[2])
                 logging.debug("{} is determined to be a GitHub Repo for '{}'".format(self.__repo_url,self.name))
@@ -121,13 +123,13 @@ class Member:
                 self.__repo_url = repo_url
 
     def __is_github_url(self, url):
-        return urlparse(url).netloc == 'www.github.com' or urlparse(url).netloc == 'github.com'
+        return self._urlparse(url).netloc == 'www.github.com' or self._urlparse(url).netloc == 'github.com'
 
     def _is_github_repo(self, url):
-        return self.__is_github_url(url) and len(urlparse(url).path.split("/")) == 3
+        return self.__is_github_url(url) and len(self._urlparse(url).path.split("/")) == 3
 
     def _is_github_org(self, url):
-        return self.__is_github_url(url) and len(urlparse(url).path.split("/")) == 2
+        return self.__is_github_url(url) and len(self._urlparse(url).path.split("/")) == 2
 
     def _fetch_best_repo_via_api(self, org_name):
         """Extracted helper to handle GitHub API search and rate limiting."""
@@ -168,7 +170,7 @@ class Member:
         if pinned:
             return pinned[0]
 
-        org_name = urlparse(url).path.split("/")[1]
+        org_name = self._urlparse(url).path.split("/")[1]
         with requests_cache.enabled():
             return self._fetch_best_repo_via_api(org_name)
 
@@ -203,10 +205,11 @@ class Member:
             self.__linkedin = "https://www.linkedin.com/{}".format(linkedin)
         # perhaps they forgot to add the https://
         elif linkedin.startswith(('www.linkedin.com','linkedin.com')):
-            self.__linkedin = "https://www.linkedin.com{}".format(urlparse(url_normalize(linkedin)).path)
+            normalized_linkedin = self._safe_url_normalize(linkedin)
+            self.__linkedin = "https://www.linkedin.com{}".format(self._urlparse(normalized_linkedin).path) if normalized_linkedin else None
         # If it is a URL, make sure it's properly formed
-        elif ( urlparse(linkedin).netloc == 'linkedin.com' or urlparse(linkedin).netloc == 'www.linkedin.com' ):
-            self.__linkedin = "https://www.linkedin.com{}".format(urlparse(linkedin).path)
+        elif ( self._urlparse(linkedin).netloc == 'linkedin.com' or self._urlparse(linkedin).netloc == 'www.linkedin.com' ):
+            self.__linkedin = "https://www.linkedin.com{}".format(self._urlparse(linkedin).path)
         else:
             self.__linkedin = None
             logging.getLogger().warning("Member.linkedin for '{name}' must be set to a valid LinkedIn URL - '{linkedin}' provided".format(linkedin=linkedin,name=self.name))
@@ -219,8 +222,8 @@ class Member:
     def crunchbase(self, crunchbase):
         if crunchbase == '':
             self.__crunchbase = None
-        elif crunchbase and ( urlparse(crunchbase).netloc == 'crunchbase.com' or urlparse(crunchbase).netloc == 'www.crunchbase.com' ) and urlparse(crunchbase).path.split("/")[1] == 'organization':
-            self.__crunchbase = "https://www.crunchbase.com/{}/{}".format(urlparse(crunchbase).path.split('/')[1],urlparse(crunchbase).path.split('/')[2])
+        elif crunchbase and ( self._urlparse(crunchbase).netloc == 'crunchbase.com' or self._urlparse(crunchbase).netloc == 'www.crunchbase.com' ) and self._urlparse(crunchbase).path.split("/")[1] == 'organization':
+            self.__crunchbase = "https://www.crunchbase.com/{}/{}".format(self._urlparse(crunchbase).path.split('/')[1],self._urlparse(crunchbase).path.split('/')[2])
         else:
             self.__crunchbase = None
             logging.getLogger().warning("Member.crunchbase for '{name}' must be set to a valid Crunchbase URL - '{crunchbase}' provided".format(crunchbase=crunchbase,name=self.name))
@@ -235,8 +238,8 @@ class Member:
             self.__homepage_url = None
             logging.getLogger().warning("Member.homepage_url must be not be blank for '{name}'".format(name=self.name))
         else:
-            normalizedhomepage_url = url_normalize(homepage_url, default_scheme='https')
-            if not validators.url(normalizedhomepage_url):
+            normalizedhomepage_url = self._safe_url_normalize(homepage_url, default_scheme='https')
+            if not normalizedhomepage_url or not validators.url(normalizedhomepage_url):
                 self.__homepage_url = None
                 logging.getLogger().warning("Member.homepage_url for '{name}' must be set to a valid homepage_url - '{homepage_url}' provided".format(homepage_url=homepage_url,name=self.name))
             else:
@@ -254,7 +257,7 @@ class Member:
             return
         elif type(logo) is SVGLogo:
             self.__logo = logo
-        elif urlparse(logo).scheme != '':
+        elif self._urlparse(logo).scheme != '':
             self.__logo = SVGLogo(url=logo)
         else:
             self.__logo = SVGLogo(filename=logo)
@@ -276,8 +279,8 @@ class Member:
             self.__twitter = None
         elif not twitter.startswith('https://twitter.com/'):
             # fix the URL if it's not formatted right
-            o = urlparse(twitter)
-            if o.netloc == '':
+            o = self._urlparse(twitter)
+            if o.netloc == '' and o.scheme == '':
                 self.__twitter = "https://twitter.com/{}".format(twitter)
             elif (o.netloc == "twitter.com" or o.netloc == "www.twitter.com"):
                 self.__twitter = "https://twitter.com{path}".format(path=o.path)
@@ -499,3 +502,23 @@ class Member:
                 result.append(item)
 
         return result
+
+    # What self._urlparse() below returns for a URL urllib can't parse: no host, and a
+    # scheme that matches nothing, so callers treat it as an invalid URL.
+    _UNPARSEABLE_URL = ParseResult(scheme='invalid', netloc='', path='', params='', query='', fragment='')
+
+    def _urlparse(self,url):
+        """urllib.parse.urlparse(), but returns _UNPARSEABLE_URL instead of raising (e.g. on an unbalanced '[' in the host)."""
+        try:
+            return _urlparse(url)
+        except ValueError:
+            return self._UNPARSEABLE_URL
+
+    def _safe_url_normalize(self,url, **kwargs):
+        """url_normalize(), returning None for URLs it can't parse (e.g. hostnames that aren't valid IDNA)."""
+        try:
+            return url_normalize(url, **kwargs)
+        except ValueError as e:
+            logging.getLogger().warning("Cannot normalize URL '{}' - error message '{}'".format(url, e))
+            return None
+

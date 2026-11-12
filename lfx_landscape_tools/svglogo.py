@@ -69,7 +69,8 @@ class SVGLogo:
 
     def _generate_from_name(self, name):
         """Helper to handle Cairo SVG generation complexity."""
-        parts = name.split(" ")
+        # cairo cannot render NUL bytes
+        parts = name.replace("\x00", "").split(" ")
         width = len(max(parts, key=len)) * 34
         height = len(parts) * 65
 

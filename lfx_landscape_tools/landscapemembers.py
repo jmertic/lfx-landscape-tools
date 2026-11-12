@@ -100,22 +100,31 @@ class LandscapeMembers(Members):
         landscape = self.load_landscape_yaml()
         if not landscape:
             return
+        if not isinstance(landscape, dict):
+            logger.error("Landscape file '{}' is not a mapping - will not load current landscape data".format(self.landscapefile))
+            return
 
         # 2. Determine root category
         rootcategory = 'landscape' if landscape.get('landscape') else 'categories'
 
         # 3. Find the target category (flattens the first loop)
-        categories = landscape.get(rootcategory, [])
-        target_category = next((c for c in categories if c.get('name') == self.landscape_category), None)
+        categories = landscape.get(rootcategory) or []
+        target_category = next((c for c in categories if isinstance(c, dict) and c.get('name') == self.landscape_category), None)
 
         if not target_category:
             return
 
         # 4. Iterate and process members
-        for subcategory in target_category.get('subcategories', []):
+        for subcategory in target_category.get('subcategories') or []:
+            if not isinstance(subcategory, dict):
+                logger.error("Skipping malformed subcategory '{}' in category '{}'".format(subcategory, self.landscape_category))
+                continue
             subcat_name = subcategory.get('name')
             logger.debug("Processing subcategory '{}'...".format(subcat_name))
 
-            for item in subcategory.get('items', []):
+            for item in subcategory.get('items') or []:
+                if not isinstance(item, dict):
+                    logger.error("Skipping malformed item '{}' in subcategory '{}'".format(item, subcat_name))
+                    continue
                 member = self._process_member_item(item, subcat_name)
                 self.members.append(member)
