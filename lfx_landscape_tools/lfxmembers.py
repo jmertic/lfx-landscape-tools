@@ -20,18 +20,18 @@ class LFXMembers(Members):
 
     project = ''
     endpointURL = 'https://api-gw.platform.linuxfoundation.org/project-service/v1/public/projects/{}/members?orderBy=name&status=Active,At Risk'
-    endpointURLUsePublicMembershipLogo = 'https://api-gw.platform.linuxfoundation.org/project-service/v1/public/projects/{}/members?orderBy=name&status=Active,At Risk&usePublicMembershipLogo=true' 
+    endpointURLUsePublicMembershipLogo = 'https://api-gw.platform.linuxfoundation.org/project-service/v1/public/projects/{}/members?orderBy=name&status=Active,At Risk&usePublicMembershipLogo=true'
     endpointURLAllAutoJoinProjects = 'https://api-gw.platform.linuxfoundation.org/project-service/v1/public/projects?autoJoinEnabled=true&pageSize=2000'
 
     def processConfig(self, config: type[Config]):
         self.project = config.project
-        self.endpointURL = self.endpointURLUsePublicMembershipLogo if config.memberUsePublicMembershipLogo else self.endpointURL
-        self.addOtherProjectMemberships = config.addOtherProjectMemberships
+        self.endpointURL = self.endpointURLUsePublicMembershipLogo if config.member_use_public_membership_logo else self.endpointURL
+        self.add_other_project_memberships = config.add_other_project_memberships
 
     def _get_other_project_memberships(self, record_id):
         """Helper to fetch memberships across other projects."""
         second_path = []
-        if not self.addOtherProjectMemberships:
+        if not self.add_other_project_memberships:
             return second_path
 
         session = requests_cache.CachedSession()
@@ -44,7 +44,7 @@ class LFXMembers(Members):
                         second_path.append(f'Project Membership / {project_name}')
         return second_path
 
-    def loadData(self):
+    def load_data(self):
         logger = logging.getLogger()
         logger.info("Loading LFX Members data")
 

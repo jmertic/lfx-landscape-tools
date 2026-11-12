@@ -111,7 +111,7 @@ class SVGLogo:
 
         return filename
 
-    def isValid(self) -> bool:
+    def is_valid(self) -> bool:
         # Treat empty, None, or whitespace-only contents as valid/clean
         if not self.__contents or not str(self.__contents).strip():
             return True
@@ -144,7 +144,7 @@ class SVGLogo:
 
         return True
 
-    def addCaption(self, caption="", title=""):
+    def add_caption(self, caption="", title=""):
         x = requests.post("https://autocrop.cncf.io/autocrop",
             json={
                 'svg': self.__contents,

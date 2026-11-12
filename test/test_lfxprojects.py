@@ -776,15 +776,15 @@ class TestLFXProjects(unittest.TestCase):
     def testLoadData(self):
         config = Config()
         config.slug = 'aswf'
-        config.projectsAddTechnologySector = True
-        config.projectsAddIndustrySector = True
-        config.projectsAddPMOManagedStatus = True
-        config.projectsAddParentProject = True
-        config.artworkRepoUrl = "https://artwork.aswf.io/projects/{slug}"
-        members = LFXProjects(config=config,loadData=False)
+        config.projects_add_technology_sector = True
+        config.projects_add_industry_sector = True
+        config.projects_add_pmo_managed_status = True
+        config.projects_add_parent_project = True
+        config.artwork_repo_url = "https://artwork.aswf.io/projects/{slug}"
+        members = LFXProjects(config=config,load_data=False)
 
         with unittest.mock.patch('requests_cache.CachedSession', requests.Session):
-            members.loadData()
+            members.load_data()
         self.assertEqual(members.members[0].name,"OpenCue")
         self.assertEqual(members.members[0].crunchbase,"https://www.crunchbase.com/organization/linux-foundation")
         self.assertEqual(members.members[0].extra["facebook_url"],"https://www.facebook.com/TheLinuxFoundation")
@@ -832,11 +832,11 @@ class TestLFXProjects(unittest.TestCase):
     def testLoadDataNoAddCategoryNoAddParentProjectNoAddTechnologySectorNoArtwork(self):
         config = Config()
         config.slug = 'aswf'
-        config.projectsAddCategory = False
-        members = LFXProjects(config=config,loadData=False)
+        config.projects_add_category = False
+        members = LFXProjects(config=config,load_data=False)
 
         with unittest.mock.patch('requests_cache.CachedSession', requests.Session):
-            members.loadData()
+            members.load_data()
         self.assertIsNone(members.members[0].extra.get("artwork_url"))
         self.assertNotIn("Project Group / Academy Software Foundation (ASWF)",members.members[0].second_path)
         self.assertIsNone(members.members[3].project)
@@ -847,11 +847,11 @@ class TestLFXProjects(unittest.TestCase):
     def testLoadDataSkippedRecords(self):
         config = Config()
         config.slug = 'aswf2'
-        config.projectsAddTechnologySector = True
-        config.projectsAddIndustrySector = True
-        config.projectsAddPMOManagedStatus = True
-        config.projectsAddParentProject = True
-        members = LFXProjects(config=config,loadData=False)
+        config.projects_add_technology_sector = True
+        config.projects_add_industry_sector = True
+        config.projects_add_pmo_managed_status = True
+        config.projects_add_parent_project = True
+        members = LFXProjects(config=config,load_data=False)
         responses.add(
             method=responses.GET,
             url=LFXProjects.endpointURL.format("aswf2"),
@@ -966,9 +966,9 @@ class TestLFXProjects(unittest.TestCase):
             })
 
         with unittest.mock.patch('requests_cache.CachedSession', requests.Session):
-            members.loadData()
+            members.load_data()
         self.assertEqual(members.members,[])
 
     def testLookupParentProjectBySlugEmptySlug(self):
-        members = LFXProjects(config=Config(),loadData=False)
+        members = LFXProjects(config=Config(),load_data=False)
         self.assertFalse(members.lookupParentProjectBySlug(None))

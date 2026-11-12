@@ -202,7 +202,7 @@ class TestMember(unittest.TestCase):
             member.repo_url = 'https://github.com/OpenAssetIO'
             self.assertEqual(member.project_org,'https://github.com/OpenAssetIO')
             self.assertEqual(member.repo_url,'https://github.com/OpenAssetIO/OpenAssetIO')
-            attributes = member.toLandscapeItemAttributes()
+            attributes = member.to_landscape_item_attributes()
             self.assertEqual(attributes['extra']['annotations']['project_org'],'https://github.com/OpenAssetIO')
             self.assertEqual(attributes['additional_repos'],[
                 {'repo_url': 'https://github.com/OpenAssetIO/OpenAssetIO-MediaCreation'},
@@ -219,7 +219,7 @@ class TestMember(unittest.TestCase):
             member.repo_url = 'https://github.com/OpenAssetIO'
             self.assertEqual(member.project_org,'https://github.com/OpenAssetIO')
             self.assertEqual(member.repo_url,'https://github.com/OpenAssetIO/OpenAssetIO')
-            attributes = member.toLandscapeItemAttributes()
+            attributes = member.to_landscape_item_attributes()
             self.assertEqual(attributes['extra']['annotations']['project_org'],'https://github.com/OpenAssetIO')
             self.assertEqual(attributes['additional_repos'],[])
 
@@ -301,7 +301,7 @@ class TestMember(unittest.TestCase):
     def testNoneCrunchbaseNotInLandscapeItemAttributes(self):
         member = Member()
         member.crunchbase = None
-        dict = member.toLandscapeItemAttributes()
+        dict = member.to_landscape_item_attributes()
         self.assertNotIn('crunchbase',dict)
 
     def testSethomepage_urlValid(self):
@@ -449,7 +449,7 @@ class TestMember(unittest.TestCase):
         member.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society'
         member.extra = {}
         member.foo = 'foo'
-        dict = member.toLandscapeItemAttributes()
+        dict = member.to_landscape_item_attributes()
 
         self.assertEqual(dict.get('name'),member.name)
         self.assertEqual(dict.get('homepage_url'),member.homepage_url)
@@ -469,7 +469,7 @@ class TestMember(unittest.TestCase):
         member.extra = {}
         member.foo = 'foo'
         member.project_org = 'https://github.com/foobar'
-        dict = member.toLandscapeItemAttributes()
+        dict = member.to_landscape_item_attributes()
 
         self.assertEqual(dict.get('name'),member.name)
         self.assertEqual(dict.get('homepage_url'),member.homepage_url)
@@ -489,7 +489,7 @@ class TestMember(unittest.TestCase):
         member.project_org = 'https://github.com/OpenAssetIO'
         member.extra = {'foo': 'foo', 'accepted': "2023-05-14", 'annotations': {'foo':'foo'}, 'other_links': [{'name':'foo','url':'https://google.com'}]}
         member.second_path = ['list2','list3']
-        dict = member.toLandscapeItemAttributes()
+        dict = member.to_landscape_item_attributes()
 
         self.assertEqual(dict.get('name'),member.name)
         self.assertEqual(dict.get('homepage_url'),member.homepage_url)
@@ -512,7 +512,7 @@ class TestMember(unittest.TestCase):
         member.membership = 'Gold'
         member.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society'
         member.linkedin = 'https://www.linkedin.com/company/208777'
-        dict = member.toLandscapeItemAttributes()
+        dict = member.to_landscape_item_attributes()
 
         self.assertEqual(dict.get('name'),member.name+" (testme)")
         self.assertEqual(dict.get('homepage_url'),member.homepage_url)
@@ -530,7 +530,7 @@ class TestMember(unittest.TestCase):
             member.logo = 'Gold.svg'
         member.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society'
 
-        self.assertTrue(member.isValidLandscapeItem())
+        self.assertTrue(member.is_valid_landscape_item())
 
     def testIsValidLandscapeItemEmptyCrunchbase(self):
         member = Member()
@@ -539,7 +539,7 @@ class TestMember(unittest.TestCase):
         with unittest.mock.patch("lfx_landscape_tools.svglogo.open", unittest.mock.mock_open(read_data="<svg></svg>")) as mock_file:
             member.logo = 'Gold.svg'
 
-        self.assertTrue(member.isValidLandscapeItem())
+        self.assertTrue(member.is_valid_landscape_item())
 
     def testIsValidLandscapeItemEmptyname(self):
         member = Member()
@@ -549,8 +549,8 @@ class TestMember(unittest.TestCase):
             member.logo = 'Gold.svg'
         member.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society'
 
-        self.assertFalse(member.isValidLandscapeItem())
-        self.assertIn('name',member.invalidLandscapeItemAttributes())
+        self.assertFalse(member.is_valid_landscape_item())
+        self.assertIn('name',member.invalid_landscape_item_attributes())
 
     def testIsValidLandscapeItemEmptyhomepage_urlLogo(self):
         member = Member()
@@ -560,9 +560,9 @@ class TestMember(unittest.TestCase):
             member.logo = ''
         member.crunchbase = 'https://www.crunchbase.com/organization/visual-effects-society'
 
-        self.assertFalse(member.isValidLandscapeItem())
-        self.assertIn('logo',member.invalidLandscapeItemAttributes())
-        self.assertIn('homepage_url',member.invalidLandscapeItemAttributes())
+        self.assertFalse(member.is_valid_landscape_item())
+        self.assertIn('logo',member.invalid_landscape_item_attributes())
+        self.assertIn('homepage_url',member.invalid_landscape_item_attributes())
 
     def testOverlay(self):
         membertooverlay = Member()
@@ -753,7 +753,7 @@ class TestMember(unittest.TestCase):
             member = Member()
             member.name = 'dog'
             member.logo = SVGLogo(name='dog')
-            member.hostLogo(tempdir)
+            member.host_logo(tempdir)
             self.assertTrue(os.path.exists(os.path.join(tempdir,'dog.svg')))
 
     def testExtra(self):
@@ -867,7 +867,7 @@ class TestMember(unittest.TestCase):
         }
 
         # 4. Process
-        result = member.toLandscapeItemAttributes()
+        result = member.to_landscape_item_attributes()
 
         # 5. Assertions
         # Now result['organization'] should contain the mapped nested data
@@ -910,7 +910,7 @@ class TestMember(unittest.TestCase):
         }
 
         # 4. Run the method
-        result = member.toLandscapeItemAttributes()
+        result = member.to_landscape_item_attributes()
 
         # 5. Verify the results to ensure the loop actually processed both
         self.assertIn('organization', result)
@@ -953,7 +953,7 @@ class TestMember(unittest.TestCase):
         }
 
         # Trigger the mapper
-        result = member.toLandscapeItemAttributes()
+        result = member.to_landscape_item_attributes()
 
         # Assertions to ensure all paths were exercised
         org_res = result['organization']

@@ -130,7 +130,7 @@ class TestLFXMembers(unittest.TestCase):
         config = Config()
         config.project = 'tlf2'
         with unittest.mock.patch('requests_cache.CachedSession', requests.Session):
-            members = LFXMembers(loadData = True, config=config)
+            members = LFXMembers(load_data = True, config=config)
         self.assertEqual(members.project,'tlf2')
         self.assertEqual(members.members[0].name,"ConsenSys AG")
         self.assertEqual(members.members[0].crunchbase,"https://www.crunchbase.com/organization/consensus-systems--consensys-")
@@ -164,9 +164,9 @@ class TestLFXMembers(unittest.TestCase):
 
         config = Config()
         config.project = 'tlf2'
-        config.addOtherProjectMemberships = True
+        config.add_other_project_memberships = True
         with unittest.mock.patch('requests_cache.CachedSession', requests.Session):
-            members = LFXMembers(loadData = True, config=config)
+            members = LFXMembers(load_data = True, config=config)
         self.assertEqual(members.project,'tlf2')
         self.assertEqual(members.members[0].name,"ConsenSys AG")
         self.assertEqual(members.members[0].crunchbase,"https://www.crunchbase.com/organization/consensus-systems--consensys-")
@@ -189,7 +189,7 @@ class TestLFXMembers(unittest.TestCase):
     def testLoadDataMissingLogo(self):
         config = Config()
         config.project = 'tlf'
-        members = LFXMembers(config=config,loadData = False)
+        members = LFXMembers(config=config,load_data = False)
         responses.add(
             method=responses.GET,
             url=members.endpointURL.format(members.project),
@@ -197,7 +197,7 @@ class TestLFXMembers(unittest.TestCase):
             )
 
         with unittest.mock.patch('requests_cache.CachedSession', requests.Session):
-            members.loadData()
+            members.load_data()
         self.assertEqual(members.project,'tlf')
         self.assertEqual(members.members[0].name,"ConsenSys AG")
         self.assertEqual(members.members[0].crunchbase,"https://www.crunchbase.com/organization/consensus-systems--consensys-")
@@ -217,7 +217,7 @@ class TestLFXMembers(unittest.TestCase):
     def testLoadDataBadLogo(self):
         config = Config()
         config.project = 'tlf'
-        members = LFXMembers(config=config,loadData = False)
+        members = LFXMembers(config=config,load_data = False)
         responses.add(
             method=responses.GET,
             url=members.endpointURL.format(members.project),
@@ -230,7 +230,7 @@ class TestLFXMembers(unittest.TestCase):
 
         with unittest.mock.patch('requests_cache.CachedSession', requests.Session):
             with self.assertLogs() as cm:
-                members.loadData()
+                members.load_data()
                 self.assertIn("WARNING:root:Member.logo for 'Hitachi, Ltd.' invalid format",cm.output)
                 self.assertIn("INFO:root:Creating text logo for 'Hitachi, Ltd.'",cm.output)
         self.assertEqual(members.project,'tlf')
@@ -246,7 +246,7 @@ class TestLFXMembers(unittest.TestCase):
     def testLoadDataMissinghomepage_url(self):
         config = Config()
         config.project = 'tlf'
-        members = LFXMembers(config=config,loadData = False)
+        members = LFXMembers(config=config,load_data = False)
         responses.add(
             method=responses.GET,
             url=members.endpointURL.format(members.project),
@@ -254,7 +254,7 @@ class TestLFXMembers(unittest.TestCase):
             )
 
         with unittest.mock.patch('requests_cache.CachedSession', requests.Session):
-            members.loadData()
+            members.load_data()
         self.assertEqual(members.project,'tlf')
         self.assertEqual(members.members[0].name,"ConsenSys AG")
         self.assertEqual(members.members[0].crunchbase,"https://www.crunchbase.com/organization/consensus-systems--consensys-")
@@ -273,7 +273,7 @@ class TestLFXMembers(unittest.TestCase):
     def testLoadDataDuplicates(self):
         config = Config()
         config.project = 'tlf'
-        members = LFXMembers(config=config,loadData = False)
+        members = LFXMembers(config=config,load_data = False)
         responses.add(
             url=members.endpointURL.format(members.project),
             method=responses.GET,
@@ -281,7 +281,7 @@ class TestLFXMembers(unittest.TestCase):
             )
 
         with unittest.mock.patch('requests_cache.CachedSession', requests.Session):
-            members.loadData()
+            members.load_data()
         self.assertEqual(members.project,'tlf')
         self.assertEqual(len(members.members),2)
 

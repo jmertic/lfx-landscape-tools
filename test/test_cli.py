@@ -45,8 +45,6 @@ class TestCli(unittest.TestCase):
         self.mock_tacagendaproject = self.patch_tacagendaproject.start()
         self.mock_landscapemembers = self.patch_landscapemembers.start()
 
-        self.patch_file = patch('argparse.FileType', return_value=lambda x: mock_open(read_data="dummy").return_value)
-        self.patch_file.start()
 
     def tearDown(self):
         """Clean up mocks."""
@@ -207,7 +205,7 @@ class TestCli(unittest.TestCase):
             active_file.write_text("<svg>active</svg>", encoding="utf-8")
             stale_file.write_text("<svg>stale</svg>", encoding="utf-8")
 
-            self.mock_config.return_value.hostedLogosDir = "hosted_logos"
+            self.mock_config.return_value.hosted_logos_dir = "hosted_logos"
             self.mock_landscapemembers.return_value.load_landscape_yaml.return_value = {
                 "landscape": [{"items": [{"logo": "active.svg"}]}]
             }
@@ -220,7 +218,7 @@ class TestCli(unittest.TestCase):
             self.assertTrue(active_file.exists())
             self.assertFalse(stale_file.exists())
             self.mock_landscapemembers.assert_called_once_with(
-                self.mock_config.return_value, loadData=False
+                self.mock_config.return_value, load_data=False
             )
 
     @patch('lfx_landscape_tools.cli.os.remove', side_effect=FileNotFoundError)
@@ -233,10 +231,12 @@ class TestCli(unittest.TestCase):
             logos_dir.mkdir()
             (logos_dir / "ghost.svg").write_text("<svg/>", encoding="utf-8")
 
-            self.mock_config.return_value.hostedLogosDir = "hosted_logos"
+            self.mock_config.return_value.hosted_logos_dir = "hosted_logos"
             self.mock_landscapemembers.return_value.load_landscape_yaml.return_value = {}
 
-            args = SimpleNamespace(configfile="config.yml", basedir=tmpdir)
+            config_path = Path(tmpdir) / "config.yml"
+            config_path.write_text("slug: test\n", encoding="utf-8")
+            args = SimpleNamespace(configfile=str(config_path), basedir=tmpdir)
             with self.assertLogs(level='WARNING') as log_ctx:
                 cli_manual.removestalelogos(args)
 
@@ -255,10 +255,12 @@ class TestCli(unittest.TestCase):
             logos_dir.mkdir()
             (logos_dir / "locked.svg").write_text("<svg/>", encoding="utf-8")
 
-            self.mock_config.return_value.hostedLogosDir = "hosted_logos"
+            self.mock_config.return_value.hosted_logos_dir = "hosted_logos"
             self.mock_landscapemembers.return_value.load_landscape_yaml.return_value = {}
 
-            args = SimpleNamespace(configfile="config.yml", basedir=tmpdir)
+            config_path = Path(tmpdir) / "config.yml"
+            config_path.write_text("slug: test\n", encoding="utf-8")
+            args = SimpleNamespace(configfile=str(config_path), basedir=tmpdir)
             with self.assertLogs(level='ERROR') as log_ctx:
                 cli_manual.removestalelogos(args)
 
@@ -272,35 +274,35 @@ class TestCli(unittest.TestCase):
 
     @patch('builtins.print')
     def test_isvalidlogo_valid(self, mock_print):
-        """Verify isvalidlogo prints valid message when SVGLogo.isValid() returns True."""
+        """Verify isvalidlogo prints valid message when SVGLogo.is_valid() returns True."""
         cli_manual = Cli.__new__(Cli)
         mock_logo = self.mock_svg(filename="valid.svg")
-        mock_logo.isValid.return_value = True
+        mock_logo.is_valid.return_value = True
 
         args = argparse.Namespace(filename=mock_logo)
         cli_manual.isvalidlogo(args)
 
-        self.mock_svg.return_value.isValid.assert_called_once()
+        self.mock_svg.return_value.is_valid.assert_called_once()
         mock_print.assert_called_once_with("Logo is valid")
 
     @patch('builtins.print')
     def test_isvalidlogo_invalid(self, mock_print):
-        """Verify isvalidlogo prints invalid message when SVGLogo.isValid() returns False."""
+        """Verify isvalidlogo prints invalid message when SVGLogo.is_valid() returns False."""
         cli_manual = Cli.__new__(Cli)
         mock_logo = self.mock_svg(filename="invalid.svg")
-        mock_logo.isValid.return_value = False
+        mock_logo.is_valid.return_value = False
 
         args = argparse.Namespace(filename=mock_logo)
         cli_manual.isvalidlogo(args)
 
-        self.mock_svg.return_value.isValid.assert_called_once()
+        self.mock_svg.return_value.is_valid.assert_called_once()
         mock_print.assert_called_once_with("Logo is not valid")
 
     @patch('builtins.print')
     @patch('sys.argv', ['cli.py', '--silent', 'isvalidlogo', '-f', 'test.svg'])
     def test_isvalidlogo_routing(self, mock_print):
         """Verify isvalidlogo subcommand routes arguments to SVGLogo."""
-        self.mock_svg.return_value.isValid.return_value = True
+        self.mock_svg.return_value.is_valid.return_value = True
         Cli()
         self.mock_svg.assert_called_once_with(filename='test.svg')
         mock_print.assert_called_once_with("Logo is valid")

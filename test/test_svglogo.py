@@ -79,7 +79,7 @@ class TestSVGLogo(unittest.TestCase):
             self.assertEqual(str(SVGLogo(url="https://someurl.com/boom.svg").filename('北京数悦铭金技术有限公司')),'bei_jing_shu_yue_ming_jin_ji_zhu_you_xian_gong_si.svg')
 
     def testHostLogoContainsPNG(self):
-        self.assertFalse(SVGLogo(contents="this is image data data:image/png;base64 dfdfdf").isValid())
+        self.assertFalse(SVGLogo(contents="this is image data data:image/png;base64 dfdfdf").is_valid())
 
     @patch('builtins.open', new_callable=mock_open, read_data="svg_content_here")
     @patch('lfx_landscape_tools.svglogo.logging.getLogger')
@@ -109,19 +109,19 @@ class TestSVGLogo(unittest.TestCase):
 
     @responses.activate
     def testHostLogoContainsText(self):
-        self.assertFalse(SVGLogo(contents="this is image data <text /> dfdfdf").isValid())
+        self.assertFalse(SVGLogo(contents="this is image data <text /> dfdfdf").is_valid())
 
     @responses.activate
     def testPr1992(self):
         """Test for PR #1992"""
-        self.assertTrue(SVGLogo(filename="{}/testpr1992.svg".format(os.path.dirname(__file__))).isValid())
+        self.assertTrue(SVGLogo(filename="{}/testpr1992.svg".format(os.path.dirname(__file__))).is_valid())
         # contains data:image/
-        self.assertFalse(SVGLogo(filename="{}/testpr1992-2.svg".format(os.path.dirname(__file__))).isValid())
+        self.assertFalse(SVGLogo(filename="{}/testpr1992-2.svg".format(os.path.dirname(__file__))).is_valid())
 
     @responses.activate
     def testPr1994(self):
         """Test for PR #1994"""
-        self.assertTrue(SVGLogo(filename="{}/testpr1994.svg".format(os.path.dirname(__file__))).isValid())
+        self.assertTrue(SVGLogo(filename="{}/testpr1994.svg".format(os.path.dirname(__file__))).is_valid())
 
     @responses.activate(registry=responses.registries.OrderedRegistry)
     def testHostLogoRetriesOnChunkedEncodingErrorException(self):
@@ -201,7 +201,7 @@ class TestSVGLogo(unittest.TestCase):
         )
 
         logo = SVGLogo(contents="this is a dog")
-        logo.addCaption("Dog")
+        logo.add_caption("Dog")
         self.assertEqual(str(logo),'this is a file')
 
     @responses.activate
@@ -214,7 +214,7 @@ class TestSVGLogo(unittest.TestCase):
 
         with self.assertRaises(RuntimeError) as cm:
             logo = SVGLogo(contents="this is a dog")
-            logo.addCaption("Dog")
+            logo.add_caption("Dog")
 
         self.assertEqual(str(cm.exception),'Adding caption failed: this is a file')
 

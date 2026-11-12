@@ -21,18 +21,18 @@ from lfx_landscape_tools.config import Config
 #
 class Members(ABC):
 
-    def __init__(self, config: type[Config], loadData = True):
+    def __init__(self, config: type[Config], load_data = True):
         self.processConfig(config)
         self.members = []
-        if loadData:
-            self.loadData()
+        if load_data:
+            self.load_data()
 
     @abstractmethod
     def processConfig(self, config: type[Config]):
         pass
 
     @abstractmethod
-    def loadData(self):
+    def load_data(self):
         pass
 
     def _get_search_strategy(self, slug, membership, norm_name, norm_homepage, norm_repo):

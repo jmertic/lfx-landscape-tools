@@ -21,61 +21,61 @@ from lfx_landscape_tools.members import Members
 
 class LandscapeOutput:
 
-    landscapeCategory = 'Members'
-    landscapeSubcategories = [
+    landscape_category = 'Members'
+    landscape_subcategories = [
         {"name": "Premier Membership", "category": "Premier"},
         {"name": "General Membership", "category": "General"},
         {"name": "Associate Membership", "category": "Associate"}
     ]
     landscapefile = 'landscape.yml'
-    hostedLogosDir = 'hosted_logos'
-    memberSuffix = ''
+    hosted_logos_dir = 'hosted_logos'
+    member_suffix = ''
 
     _items_processed = 0
     _items_errors = 0
 
     def __init__(self, config: Config):
-        self.landscapeItems = []
-        self.landscapeCategory = config.landscapeCategory
-        self.landscapeSubcategories = config.landscapeSubcategories
+        self.landscape_items = []
+        self.landscape_category = config.landscape_category
+        self.landscape_subcategories = config.landscape_subcategories
         self.landscapefile = os.path.join(config.basedir,config.landscapefile)
-        self.hostedLogosDir = os.path.join(config.basedir,config.hostedLogosDir)
-        self.memberSuffix = config.memberSuffix if config.view == 'members' else self.memberSuffix
-        for landscapeSubcategory in self.landscapeSubcategories:
+        self.hosted_logos_dir = os.path.join(config.basedir,config.hosted_logos_dir)
+        self.member_suffix = config.member_suffix if config.view == 'members' else self.member_suffix
+        for landscape_subcategory in self.landscape_subcategories:
             subcategory = {
                 "subcategory": None,
-                "name": landscapeSubcategory.get('category'),
+                "name": landscape_subcategory.get('category'),
                 "items" : []
             }
-            if subcategory not in self.landscapeItems:
-                self.landscapeItems.append(subcategory)
+            if subcategory not in self.landscape_items:
+                self.landscape_items.append(subcategory)
     @property
-    def itemsProcessed(self):
+    def items_processed(self):
         return self._items_processed
 
     @property
-    def itemsErrors(self):
+    def items_errors(self):
         return self._items_errors
 
     def load(self, members: Members):
         """
-        Load Members into landscapeItems
+        Load Members into landscape_items
         Keyword arguments:
         members -- Members object to load
         """
         logger = logging.getLogger()
-        logger.info(f"Processing '{self.landscapeCategory}' items")
+        logger.info(f"Processing '{self.landscape_category}' items")
 
         # Optimization: Map subcategory names to their parent categories once.
         # This eliminates the need for the 'next()' call inside the loop.
-        subcat_to_parent = {s['name']: s['category'] for s in self.landscapeSubcategories}
+        subcat_to_parent = {s['name']: s['category'] for s in self.landscape_subcategories}
 
         for member in members.members:
             logger.info(f"Processing '{member.name}'...")
 
             # 1. Resolve target category using our map
             parent_cat_name = subcat_to_parent.get(member.membership)
-            target_subcat = next((item for item in self.landscapeItems
+            target_subcat = next((item for item in self.landscape_items
                                  if item['name'] == parent_cat_name), None)
 
             # Guard Clause: Category not found
@@ -85,8 +85,8 @@ class LandscapeOutput:
                 continue
 
             # Guard Clause: Validation check
-            if not member.isValidLandscapeItem():
-                missing = ",".join(member.invalidLandscapeItemAttributes())
+            if not member.is_valid_landscape_item():
+                missing = ",".join(member.invalid_landscape_item_attributes())
                 logger.error(f"Not adding '{member.name}' - Missing key attributes {missing}")
                 self._items_errors += 1
                 continue
@@ -94,16 +94,16 @@ class LandscapeOutput:
             logger.info(f"Added '{member.name}' to Landscape in SubCategory '{member.membership}'")
             self._items_processed += 1
 
-            if self.memberSuffix:
-                member.entrysuffix = self.memberSuffix
+            if self.member_suffix:
+                member.entrysuffix = self.member_suffix
 
-            member.hostLogo(self.hostedLogosDir)
+            member.host_logo(self.hosted_logos_dir)
 
-            target_subcat['items'].append(member.toLandscapeItemAttributes())
+            target_subcat['items'].append(member.to_landscape_item_attributes())
 
     def save(self):
         '''
-        Save the landscapeItems for a given landscapeCategory to the landscapefile
+        Save the landscape_items for a given landscape_category to the landscapefile
         '''
         # open existing landscape data file and see where to add the category data
         landscape = {}
@@ -119,8 +119,8 @@ class LandscapeOutput:
             logging.getLogger().exception("Error opening landscape file '{}'; will reset file - error message is '{}'".format(self.landscapefile,e))
             landscape = {
                 'categories': [{
-                    'name': self.landscapeCategory,
-                    'subcategories': self.landscapeItems
+                    'name': self.landscape_category,
+                    'subcategories': self.landscape_items
                 }]
             }
         else:
@@ -129,18 +129,18 @@ class LandscapeOutput:
             if landscape.get('landscape'):
                 rootcategory = 'landscape'
             for x in landscape.get(rootcategory,[]):
-                if x['name'] == self.landscapeCategory:
-                    logging.getLogger().debug("Landscape Category '{}' found".format(self.landscapeCategory))
-                    x['subcategories'] = self.landscapeItems
+                if x['name'] == self.landscape_category:
+                    logging.getLogger().debug("Landscape Category '{}' found".format(self.landscape_category))
+                    x['subcategories'] = self.landscape_items
                     found = True
                     continue
 
             if not found:
-                logging.getLogger().debug("Landscape Category '{}' not found; adding it".format(self.landscapeCategory))
+                logging.getLogger().debug("Landscape Category '{}' not found; adding it".format(self.landscape_category))
                 landscape[rootcategory].append({
                     'category': None,
-                    'name': self.landscapeCategory,
-                    'subcategories': self.landscapeItems
+                    'name': self.landscape_category,
+                    'subcategories': self.landscape_items
                     })
         finally:
             with open(self.landscapefile, 'w+', encoding="utf8", errors='ignore') as fileobject:
@@ -152,10 +152,10 @@ class LandscapeOutput:
                 ryaml.allow_unicode = True
                 ryaml.width = 1000000
                 ryaml.preserve_quotes = False
-                ryaml.dump(landscape, fileobject, transform=self._removeNulls)
-            logging.getLogger().info("Successfully processed {} members and skipped {} members".format(self.itemsProcessed,self.itemsErrors))
+                ryaml.dump(landscape, fileobject, transform=self._remove_nulls)
+            logging.getLogger().info("Successfully processed {} members and skipped {} members".format(self.items_processed,self.items_errors))
 
-    def _removeNulls(self,yamlout):
+    def _remove_nulls(self,yamlout):
         return yamlout.replace('- item: null','- item:') \
             .replace('- category: null','- category:') \
             .replace('- subcategory: null','- subcategory:') \

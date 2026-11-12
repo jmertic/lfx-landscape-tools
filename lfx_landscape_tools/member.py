@@ -259,11 +259,11 @@ class Member:
         else:
             self.__logo = SVGLogo(filename=logo)
 
-        if not self.__logo.isValid():
+        if not self.__logo.is_valid():
             self.__logo = None
             logging.getLogger().warning(f"Member.logo for '{self.name}' invalid format")
 
-    def hostLogo(self, path = "./"):
+    def host_logo(self, path = "./"):
         self.__logo.save(f"{self.name}{self.entrysuffix}",path)
 
     @property
@@ -384,7 +384,7 @@ class Member:
                 result[subkey] = val
         return result or None
 
-    def toLandscapeItemAttributes(self):
+    def to_landscape_item_attributes(self):
         """Converts the member object attributes into the format that would go into the landscape file entry."""
         logging.getLogger().debug("Processing into landscape item attributes")
 
@@ -413,10 +413,10 @@ class Member:
         extra = entry.setdefault('extra', {})
         extra[key] = value
 
-    def isValidLandscapeItem(self):
+    def is_valid_landscape_item(self):
         return self.homepage_url and self.logo and self.name
 
-    def invalidLandscapeItemAttributes(self):
+    def invalid_landscape_item_attributes(self):
         invalid_attributes = []
         if not self.homepage_url:
             invalid_attributes.append('homepage_url')

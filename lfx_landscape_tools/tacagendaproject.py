@@ -70,15 +70,15 @@ query($org: String!, $number: Int!) {
 
     def processConfig(self, config: type[Config]):
         self.parent_slug = config.slug
-        self.defaultCrunchbase = config.projectsDefaultCrunchbase
-        self.assignSIGs = config.projectsAssignSIGs
-        if config.tacAgendaProjectUrl:
-            urlparts = urlparse(config.tacAgendaProjectUrl).path.split('/')
+        self.defaultCrunchbase = config.projects_default_crunchbase
+        self.assignSIGs = config.projects_assign_sigs
+        if config.tac_agenda_project_url:
+            urlparts = urlparse(config.tac_agenda_project_url).path.split('/')
             if urlparts and len(urlparts) > 3 and urlparts[1] == 'orgs' and urlparts[3] == 'projects':
                 self.gh_org = urlparts[2]
                 self.gh_project_id = urlparts[4]
 
-    def loadData(self):
+    def load_data(self):
         logger = logging.getLogger()
         logger.info("Loading TAC Agenda Project data")
 
