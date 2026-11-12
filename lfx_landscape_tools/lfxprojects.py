@@ -26,7 +26,7 @@ class LFXProjects(Members):
     calendarUrl = 'https://zoom-lfx.platform.linuxfoundation.org/meetings/{slug}'
     icalUrl = 'https://webcal.prod.itx.linuxfoundation.org/lfx/{project_id}'
     lfxinsightsUrl = "https://insights.linuxfoundation.org/project/{slug}"
-    artworkRepoUrl = None
+    artwork_repo_url = None
 
     defaultCategory = ''
     defaultSubcategory = ''
@@ -37,19 +37,19 @@ class LFXProjects(Members):
     addPMOManagedStatus = True
     addParentProject = True
     addCategory = True
-    landscapeProjectsLevels = {}
+    landscape_projects_levels = {}
 
     def processConfig(self, config: type[Config]):
         self.project = config.slug
-        self.addTechnologySector = config.projectsAddTechnologySector
-        self.addIndustrySector = config.projectsAddIndustrySector
-        self.addPMOManagedStatus = config.projectsAddPMOManagedStatus
-        self.addParentProject = config.projectsAddParentProject
-        self.addCategory = config.projectsAddCategory
-        self.defaultCrunchbase = config.projectsDefaultCrunchbase
-        self.artworkRepoUrl = config.artworkRepoUrl
-        self.projectsFilterByParentSlug = config.projectsFilterByParentSlug
-        self.landscapeProjectsLevels = config.landscapeProjectsLevels
+        self.addTechnologySector = config.projects_add_technology_sector
+        self.addIndustrySector = config.projects_add_industry_sector
+        self.addPMOManagedStatus = config.projects_add_pmo_managed_status
+        self.addParentProject = config.projects_add_parent_project
+        self.addCategory = config.projects_add_category
+        self.defaultCrunchbase = config.projects_default_crunchbase
+        self.artwork_repo_url = config.artwork_repo_url
+        self.projects_filter_by_parent_slug = config.projects_filter_by_parent_slug
+        self.landscape_projects_levels = config.landscape_projects_levels
 
     def _should_skip_record(self, record):
         """Helper method to encapsulate the filtering logic."""
@@ -69,7 +69,7 @@ class LFXProjects(Members):
         logger = logging.getLogger()
         logger.debug(f"Trying to see if project level {category} is valid")
 
-        for project_level in self.landscapeProjectsLevels:
+        for project_level in self.landscape_projects_levels:
             if project_level.get('name') == category:
                 member.project = project_level.get('level')
                 member.membership = project_level.get('name')
@@ -152,8 +152,8 @@ class LFXProjects(Members):
         if member.repo_url and record.get('Category') != 'Working Group':
             extra['dev_stats_url'] = self.lfxinsightsUrl.format(parent_slug=parent_slug, slug=lfx_slug)
 
-        if self.artworkRepoUrl:
-            extra['artwork_url'] = self.artworkRepoUrl.format(slug=lfx_slug)
+        if self.artwork_repo_url:
+            extra['artwork_url'] = self.artwork_repo_url.format(slug=lfx_slug)
 
         extra['other_links'] = [
             {'name': 'Calendar', 'url': self.calendarUrl.format(slug=lfx_slug)},
@@ -164,13 +164,13 @@ class LFXProjects(Members):
         member.extra = extra
         return member
 
-    def loadData(self):
+    def load_data(self):
         """Main method to fetch and process LFX projects data."""
         logger = logging.getLogger()
         logger.info("Loading LFX Projects data for {}".format(self.project))
 
         session = requests_cache.CachedSession()
-        project_param = self.project if self.projectsFilterByParentSlug else ''
+        project_param = self.project if self.projects_filter_by_parent_slug else ''
 
         with session.get(self.endpointURL.format(project_param)) as endpointResponse:
             member_list = endpointResponse.json()

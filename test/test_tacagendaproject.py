@@ -195,15 +195,15 @@ class TestTACAgendaProjects(unittest.TestCase):
 
         config = Config()
         config.slug = 'aswf'
-        config.projectsAddTechnologySector = True
-        config.projectsAddIndustrySector = True
-        config.projectsAddPMOManagedStatus = True
-        config.projectsAddParentProject = True
-        config.artworkRepoUrl = "https://artwork.aswf.io/projects/{slug}"
-        config.tacAgendaProjectUrl = "https://github.com/orgs/AcademySoftwareFoundation/projects/19/views/1"
-        members = TACAgendaProject(config=config,loadData=False)
+        config.projects_add_technology_sector = True
+        config.projects_add_industry_sector = True
+        config.projects_add_pmo_managed_status = True
+        config.projects_add_parent_project = True
+        config.artwork_repo_url = "https://artwork.aswf.io/projects/{slug}"
+        config.tac_agenda_project_url = "https://github.com/orgs/AcademySoftwareFoundation/projects/19/views/1"
+        members = TACAgendaProject(config=config,load_data=False)
         with unittest.mock.patch('requests_cache.CachedSession', requests.Session):
-            members.loadData()
+            members.load_data()
         self.assertEqual(members.members[0].name,"D&I Working Group")
         self.assertEqual(members.members[0].extra.get('annotations',[]).get('chair'),'Carol Payne, Rachel Rose')
         self.assertEqual(members.members[0].extra.get('annotations',[]).get('TAC_representative'),'Bill Rose')
@@ -234,15 +234,15 @@ class TestTACAgendaProjects(unittest.TestCase):
 
         config = Config()
         config.slug = 'aswf'
-        config.projectsAddTechnologySector = True
-        config.projectsAddIndustrySector = True
-        config.projectsAddPMOManagedStatus = True
-        config.projectsAddParentProject = True
-        config.artworkRepoUrl = "https://artwork.aswf.io/projects/{slug}"
-        config.tacAgendaProjectUrl = "https://github.com/orgs/AcademySoftwareFoundation/projects/19/views/1" 
-        members = TACAgendaProject(config=config,loadData=False)
+        config.projects_add_technology_sector = True
+        config.projects_add_industry_sector = True
+        config.projects_add_pmo_managed_status = True
+        config.projects_add_parent_project = True
+        config.artwork_repo_url = "https://artwork.aswf.io/projects/{slug}"
+        config.tac_agenda_project_url = "https://github.com/orgs/AcademySoftwareFoundation/projects/19/views/1"
+        members = TACAgendaProject(config=config,load_data=False)
         with unittest.mock.patch('requests_cache.CachedSession', requests.Session):
-            members.loadData()
+            members.load_data()
         self.assertEqual(members.members[0].name,"D&I Working Group")
         self.assertEqual(members.members[0].extra.get('annotations',[]).get('chair'),'Carol Payne, Rachel Rose')
         self.assertEqual(members.members[0].extra.get('annotations',[]).get('TAC_representative'),'Bill Rose')
@@ -276,16 +276,16 @@ class TestTACAgendaProjects(unittest.TestCase):
 
         config = Config()
         config.slug = 'aswf'
-        config.projectsAddTechnologySector = True
-        config.projectsAddIndustrySector = True
-        config.projectsAddPMOManagedStatus = True
-        config.projectsAddParentProject = True
-        config.projectsAssignSIGs = True
-        config.artworkRepoUrl = "https://artwork.aswf.io/projects/{slug}"
-        config.tacAgendaProjectUrl = "https://github.com/orgs/AcademySoftwareFoundation/projects/19/views/1"
-        members = TACAgendaProject(config=config,loadData=False)
+        config.projects_add_technology_sector = True
+        config.projects_add_industry_sector = True
+        config.projects_add_pmo_managed_status = True
+        config.projects_add_parent_project = True
+        config.projects_assign_sigs = True
+        config.artwork_repo_url = "https://artwork.aswf.io/projects/{slug}"
+        config.tac_agenda_project_url = "https://github.com/orgs/AcademySoftwareFoundation/projects/19/views/1"
+        members = TACAgendaProject(config=config,load_data=False)
         with unittest.mock.patch('requests_cache.CachedSession', requests.Session):
-            members.loadData()
+            members.load_data()
         self.assertEqual(members.members[0].name,"D&I Working Group")
         self.assertEqual(members.members[0].second_path,['SIG / dog'])
         self.assertEqual(len(members.members),1)
@@ -316,15 +316,15 @@ class TestTACAgendaProjects(unittest.TestCase):
 
         config = Config()
         config.slug = 'aswf'
-        config.projectsAddTechnologySector = True
-        config.projectsAddIndustrySector = True
-        config.projectsAddPMOManagedStatus = True
-        config.projectsAddParentProject = True
-        config.artworkRepoUrl = "https://artwork.aswf.io/projects/{slug}"
-        config.tacAgendaProjectUrl = "https://github.com/orgs/AcademySoftwareFoundation/projects/19/views/1"
-        members = TACAgendaProject(config=config,loadData=False)
+        config.projects_add_technology_sector = True
+        config.projects_add_industry_sector = True
+        config.projects_add_pmo_managed_status = True
+        config.projects_add_parent_project = True
+        config.artwork_repo_url = "https://artwork.aswf.io/projects/{slug}"
+        config.tac_agenda_project_url = "https://github.com/orgs/AcademySoftwareFoundation/projects/19/views/1"
+        members = TACAgendaProject(config=config,load_data=False)
         with unittest.mock.patch('requests_cache.CachedSession', requests.Session):
-            members.loadData()
+            members.load_data()
         self.assertEqual(members.members[0].name,"D&I Working Group")
         self.assertEqual(members.members[0].extra.get('annotations',[]).get('submitted_date'),"2023-09-18")
         self.assertEqual(len(members.members),1)
@@ -354,15 +354,15 @@ class TestTACAgendaProjects(unittest.TestCase):
 
         config = Config()
         config.slug = 'aswf'
-        config.projectsAddTechnologySector = True
-        config.projectsAddIndustrySector = True
-        config.projectsAddPMOManagedStatus = True
-        config.projectsAddParentProject = True
-        config.artworkRepoUrl = "https://artwork.aswf.io/projects/{slug}"
-        members = TACAgendaProject(config=config,loadData=False)
+        config.projects_add_technology_sector = True
+        config.projects_add_industry_sector = True
+        config.projects_add_pmo_managed_status = True
+        config.projects_add_parent_project = True
+        config.artwork_repo_url = "https://artwork.aswf.io/projects/{slug}"
+        members = TACAgendaProject(config=config,load_data=False)
         with self.assertLogs(level='ERROR') as cm:
             with unittest.mock.patch('requests_cache.CachedSession', requests.Session):
-                members.loadData()
+                members.load_data()
         self.assertEqual(cm.output, ['ERROR:root:Cannot find GitHub Project - ID: Org:'])
         self.assertEqual(members.members,[])
 
@@ -393,15 +393,15 @@ class TestTACAgendaProjects(unittest.TestCase):
 
         config = Config()
         config.slug = 'aswf'
-        config.projectsAddTechnologySector = True
-        config.projectsAddIndustrySector = True
-        config.projectsAddPMOManagedStatus = True
-        config.projectsAddParentProject = True
-        config.artworkRepoUrl = "https://artwork.aswf.io/projects/{slug}"
-        config.tacAgendaProjectUrl = "https://github.com/orgs/AcademySoftwareFoundation/projects/19/views/1"
-        members = TACAgendaProject(config=config,loadData=False)
+        config.projects_add_technology_sector = True
+        config.projects_add_industry_sector = True
+        config.projects_add_pmo_managed_status = True
+        config.projects_add_parent_project = True
+        config.artwork_repo_url = "https://artwork.aswf.io/projects/{slug}"
+        config.tac_agenda_project_url = "https://github.com/orgs/AcademySoftwareFoundation/projects/19/views/1"
+        members = TACAgendaProject(config=config,load_data=False)
         with unittest.mock.patch('requests_cache.CachedSession', requests.Session):
-            members.loadData()
+            members.load_data()
         self.assertEqual(members.members[0].name,"D&I Working Group")
         self.assertEqual(members.members[0].extra.get('annotations',[]).get('chair'),'Carol Payne, Rachel Rose')
         self.assertEqual(members.members[0].extra.get('annotations',[]).get('TAC_representative'),'Bill Rose')
@@ -416,30 +416,30 @@ class TestTACAgendaProjects(unittest.TestCase):
 
         config = Config()
         config.slug = 'aswf'
-        config.projectsAddTechnologySector = True
-        config.projectsAddIndustrySector = True
-        config.projectsAddPMOManagedStatus = True
-        config.projectsAddParentProject = True
-        config.artworkRepoUrl = "https://artwork.aswf.io/projects/{slug}"
-        config.tacAgendaProjectUrl = "https://github.com/orgs/AcademySoftwareFoundation/projects/19/views/1"
-        members = TACAgendaProject(config=config,loadData=False)
+        config.projects_add_technology_sector = True
+        config.projects_add_industry_sector = True
+        config.projects_add_pmo_managed_status = True
+        config.projects_add_parent_project = True
+        config.artwork_repo_url = "https://artwork.aswf.io/projects/{slug}"
+        config.tac_agenda_project_url = "https://github.com/orgs/AcademySoftwareFoundation/projects/19/views/1"
+        members = TACAgendaProject(config=config,load_data=False)
         with self.assertLogs(level='ERROR') as cm:
             with unittest.mock.patch('requests_cache.CachedSession', requests.Session):
-                members.loadData()
+                members.load_data()
         self.assertEqual(cm.output, ["ERROR:root:Invalid response from gh client: 'foo'"])
         self.assertEqual(members.members,[])
 
     def testProcessConfigTACAgendaProjectUrlInvalid(self):
         config = Config()
         config.slug = 'foobar'
-        config.projectsDefaultCrunchbase = 'https://www.crunchbase.com/organization/lf-energy'
-        config.projectsAssignSIGs = True
-        config.tacAgendaProjectUrl = 'https://google.com'
+        config.projects_default_crunchbase = 'https://www.crunchbase.com/organization/lf-energy'
+        config.projects_assign_sigs = True
+        config.tac_agenda_project_url = 'https://google.com'
 
-        members = TACAgendaProject(config=config,loadData=False)
+        members = TACAgendaProject(config=config,load_data=False)
 
         self.assertEqual(members.parent_slug,config.slug)
-        self.assertEqual(members.defaultCrunchbase,config.projectsDefaultCrunchbase)
+        self.assertEqual(members.defaultCrunchbase,config.projects_default_crunchbase)
         self.assertTrue(members.assignSIGs)
         self.assertIsNone(members.gh_org)
         self.assertIsNone(members.gh_project_id)
@@ -481,8 +481,8 @@ class TestTACAgendaProjects(unittest.TestCase):
 
         # 4. Execute - This will hit line 161 (the logger.error for the exception)
         config = Config()
-        config.tacAgendaProjectUrl = 'https://github.com/orgs/AcademySoftwareFoundation/projects/19/views/1'
-        tap = TACAgendaProject(config,loadData=False)
+        config.tac_agenda_project_url = 'https://github.com/orgs/AcademySoftwareFoundation/projects/19/views/1'
+        tap = TACAgendaProject(config,load_data=False)
         with self.assertLogs(level='ERROR') as cm:
             with unittest.mock.patch('requests_cache.CachedSession', requests.Session):
                 tap._lookupprojectdetailsfromlfxcommittee({'project_id': 1, 'committee_id': 2})
@@ -499,12 +499,12 @@ class TestTACAgendaProjects(unittest.TestCase):
             stdout="Internal Server Error (Not JSON)"
         )
         config = Config()
-        config.tacAgendaProjectUrl = 'https://github.com/orgs/AcademySoftwareFoundation/projects/19/views/1'
-        tap = TACAgendaProject(config,loadData=False)
+        config.tac_agenda_project_url = 'https://github.com/orgs/AcademySoftwareFoundation/projects/19/views/1'
+        tap = TACAgendaProject(config,load_data=False)
 
         with self.assertLogs(level='ERROR') as cm:
             with unittest.mock.patch('requests_cache.CachedSession', requests.Session):
-                result = tap.loadData()
+                result = tap.load_data()
 
         self.assertIsNone(result)
         self.assertTrue(any("Invalid json" in msg for msg in cm.output))
@@ -522,8 +522,8 @@ class TestTACAgendaProjects(unittest.TestCase):
         url = 'https://pc.lfx.dev/project/123/collaboration/committees/456'
 
         config = Config()
-        config.tacAgendaProjectUrl = 'https://github.com/orgs/AcademySoftwareFoundation/projects/19/views/1'
-        tap = TACAgendaProject(config,loadData=False)
+        config.tac_agenda_project_url = 'https://github.com/orgs/AcademySoftwareFoundation/projects/19/views/1'
+        tap = TACAgendaProject(config,load_data=False)
         with self.assertLogs(level='WARNING') as cm:
             result = tap._lookupProjectAndCommitteeDetailsByLFXURL(url)
 

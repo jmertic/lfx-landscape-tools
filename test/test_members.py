@@ -163,7 +163,7 @@ class TestMembers(unittest.TestCase):
 
     @unittest.mock.patch("lfx_landscape_tools.members.Members.__abstractmethods__", set())
     def testNormalizeNameEmptyOrg(self):
-        members = Members(Config(),loadData=False)
+        members = Members(Config(),load_data=False)
         self.assertEqual(members.normalizeName(None),'')
 
     @unittest.mock.patch("lfx_landscape_tools.members.Members.__abstractmethods__", set())
@@ -174,7 +174,7 @@ class TestMembers(unittest.TestCase):
         ]
 
         for company in companies:
-            members = Members(Config(),loadData=False)
+            members = Members(Config(),load_data=False)
             self.assertEqual(members.normalizeName(company["name"]),company["normalized"])
 
     @unittest.mock.patch("lfx_landscape_tools.members.Members.__abstractmethods__", set())

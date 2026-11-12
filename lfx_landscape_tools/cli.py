@@ -15,7 +15,7 @@ from lfx_landscape_tools.svglogo import SVGLogo
 from lfx_landscape_tools.tacagendaproject import TACAgendaProject
 
 from datetime import datetime
-from argparse import ArgumentParser,FileType
+from argparse import ArgumentParser
 import argparse
 import os
 import subprocess
@@ -41,7 +41,7 @@ class Cli:
 
         lfx_parent = ArgumentParser(add_help=False)
         lfx_parent.add_argument("-c", "--config", dest="configfile", default=self._defaultconfigfile,
-                                type=FileType('r'), help="name of YAML config file")
+                                help="name of YAML config file")
         lfx_parent.add_argument("-d", "--dir", dest="basedir", default=".",
                                 type=self._dir_path, help="path to where landscape directory is")
 
@@ -117,6 +117,13 @@ class Cli:
     def run():
         Cli()
 
+    def _load_config(self, configfile, view=None):
+        try:
+            with open(configfile, 'r') as config_file:
+                return Config(config_file, view=view)
+        except OSError as e:
+            sys.exit(f"can't open '{configfile}': {e.strerror}")
+
     def _dir_path(self,path):
         if os.path.isdir(path):
             return path
@@ -124,25 +131,25 @@ class Cli:
             raise argparse.ArgumentTypeError(f"readable_dir:{path} is not a valid path")
 
     def buildmembers(self,args):
-        config = Config(args.configfile,view='members')
+        config = self._load_config(args.configfile,view='members')
         landscapeoutput = LandscapeOutput(config)
         landscapeoutput.load(LFXMembers(config))
         landscapeoutput.save()
 
     def buildprojects(self,args):
-        config = Config(args.configfile,view='projects')
+        config = self._load_config(args.configfile,view='projects')
         landscapeoutput = LandscapeOutput(config)
         landscapeoutput.load(LFXProjects(config))
         landscapeoutput.save()
 
     def buildlfeuprojects(self,args):
-        config = Config(args.configfile,view='projects')
+        config = self._load_config(args.configfile,view='projects')
         landscapeoutput = LandscapeOutput(config)
         landscapeoutput.load(LFXProjectsEU(config))
         landscapeoutput.save()
 
     def syncprojects(self,args):
-        config = Config(args.configfile,view='projects')
+        config = self._load_config(args.configfile,view='projects')
         items = LFXProjects(config)
         logging.getLogger().info("Overlaying current Landscape data")
         items.overlay(LandscapeMembers(config))
@@ -159,7 +166,7 @@ class Cli:
         landscapeoutput.save()
 
     def syncmembers(self,args):
-        config = Config(args.configfile,view='members')
+        config = self._load_config(args.configfile,view='members')
         items = LFXMembers(config)
         logging.getLogger().info("Overlaying current Landscape member data")
         items.overlay(LandscapeMembers(config))
@@ -181,11 +188,11 @@ class Cli:
 
     def isvalidlogo(self,args):
         svglogo = SVGLogo(filename=args.filename)
-        if svglogo.isValid():
+        if svglogo.is_valid():
             print("Logo is valid")
         else:
             print("Logo is not valid")
-    
+
     def _extract_logos(self,data):
         """Recursively traverse parsed YAML data to find all 'logo' values."""
         logos = []
@@ -201,10 +208,10 @@ class Cli:
         return logos
 
     def removestalelogos(self,args):
-        config = Config(args.configfile)
-        logos = self._extract_logos(LandscapeMembers(config,loadData=False).load_landscape_yaml())
+        config = self._load_config(args.configfile)
+        logos = self._extract_logos(LandscapeMembers(config,load_data=False).load_landscape_yaml())
 
-        with os.scandir(os.path.join(args.basedir,config.hostedLogosDir)) as hostedlogos:
+        with os.scandir(os.path.join(args.basedir,config.hosted_logos_dir)) as hostedlogos:
             for hostedlogo in hostedlogos:
                 if hostedlogo.name not in logos:
                     logging.getLogger().info(f"`{hostedlogo.name}` not used in landscape - deleting.")

@@ -58,11 +58,11 @@ memberSuffix: " (help)"
             config = Config(fp)
 
             self.assertEqual(config.project,"a09410000182dD2AAI")
-            self.assertEqual(config.landscapeCategory,"ASWF Member Company")
+            self.assertEqual(config.landscape_category,"ASWF Member Company")
             self.assertEqual(config.landscapefile,"landscape.yml")
             self.assertEqual(config.missingcsvfile,"missing.csv")
-            self.assertEqual(config.landscapeSubcategories[0]['name'],"Premier Membership")
-            self.assertEqual(config.memberSuffix," (help)")
+            self.assertEqual(config.landscape_subcategories[0]['name'],"Premier Membership")
+            self.assertEqual(config.member_suffix," (help)")
 
         os.unlink(tmpfilename.name)
 
@@ -98,15 +98,15 @@ slug: aswf
         with open(tmpfilename.name) as fp:
             config = Config(fp)
 
-            self.assertEqual(config.landscapeCategory,'Members')
-            self.assertEqual(config.landscapeSubcategories,[
+            self.assertEqual(config.landscape_category,'Members')
+            self.assertEqual(config.landscape_subcategories,[
                 {"name": "Premier Membership", "category": "Premier"},
                 {"name": "General Membership", "category": "General"},
             ])
             self.assertEqual(config.landscapefile,'landscape.yml')
             self.assertEqual(config.missingcsvfile,'missing.csv')
-            self.assertEqual(config.hostedLogosDir,'hosted_logos')
-            self.assertEqual(config.memberSuffix,'')
+            self.assertEqual(config.hosted_logos_dir,'hosted_logos')
+            self.assertEqual(config.member_suffix,'')
             self.assertEqual(config.project,"a09410000182dD2AAI")
 
         os.unlink(tmpfilename.name)
@@ -156,11 +156,11 @@ missingcsvfile: missing.csv
             config = Config(fp,view='projects')
 
             self.assertEqual(config.project,"a094100001Cb6HaAAJ")
-            self.assertEqual(config.landscapeCategory,"LF Energy Projects")
+            self.assertEqual(config.landscape_category,"LF Energy Projects")
             self.assertEqual(config.landscapefile,"landscape.yml")
             self.assertEqual(config.missingcsvfile,"missing.csv")
-            self.assertEqual(config.landscapeSubcategories[0]['name'],"All")
-            self.assertEqual(config.memberSuffix," (member)")
+            self.assertEqual(config.landscape_subcategories[0]['name'],"All")
+            self.assertEqual(config.member_suffix," (member)")
 
         os.unlink(tmpfilename.name)
 

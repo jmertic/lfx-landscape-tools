@@ -45,8 +45,8 @@ class TestLandscapeOutput(unittest.TestCase):
 
     def testNewLandscape(self):
         config = Config()
-        config.landscapeMembersCategory = 'test me'
-        config.landscapeMembersSubcategories = [
+        config.landscape_members_category = 'test me'
+        config.landscape_members_subcategories = [
             {"name": "Good Membership", "category": "Good"},
             {"name": "Bad Membership", "category": "Bad"}
             ]
@@ -94,8 +94,8 @@ landscape:
             tmpfilename.flush()
 
             config = Config()
-            config.landscapeMembersCategory = 'test me'
-            config.landscapeMembersSubcategories = [
+            config.landscape_members_category = 'test me'
+            config.landscape_members_subcategories = [
                 {"name": "Good Membership", "category": "Good"},
                 {"name": "Bad Membership", "category": "Bad"}
                 ]
@@ -153,17 +153,17 @@ landscape:
             tmpfilename.flush()
 
             config = Config()
-            config.landscapeMembersCategory = 'test me'
-            config.landscapeMembersSubcategories = [
+            config.landscape_members_category = 'test me'
+            config.landscape_members_subcategories = [
                 {"name": "Good Membership", "category": "Good"},
                 {"name": "Bad Membership", "category": "Bad"}
                 ]
             config.landscapefile = tmpfilename.name
 
             landscape = LandscapeOutput(config=config)
-            landscapemembers = LandscapeMembers(config=config,loadData=False)
+            landscapemembers = LandscapeMembers(config=config,load_data=False)
             with unittest.mock.patch('requests_cache.CachedSession', requests.Session):
-                landscapemembers.loadData()
+                landscapemembers.load_data()
             with unittest.mock.patch('lfx_landscape_tools.svglogo.SVGLogo.save') as mock_svglogo_save:
                 mock_svglogo_save.return_value = 'here_global_b_v.svg'
                 landscape.load(members=landscapemembers)
@@ -190,7 +190,7 @@ landscape:
 """)
 
     def testAddItemToLandscape(self):
-        members = LFXMembers(loadData=False,config=Config())
+        members = LFXMembers(load_data=False,config=Config())
 
         member = Member()
         member.name = 'test'
@@ -227,17 +227,17 @@ landscape:
             with self.assertLogs(level='ERROR'):
                 landscape.load(members)
 
-        self.assertEqual(landscape.landscapeItems[0]['name'],'Premier')
-        self.assertEqual(landscape.landscapeItems[0]['items'][0]['name'],"test")
-        self.assertEqual(landscape.landscapeItems[1]['name'],'General')
-        self.assertEqual(0,len(landscape.landscapeItems[1]['items']))
-        self.assertEqual(2,len(landscape.landscapeItems))
-        self.assertEqual(1,len(landscape.landscapeItems[0]['items']))
-        self.assertEqual(1,landscape.itemsProcessed)
-        self.assertEqual(2,landscape.itemsErrors)
+        self.assertEqual(landscape.landscape_items[0]['name'],'Premier')
+        self.assertEqual(landscape.landscape_items[0]['items'][0]['name'],"test")
+        self.assertEqual(landscape.landscape_items[1]['name'],'General')
+        self.assertEqual(0,len(landscape.landscape_items[1]['items']))
+        self.assertEqual(2,len(landscape.landscape_items))
+        self.assertEqual(1,len(landscape.landscape_items[0]['items']))
+        self.assertEqual(1,landscape.items_processed)
+        self.assertEqual(2,landscape.items_errors)
 
     def testSyncItemInLandscape(self):
-        members = LFXProjects(loadData=False,config=Config())
+        members = LFXProjects(load_data=False,config=Config())
 
         member = Member()
         member.name = 'test'
@@ -273,7 +273,7 @@ landscape:
             config = Config()
             config.landscapefile = os.path.basename(tmpfilename.name)
             config.basedir = os.path.dirname(tmpfilename.name)
-            config.landscapeMembersSubcategories = [{"name": "Premier Membership", "category": "Premier"}]
+            config.landscape_members_subcategories = [{"name": "Premier Membership", "category": "Premier"}]
 
             members.overlay(LandscapeMembers(config=config))
             landscape = LandscapeOutput(config=config)
@@ -330,8 +330,8 @@ landscape:
             tmpfilename.flush()
 
             config = Config()
-            config.landscapeMembersCategory = 'test me'
-            config.landscapeMembersSubcategories = [
+            config.landscape_members_category = 'test me'
+            config.landscape_members_subcategories = [
                 {"name": "Good Membership", "category": "Good"},
                 {"name": "Bad Membership", "category": "Bad"}
                 ]
@@ -359,8 +359,8 @@ landscape:
             tmpfilename.flush()
 
             config = Config()
-            config.landscapeMembersCategory = 'test me'
-            config.landscapeMembersSubcategories = [
+            config.landscape_members_category = 'test me'
+            config.landscape_members_subcategories = [
                 {"name": "Good Membership", "category": "Good"},
                 {"name": "Bad Membership", "category": "Bad"}
                 ]
@@ -404,18 +404,18 @@ landscape:
             tmpfilename.flush()
 
             config = Config()
-            config.landscapeMembersCategory = 'test me'
-            config.memberSuffix = " (testme)"
-            config.landscapeMembersSubcategories = [
+            config.landscape_members_category = 'test me'
+            config.member_suffix = " (testme)"
+            config.landscape_members_subcategories = [
                 {"name": "Good Membership", "category": "Good"},
                 {"name": "Bad Membership", "category": "Bad"}
                 ]
             config.landscapefile = tmpfilename.name
 
             landscape = LandscapeOutput(config=config)
-            landscapemembers = LandscapeMembers(config=config,loadData=False)
+            landscapemembers = LandscapeMembers(config=config,load_data=False)
             with unittest.mock.patch('requests_cache.CachedSession', requests.Session):
-                landscapemembers.loadData()
+                landscapemembers.load_data()
             with unittest.mock.patch('lfx_landscape_tools.svglogo.SVGLogo.save') as mock_svglogo_save:
                 mock_svglogo_save.return_value = 'here_global_b_v.svg'
                 landscape.load(members=landscapemembers)
@@ -445,18 +445,18 @@ landscape:
         config = Config()
         config.basedir = "/tmp"
         config.landscapefile = "land.yml"
-        config.hostedLogosDir = "logos"
-        config.landscapeMembersCategory = "Members"
+        config.hosted_logos_dir = "logos"
+        config.landscape_members_category = "Members"
         config.view = "members"
-        config.memberSuffix = " (Member)"
+        config.member_suffix = " (Member)"
         # Fix 49 -> 43: Add a duplicate category
-        config.landscapeMembersSubcategories = [
+        config.landscape_members_subcategories = [
             {"name": "Gold", "category": "Gold"},
             {"name": "Gold", "category": "Gold"}
         ]
         lo = LandscapeOutput(config)
         # Should only have 1 item despite 2 in config
-        self.assertEqual(len(lo.landscapeItems), 1)
+        self.assertEqual(len(lo.landscape_items), 1)
 
     @patch('ruamel.yaml.YAML.load')
     @patch('builtins.open', new_callable=mock_open, read_data="categories: []")
@@ -465,10 +465,10 @@ landscape:
         config = Config()
         config.basedir = "/tmp"
         config.landscapefile = "land.yml"
-        config.hostedLogosDir = "logos"
-        config.landscapeMembersCategory = "Members"
+        config.hosted_logos_dir = "logos"
+        config.landscape_members_category = "Members"
         config.view = "members"
-        config.memberSuffix = " (Member)"
+        config.member_suffix = " (Member)"
         mock_yaml_load.return_value = {'categories': [{'name': 'Other'}]}
         lo = LandscapeOutput(config)
         lo.save()
@@ -483,10 +483,10 @@ landscape:
         config = Config()
         config.basedir = "/tmp"
         config.landscapefile = "land.yml"
-        config.hostedLogosDir = "logos"
-        config.landscapeMembersCategory = "Members"
+        config.hosted_logos_dir = "logos"
+        config.landscape_members_category = "Members"
         config.view = "members"
-        config.memberSuffix = " (Member)"
+        config.member_suffix = " (Member)"
         lo = LandscapeOutput(config)
 
         # Manually trigger the presenter with multi-line data
@@ -501,10 +501,10 @@ landscape:
         config = Config()
         config.basedir = "/tmp"
         config.landscapefile = "land.yml"
-        config.hostedLogosDir = "logos"
-        config.landscapeMembersCategory = "Members"
+        config.hosted_logos_dir = "logos"
+        config.landscape_members_category = "Members"
         config.view = "members"
-        config.memberSuffix = " (Member)"
+        config.member_suffix = " (Member)"
         lo = LandscapeOutput(config)
 
         mock_dumper = MagicMock()
@@ -526,27 +526,27 @@ landscape:
         config = Config()
         config.basedir = "/tmp"
         config.landscapefile = "land.yml"
-        config.hostedLogosDir = "logos"
-        config.landscapeMembersCategory = "Members"
+        config.hosted_logos_dir = "logos"
+        config.landscape_members_category = "Members"
         config.view = "members"
-        config.memberSuffix = " (Member)"
+        config.member_suffix = " (Member)"
         mock_yaml_load.side_effect = Exception("Format Error")
         lo = LandscapeOutput(config)
         with self.assertLogs(level='ERROR'):
             lo.save()
         # Logic should reset landscape structure
-        self.assertEqual(len(lo.landscapeItems), len(config.landscapeSubcategories))
+        self.assertEqual(len(lo.landscape_items), len(config.landscape_subcategories))
 
     def test_remove_extrawhitespace(self):
         with tempfile.NamedTemporaryFile(mode='w') as tmpfilename:
             config = Config()
-            config.landscapeMembersCategory = 'test me'
-            config.landscapeMembersSubcategories = [
+            config.landscape_members_category = 'test me'
+            config.landscape_members_subcategories = [
                 {"name": "Bad Membership", "category": "Bad"}
                 ]
             config.landscapefile = tmpfilename.name
 
-            members = LFXMembers(loadData=False,config=config)
+            members = LFXMembers(load_data=False,config=config)
             member = Member()
             member.name = "   bad string    "
             member.description = """DreamWorks Animation SKG is devoted to producing high-quality family entertainment through the use of computer-generated (CG) animation.

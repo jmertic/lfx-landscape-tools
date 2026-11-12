@@ -21,22 +21,22 @@ from lfx_landscape_tools.config import Config
 
 class LandscapeMembers(Members):
 
-    landscapeCategory = 'Members'
-    landscapeSubcategories = [
+    landscape_category = 'Members'
+    landscape_subcategories = [
         {"name": "Premier Membership", "category": "Premier"},
         {"name": "General Membership", "category": "General"},
         {"name": "Associate Membership", "category": "Associate"}
     ]
     landscapefile = 'landscape.yml'
-    memberSuffix = ''
+    member_suffix = ''
 
     def processConfig(self, config: type[Config]):
-        self.landscapeCategory = config.landscapeCategory
-        self.landscapeSubcategories = config.landscapeSubcategories
+        self.landscape_category = config.landscape_category
+        self.landscape_subcategories = config.landscape_subcategories
         self.landscapefile = os.path.join(config.basedir,config.landscapefile)
-        self.memberSuffix = config.memberSuffix if config.view == 'members' else self.memberSuffix
-        self.hostedLogosDir = os.path.join(config.basedir,config.hostedLogosDir)
-        self.assignSIGs = config.projectsAssignSIGs
+        self.member_suffix = config.member_suffix if config.view == 'members' else self.member_suffix
+        self.hosted_logos_dir = os.path.join(config.basedir,config.hosted_logos_dir)
+        self.assignSIGs = config.projects_assign_sigs
 
     def load_landscape_yaml(self):
         """Helper method to load and parse the landscape YAML file."""
@@ -55,13 +55,13 @@ class LandscapeMembers(Members):
         """Helper method to map a single YAML item to a Member object."""
         logger = logging.getLogger()
         member = Member()
-        member.name = re.sub('{}$'.format(re.escape(self.memberSuffix)), '', item.get('name', ''))
+        member.name = re.sub('{}$'.format(re.escape(self.member_suffix)), '', item.get('name', ''))
 
         # Process Logo
         logo = item.get('logo')
         if logo:
             if urlparse(logo).scheme == '':
-                member.logo = os.path.normpath("{}/{}".format(self.hostedLogosDir, logo))
+                member.logo = os.path.normpath("{}/{}".format(self.hosted_logos_dir, logo))
             else:
                 member.logo = logo
 
@@ -75,9 +75,9 @@ class LandscapeMembers(Members):
                 setattr(member, key, value)
 
         # Match subcategory to determine membership
-        for ls in self.landscapeSubcategories:
+        for ls in self.landscape_subcategories:
             if subcategory_name == ls.get('category'):
-                logger.debug("Parsing subcategory '{}' to landscapeSubcategory '{}'".format(subcategory_name, ls.get('name')))
+                logger.debug("Parsing subcategory '{}' to landscape subcategory '{}'".format(subcategory_name, ls.get('name')))
                 member.membership = ls.get('name')
                 break
 
@@ -91,10 +91,10 @@ class LandscapeMembers(Members):
 
         return member
 
-    def loadData(self):
+    def load_data(self):
         """Main method to load landscape data into self.members."""
         logger = logging.getLogger()
-        logger.info("Loading Current Landscape members in category '{}'".format(self.landscapeCategory))
+        logger.info("Loading Current Landscape members in category '{}'".format(self.landscape_category))
 
         # 1. Load Data
         landscape = self.load_landscape_yaml()
@@ -106,7 +106,7 @@ class LandscapeMembers(Members):
 
         # 3. Find the target category (flattens the first loop)
         categories = landscape.get(rootcategory, [])
-        target_category = next((c for c in categories if c.get('name') == self.landscapeCategory), None)
+        target_category = next((c for c in categories if c.get('name') == self.landscape_category), None)
 
         if not target_category:
             return

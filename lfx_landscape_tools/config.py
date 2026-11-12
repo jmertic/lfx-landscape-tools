@@ -21,37 +21,37 @@ class Config:
     project = None
     view = 'members'
     slug = None
-    landscapeMembersCategory = 'Members'
-    landscapeMembersSubcategories = [
+    landscape_members_category = 'Members'
+    landscape_members_subcategories = [
         {"name": "Premier Membership", "category": "Premier"},
         {"name": "General Membership", "category": "General"},
     ]
-    landscapeProjectsLevels = [
+    landscape_projects_levels = [
         {"name": "Active", "level": "active"},
         {"name": "Incubation", "level": "incubation"},
         {"name": "Sandbox", "level": "sandbox"},
     ]
-    landscapeProjectsCategory = 'Projects'
-    landscapeProjectsSubcategories = [
+    landscape_projects_category = 'Projects'
+    landscape_projects_subcategories = [
        {"name": "All", "category": "All"}
     ]
     basedir = "."
     landscapefile = 'landscape.yml'
     missingcsvfile = 'missing.csv'
-    hostedLogosDir = 'hosted_logos'
-    memberSuffix = ''
-    memberUsePublicMembershipLogo = False
-    projectsAddTechnologySector = False
-    projectsAddIndustrySector = False
-    projectsAddPMOManagedStatus = False
-    projectsAddParentProject = False
-    projectsAddCategory = True
-    projectsDefaultCrunchbase = 'https://www.crunchbase.com/organization/linux-foundation'
-    projectsFilterByParentSlug = True
-    projectsAssignSIGs = False
-    tacAgendaProjectUrl = None
-    artworkRepoUrl = None
-    addOtherProjectMemberships = False
+    hosted_logos_dir = 'hosted_logos'
+    member_suffix = ''
+    member_use_public_membership_logo = False
+    projects_add_technology_sector = False
+    projects_add_industry_sector = False
+    projects_add_pmo_managed_status = False
+    projects_add_parent_project = False
+    projects_add_category = True
+    projects_default_crunchbase = 'https://www.crunchbase.com/organization/linux-foundation'
+    projects_filter_by_parent_slug = True
+    projects_assign_sigs = False
+    tac_agenda_project_url = None
+    artwork_repo_url = None
+    add_other_project_memberships = False
 
     def __init__(self, config_file: io.TextIOWrapper = None, view = None):
         if config_file:
@@ -62,46 +62,46 @@ class Config:
             self.project = data_loaded.get('project',self._lookup_project_from_slug(self.slug))
             if not self.slug or not self.project:
                 raise ValueError("Invalid project specification in config file")
-            self.landscapeProjectsCategory = data_loaded.get('landscapeProjectsCategory',Config.landscapeProjectsCategory)
-            self.landscapeProjectsLevels = data_loaded.get('landscapeProjectsLevels',Config.landscapeProjectsLevels)
-            self.landscapeProjectsSubcategories = data_loaded.get('landscapeProjectsSubcategories',self._get_landscape_projects_subcategories_from_levels())
-            self.landscapeMembersCategory = data_loaded.get('landscapeMembersCategory',Config.landscapeMembersCategory)
-            self.landscapeMembersCategory = data_loaded.get('landscapeMemberCategory',Config.landscapeMembersCategory)
-            self.landscapeMembersSubcategories = data_loaded.get('landscapeMembersSubcategories',Config.landscapeMembersSubcategories)
-            self.landscapeMembersSubcategories = data_loaded.get('landscapeMemberClasses',Config.landscapeMembersSubcategories)
+            self.landscape_projects_category = data_loaded.get('landscapeProjectsCategory',Config.landscape_projects_category)
+            self.landscape_projects_levels = data_loaded.get('landscapeProjectsLevels',Config.landscape_projects_levels)
+            self.landscape_projects_subcategories = data_loaded.get('landscapeProjectsSubcategories',self._get_landscape_projects_subcategories_from_levels())
+            self.landscape_members_category = data_loaded.get('landscapeMembersCategory',Config.landscape_members_category)
+            self.landscape_members_category = data_loaded.get('landscapeMemberCategory',Config.landscape_members_category)
+            self.landscape_members_subcategories = data_loaded.get('landscapeMembersSubcategories',Config.landscape_members_subcategories)
+            self.landscape_members_subcategories = data_loaded.get('landscapeMemberClasses',Config.landscape_members_subcategories)
             self.landscapefile = data_loaded.get('landscapefile',Config.landscapefile)
             self.missingcsvfile = data_loaded.get('missingcsvfile',Config.missingcsvfile)
-            self.hostedLogosDir = data_loaded.get('hostedLogosDir',Config.hostedLogosDir)
-            self.memberSuffix = data_loaded.get('memberSuffix',Config.memberSuffix)
-            self.memberUsePublicMembershipLogo = data_loaded.get('memberUsePublicMembershipLogo',Config.memberUsePublicMembershipLogo)
-            self.projectsAddTechnologySector = data_loaded.get('projectsAddTechnologySector',Config.projectsAddTechnologySector)
-            self.projectsAddIndustrySector = data_loaded.get('projectsAddIndustrySector',Config.projectsAddIndustrySector)
-            self.projectsAddPMOManagedStatus = data_loaded.get('projectsAddPMOManagedStatus',Config.projectsAddPMOManagedStatus)
-            self.projectsAddParentProject = data_loaded.get('projectsAddParentProject',Config.projectsAddParentProject)
-            self.projectsAddCategory = data_loaded.get('projectsAddCategory',Config.projectsAddCategory)
-            self.projectsDefaultCrunchbase = data_loaded.get('projectsDefaultCrunchbase',Config.projectsDefaultCrunchbase)
-            self.projectsFilterByParentSlug = data_loaded.get('projectsFilterByParentSlug',Config.projectsFilterByParentSlug)
-            self.projectsAssignSIGs = data_loaded.get('projectsAssignSIGs',Config.projectsAssignSIGs)
-            self.tacAgendaProjectUrl = data_loaded.get('tacAgendaProjectUrl',Config.tacAgendaProjectUrl)
-            self.artworkRepoUrl = data_loaded.get('artworkRepoUrl',Config.artworkRepoUrl)
-            self.addOtherProjectMemberships = data_loaded.get('addOtherProjectMemberships',Config.addOtherProjectMemberships)
+            self.hosted_logos_dir = data_loaded.get('hostedLogosDir',Config.hosted_logos_dir)
+            self.member_suffix = data_loaded.get('memberSuffix',Config.member_suffix)
+            self.member_use_public_membership_logo = data_loaded.get('memberUsePublicMembershipLogo',Config.member_use_public_membership_logo)
+            self.projects_add_technology_sector = data_loaded.get('projectsAddTechnologySector',Config.projects_add_technology_sector)
+            self.projects_add_industry_sector = data_loaded.get('projectsAddIndustrySector',Config.projects_add_industry_sector)
+            self.projects_add_pmo_managed_status = data_loaded.get('projectsAddPMOManagedStatus',Config.projects_add_pmo_managed_status)
+            self.projects_add_parent_project = data_loaded.get('projectsAddParentProject',Config.projects_add_parent_project)
+            self.projects_add_category = data_loaded.get('projectsAddCategory',Config.projects_add_category)
+            self.projects_default_crunchbase = data_loaded.get('projectsDefaultCrunchbase',Config.projects_default_crunchbase)
+            self.projects_filter_by_parent_slug = data_loaded.get('projectsFilterByParentSlug',Config.projects_filter_by_parent_slug)
+            self.projects_assign_sigs = data_loaded.get('projectsAssignSIGs',Config.projects_assign_sigs)
+            self.tac_agenda_project_url = data_loaded.get('tacAgendaProjectUrl',Config.tac_agenda_project_url)
+            self.artwork_repo_url = data_loaded.get('artworkRepoUrl',Config.artwork_repo_url)
+            self.add_other_project_memberships = data_loaded.get('addOtherProjectMemberships',Config.add_other_project_memberships)
 
     def _is_valid_view_option(self,view):
         return view in ['projects','members']
 
     @property
-    def landscapeCategory(self):
+    def landscape_category(self):
         mapping = {
-            'projects': self.landscapeProjectsCategory,
-            'members': self.landscapeMembersCategory
+            'projects': self.landscape_projects_category,
+            'members': self.landscape_members_category
         }
         return mapping.get(self.view)
 
     @property
-    def landscapeSubcategories(self):
+    def landscape_subcategories(self):
         mapping = {
-            'projects': self.landscapeProjectsSubcategories,
-            'members': self.landscapeMembersSubcategories
+            'projects': self.landscape_projects_subcategories,
+            'members': self.landscape_members_subcategories
         }
         return mapping.get(self.view)
 
@@ -119,10 +119,10 @@ class Config:
         return None
 
     def _lookup_slug_from_project(self,project):
-        singleProjectEndpointURL = 'https://api-gw.platform.linuxfoundation.org/project-service/v1/public/projects?$filter=projectId%20eq%20{}'
+        single_project_endpoint_url = 'https://api-gw.platform.linuxfoundation.org/project-service/v1/public/projects?$filter=projectId%20eq%20{}'
         session = requests_cache.CachedSession()
         if project:
-            with session.get(singleProjectEndpointURL.format(project)) as endpointResponse:
+            with session.get(single_project_endpoint_url.format(project)) as endpointResponse:
                 parent_project = endpointResponse.json()
                 if len(parent_project.get('Data')) > 0:
                     return parent_project.get('Data',[])[0].get("Slug")
@@ -132,5 +132,5 @@ class Config:
         return None
 
     def _get_landscape_projects_subcategories_from_levels(self):
-        for level in self.landscapeProjectsLevels:
-            self.landscapeProjectsSubcategories.append({'name':level['name'],'category':level['name']})
+        for level in self.landscape_projects_levels:
+            self.landscape_projects_subcategories.append({'name':level['name'],'category':level['name']})
