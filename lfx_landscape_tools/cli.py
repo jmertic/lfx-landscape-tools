@@ -63,6 +63,10 @@ class Cli:
         logo_parser.add_argument("--autocrop", action='store_true', help="Process logo with autocrop")
         logo_parser.set_defaults(func=self.maketextlogo)
 
+        validlogo_parser = subparsers.add_parser("isvalidlogo", help="Checks a logo and determines if it is a valid, clean SVG or not")
+        validlogo_parser.add_argument("-f", "--filename", required=True, help="Logo to check")
+        validlogo_parser.set_defaults(func=self.isvalidlogo)
+
         val_parser = subparsers.add_parser("validatedata", help="Validate landscape data file")
         val_parser.add_argument("filename", nargs="?", default="landscape.yml", help="Landscape data file name")
         val_parser.set_defaults(func=self.validatedata)
@@ -175,6 +179,13 @@ class Cli:
         sys.stdout.buffer.write(svglogo.encode("utf-8"))
         sys.stdout.buffer.flush()
 
+    def isvalidlogo(self,args):
+        svglogo = SVGLogo(filename=args.filename)
+        if svglogo.isValid():
+            print("Logo is valid")
+        else:
+            print("Logo is not valid")
+    
     def _extract_logos(self,data):
         """Recursively traverse parsed YAML data to find all 'logo' values."""
         logos = []

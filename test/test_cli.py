@@ -17,6 +17,7 @@ from types import SimpleNamespace
 import os
 
 from lfx_landscape_tools.cli import Cli
+from lfx_landscape_tools.svglogo import SVGLogo
 
 
 class TestCli(unittest.TestCase):
@@ -269,6 +270,40 @@ class TestCli(unittest.TestCase):
                 )
             )
 
+    @patch('builtins.print')
+    def test_isvalidlogo_valid(self, mock_print):
+        """Verify isvalidlogo prints valid message when SVGLogo.isValid() returns True."""
+        cli_manual = Cli.__new__(Cli)
+        mock_logo = self.mock_svg(filename="valid.svg")
+        mock_logo.isValid.return_value = True
+
+        args = argparse.Namespace(filename=mock_logo)
+        cli_manual.isvalidlogo(args)
+
+        self.mock_svg.return_value.isValid.assert_called_once()
+        mock_print.assert_called_once_with("Logo is valid")
+
+    @patch('builtins.print')
+    def test_isvalidlogo_invalid(self, mock_print):
+        """Verify isvalidlogo prints invalid message when SVGLogo.isValid() returns False."""
+        cli_manual = Cli.__new__(Cli)
+        mock_logo = self.mock_svg(filename="invalid.svg")
+        mock_logo.isValid.return_value = False
+
+        args = argparse.Namespace(filename=mock_logo)
+        cli_manual.isvalidlogo(args)
+
+        self.mock_svg.return_value.isValid.assert_called_once()
+        mock_print.assert_called_once_with("Logo is not valid")
+
+    @patch('builtins.print')
+    @patch('sys.argv', ['cli.py', '--silent', 'isvalidlogo', '-f', 'test.svg'])
+    def test_isvalidlogo_routing(self, mock_print):
+        """Verify isvalidlogo subcommand routes arguments to SVGLogo."""
+        self.mock_svg.return_value.isValid.return_value = True
+        Cli()
+        self.mock_svg.assert_called_once_with(filename='test.svg')
+        mock_print.assert_called_once_with("Logo is valid")
 
 if __name__ == "__main__":
     unittest.main()
