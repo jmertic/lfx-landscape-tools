@@ -70,9 +70,7 @@ class Member:
 
     def __dir__(self):
         returnvalue = list(self.itemschema.keys())
-        returnvalue.append('linkedin')
-        returnvalue.append('membership')
-        returnvalue.append('project_org')
+        returnvalue.extend(['linkedin','membership','project_org'])
         return returnvalue
 
     @property
