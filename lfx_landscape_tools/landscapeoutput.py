@@ -94,10 +94,10 @@ class LandscapeOutput:
             logger.info(f"Added '{member.name}' to Landscape in SubCategory '{member.membership}'")
             self._items_processed += 1
 
-            member.hostLogo(self.hostedLogosDir)
-
             if self.memberSuffix:
                 member.entrysuffix = self.memberSuffix
+
+            member.hostLogo(self.hostedLogosDir)
 
             target_subcat['items'].append(member.toLandscapeItemAttributes())
 

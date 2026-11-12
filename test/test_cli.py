@@ -11,8 +11,14 @@ import sys
 import argparse
 from datetime import datetime
 import logging
+from pathlib import Path
+import tempfile
+from types import SimpleNamespace
+import os
 
 from lfx_landscape_tools.cli import Cli
+from lfx_landscape_tools.svglogo import SVGLogo
+
 
 class TestCli(unittest.TestCase):
 
@@ -160,3 +166,144 @@ class TestCli(unittest.TestCase):
         Cli.run()
         # Ensure LFXProjects was initialized
         self.mock_projects.assert_called()
+
+    def test_extract_logos(self):
+        """Verify _extract_logos recursively extracts non-null logo entries."""
+        cli_manual = Cli.__new__(Cli)
+        sample_yaml = {
+            "landscape": [
+                {
+                    "name": "Category 1",
+                    "subcategories": [
+                        {
+                            "name": "Subcategory A",
+                            "items": [
+                                {"name": "Item 1", "logo": "item1.svg"},
+                                {"name": "Item 2", "logo": None},
+                                {"name": "Item 3"},
+                            ],
+                        }
+                    ],
+                },
+                {"name": "Top-level item", "logo": "toplevel.svg"},
+            ]
+        }
+
+        self.assertEqual(cli_manual._extract_logos(sample_yaml), ["item1.svg", "toplevel.svg"])
+        self.assertEqual(cli_manual._extract_logos({}), [])
+        self.assertEqual(cli_manual._extract_logos([]), [])
+        self.assertEqual(cli_manual._extract_logos(None), [])
+
+    @patch('sys.argv', ['cli.py', '--silent', 'removestalelogos'])
+    @patch('builtins.open', new_callable=mock_open, read_data="--- \n # valid yaml content")
+    def test_removestalelogos_routing_and_cleanup(self, mock_file):
+        """Verify removestalelogos command routes properly and deletes only unused logos."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            logos_dir = Path(tmpdir) / "hosted_logos"
+            logos_dir.mkdir()
+
+            active_file = logos_dir / "active.svg"
+            stale_file = logos_dir / "stale.svg"
+            active_file.write_text("<svg>active</svg>", encoding="utf-8")
+            stale_file.write_text("<svg>stale</svg>", encoding="utf-8")
+
+            self.mock_config.return_value.hostedLogosDir = "hosted_logos"
+            self.mock_landscapemembers.return_value.load_landscape_yaml.return_value = {
+                "landscape": [{"items": [{"logo": "active.svg"}]}]
+            }
+
+            with patch('os.chdir'):
+                # Verify CLI routing works with default basedir
+                with patch('lfx_landscape_tools.cli.os.scandir', return_value=os.scandir(logos_dir)):
+                    Cli()
+
+            self.assertTrue(active_file.exists())
+            self.assertFalse(stale_file.exists())
+            self.mock_landscapemembers.assert_called_once_with(
+                self.mock_config.return_value, loadData=False
+            )
+
+    @patch('lfx_landscape_tools.cli.os.remove', side_effect=FileNotFoundError)
+    def test_removestalelogos_file_not_found(self, mock_remove):
+        """Verify removestalelogos logs a warning if a stale file disappears before deletion."""
+        cli_manual = Cli.__new__(Cli)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            logos_dir = Path(tmpdir) / "hosted_logos"
+            logos_dir.mkdir()
+            (logos_dir / "ghost.svg").write_text("<svg/>", encoding="utf-8")
+
+            self.mock_config.return_value.hostedLogosDir = "hosted_logos"
+            self.mock_landscapemembers.return_value.load_landscape_yaml.return_value = {}
+
+            args = SimpleNamespace(configfile="config.yml", basedir=tmpdir)
+            with self.assertLogs(level='WARNING') as log_ctx:
+                cli_manual.removestalelogos(args)
+
+            mock_remove.assert_called_once()
+            self.assertTrue(
+                any("File was already deleted or does not exist." in msg for msg in log_ctx.output)
+            )
+
+    @patch('lfx_landscape_tools.cli.os.remove', side_effect=PermissionError("Access denied"))
+    def test_removestalelogos_permission_error(self, mock_remove):
+        """Verify removestalelogos logs an exception if deleting a stale file raises PermissionError."""
+        cli_manual = Cli.__new__(Cli)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            logos_dir = Path(tmpdir) / "hosted_logos"
+            logos_dir.mkdir()
+            (logos_dir / "locked.svg").write_text("<svg/>", encoding="utf-8")
+
+            self.mock_config.return_value.hostedLogosDir = "hosted_logos"
+            self.mock_landscapemembers.return_value.load_landscape_yaml.return_value = {}
+
+            args = SimpleNamespace(configfile="config.yml", basedir=tmpdir)
+            with self.assertLogs(level='ERROR') as log_ctx:
+                cli_manual.removestalelogos(args)
+
+            mock_remove.assert_called_once()
+            self.assertTrue(
+                any(
+                    "Permission denied: file may be open or read-only." in msg
+                    for msg in log_ctx.output
+                )
+            )
+
+    @patch('builtins.print')
+    def test_isvalidlogo_valid(self, mock_print):
+        """Verify isvalidlogo prints valid message when SVGLogo.isValid() returns True."""
+        cli_manual = Cli.__new__(Cli)
+        mock_logo = self.mock_svg(filename="valid.svg")
+        mock_logo.isValid.return_value = True
+
+        args = argparse.Namespace(filename=mock_logo)
+        cli_manual.isvalidlogo(args)
+
+        self.mock_svg.return_value.isValid.assert_called_once()
+        mock_print.assert_called_once_with("Logo is valid")
+
+    @patch('builtins.print')
+    def test_isvalidlogo_invalid(self, mock_print):
+        """Verify isvalidlogo prints invalid message when SVGLogo.isValid() returns False."""
+        cli_manual = Cli.__new__(Cli)
+        mock_logo = self.mock_svg(filename="invalid.svg")
+        mock_logo.isValid.return_value = False
+
+        args = argparse.Namespace(filename=mock_logo)
+        cli_manual.isvalidlogo(args)
+
+        self.mock_svg.return_value.isValid.assert_called_once()
+        mock_print.assert_called_once_with("Logo is not valid")
+
+    @patch('builtins.print')
+    @patch('sys.argv', ['cli.py', '--silent', 'isvalidlogo', '-f', 'test.svg'])
+    def test_isvalidlogo_routing(self, mock_print):
+        """Verify isvalidlogo subcommand routes arguments to SVGLogo."""
+        self.mock_svg.return_value.isValid.return_value = True
+        Cli()
+        self.mock_svg.assert_called_once_with(filename='test.svg')
+        mock_print.assert_called_once_with("Logo is valid")
+
+if __name__ == "__main__":
+    unittest.main()

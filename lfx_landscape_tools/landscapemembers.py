@@ -38,7 +38,7 @@ class LandscapeMembers(Members):
         self.hostedLogosDir = os.path.join(config.basedir,config.hostedLogosDir)
         self.assignSIGs = config.projectsAssignSIGs
 
-    def _load_landscape_yaml(self):
+    def load_landscape_yaml(self):
         """Helper method to load and parse the landscape YAML file."""
         logger = logging.getLogger()
         try:
@@ -97,7 +97,7 @@ class LandscapeMembers(Members):
         logger.info("Loading Current Landscape members in category '{}'".format(self.landscapeCategory))
 
         # 1. Load Data
-        landscape = self._load_landscape_yaml()
+        landscape = self.load_landscape_yaml()
         if not landscape:
             return
 

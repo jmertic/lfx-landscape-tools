@@ -51,6 +51,7 @@ class Cli:
             ("build_lfeuprojects", "Replace current LF Europe projects with latest from LFX", self.buildlfeuprojects),
             ("sync_projects", "Sync current projects with latest from LFX", self.syncprojects),
             ("sync_members", "Sync current members with latest from LFX", self.syncmembers),
+            ("removestalelogos", "Remove any stale logos no longer used in the landscape", self.removestalelogos),
         ]
 
         for name, help_text, func in lfx_commands:
@@ -61,6 +62,10 @@ class Cli:
         logo_parser.add_argument("-n", "--name", required=True, help="Name to appear in logo")
         logo_parser.add_argument("--autocrop", action='store_true', help="Process logo with autocrop")
         logo_parser.set_defaults(func=self.maketextlogo)
+
+        validlogo_parser = subparsers.add_parser("isvalidlogo", help="Checks a logo and determines if it is a valid, clean SVG or not")
+        validlogo_parser.add_argument("-f", "--filename", required=True, help="Logo to check")
+        validlogo_parser.set_defaults(func=self.isvalidlogo)
 
         val_parser = subparsers.add_parser("validatedata", help="Validate landscape data file")
         val_parser.add_argument("filename", nargs="?", default="landscape.yml", help="Landscape data file name")
@@ -173,6 +178,42 @@ class Cli:
 
         sys.stdout.buffer.write(svglogo.encode("utf-8"))
         sys.stdout.buffer.flush()
+
+    def isvalidlogo(self,args):
+        svglogo = SVGLogo(filename=args.filename)
+        if svglogo.isValid():
+            print("Logo is valid")
+        else:
+            print("Logo is not valid")
+    
+    def _extract_logos(self,data):
+        """Recursively traverse parsed YAML data to find all 'logo' values."""
+        logos = []
+        if isinstance(data, dict):
+            for key, value in data.items():
+                if key == "logo" and value is not None:
+                    logos.append(value)
+                else:
+                    logos.extend(self._extract_logos(value))
+        elif isinstance(data, list):
+            for item in data:
+                logos.extend(self._extract_logos(item))
+        return logos
+
+    def removestalelogos(self,args):
+        config = Config(args.configfile)
+        logos = self._extract_logos(LandscapeMembers(config,loadData=False).load_landscape_yaml())
+
+        with os.scandir(os.path.join(args.basedir,config.hostedLogosDir)) as hostedlogos:
+            for hostedlogo in hostedlogos:
+                if hostedlogo.name not in logos:
+                    logging.getLogger().info(f"`{hostedlogo.name}` not used in landscape - deleting.")
+                    try:
+                        os.remove(hostedlogo.path)
+                    except FileNotFoundError:
+                        logging.getLogger().warning("File was already deleted or does not exist.")
+                    except PermissionError:
+                        logging.getLogger().exception("Permission denied: file may be open or read-only.")
 
     def validatedata(self,args):
         schema = "https://raw.githubusercontent.com/cncf/landscape2/refs/heads/main/docs/config/schema/data.schema.json"
