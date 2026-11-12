@@ -70,9 +70,7 @@ class Member:
 
     def __dir__(self):
         returnvalue = list(self.itemschema.keys())
-        returnvalue.append('linkedin')
-        returnvalue.append('membership')
-        returnvalue.append('project_org')
+        returnvalue.extend(['linkedin','membership','project_org'])
         return returnvalue
 
     @property
@@ -266,7 +264,7 @@ class Member:
             logging.getLogger().warning(f"Member.logo for '{self.name}' invalid format")
 
     def hostLogo(self, path = "./"):
-        self.__logo.save(self.name,path)
+        self.__logo.save(f"{self.name}{self.entrysuffix}",path)
 
     @property
     def twitter(self):
@@ -355,7 +353,7 @@ class Member:
         if key == 'name':
             return f"{self.name}{self.entrysuffix}"
         if key == 'logo' and isinstance(self.__logo, SVGLogo):
-            return self.__logo.filename(self.name)
+            return self.__logo.filename(f"{self.name}{self.entrysuffix}")
 
         attr_val = getattr(self, key, None)
         if not attr_val:

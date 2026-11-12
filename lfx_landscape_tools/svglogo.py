@@ -94,7 +94,7 @@ class SVGLogo:
         return str(self.__contents or '')
 
     def filename(self, name):
-        return self.__filename if self.__filename else "{}.svg".format(slugify(os.path.splitext(name)[0],separator='_'))
+        return self.__filename if self.__filename else "{}.svg".format(slugify(name,separator='_'))
 
     def save(self, name, path = './'):
         filename = self.filename(name)
