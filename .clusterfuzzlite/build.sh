@@ -13,7 +13,7 @@ for fuzzer in fuzz/fuzz_*.py; do
   name=$(basename -s .py "$fuzzer")
 
   # python-slugify imports text_unidecode dynamically, so PyInstaller misses it.
-  compile_python_fuzzer "$fuzzer" --paths=fuzz --collect-all text_unidecode
+  compile_python_fuzzer "$fuzzer" --paths=fuzz --collect-all text_unidecode --collect-all jaraco
 
   if [ -d "fuzz/corpus/$name" ]; then
     zip -qj "$OUT/${name}_seed_corpus.zip" "fuzz/corpus/$name"/*
