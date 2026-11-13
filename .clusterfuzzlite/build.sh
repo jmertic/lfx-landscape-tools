@@ -11,10 +11,11 @@ pip3 install --ignore-requires-python .
 
 # PyInstaller excludes X11/Cairo system libraries (libxcb, libX11, fontconfig, etc.)
 # by default, which are absent in the headless ClusterFuzzLite runner image.
-# Resolve all transitive shared libraries linked by pycairo and bundle them.
-CAIRO_SO=$(python3 -c "import cairo._cairo as c; print(c.__file__)")
+# Find _cairo*.so on disk without importing it (it is compiled with sanitizer flags
+# that require LD_PRELOAD of sanitizer_with_fuzzer.so at runtime).
+CAIRO_SO=$(find /usr/local/lib -path '*/cairo/_cairo*.so' -print -quit)
 EXTRA_BINS=()
-while read -r lib; do
+while IFS= read -r lib; do
   case "$(basename "$lib")" in
     libc.so*|libm.so*|libpthread.so*|libdl.so*|librt.so*|ld-linux*|libgcc_s.so*|libstdc++.so*|libasan*|libubsan*) ;;
     *) EXTRA_BINS+=(--add-binary "$lib:.") ;;
