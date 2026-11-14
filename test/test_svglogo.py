@@ -259,3 +259,15 @@ class TestSVGLogo(unittest.TestCase):
     def test_create_text_logo_with_nul_byte(self):
         logo = SVGLogo(name="Foo\x00 Bar")
         self.assertIn("<svg", str(logo))
+
+    def test_generate_from_name_sanitizes_noncharacters(self):
+        for name in (
+            ":\U0010ffff~",
+            "Org\ufffeName\uffff",
+            "Plane\U0010fffeTest",
+            "Null\x00Byte\uffffName",
+        ):
+            with self.subTest(name=repr(name)):
+                logo = SVGLogo(name=name)
+                self.assertIn("<svg", str(logo))
+                self.assertTrue(logo.is_valid())
