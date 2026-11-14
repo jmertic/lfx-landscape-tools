@@ -990,3 +990,27 @@ class TestMember(unittest.TestCase):
         # after processing 'first_nested' at line 379.
         self.assertEqual(result['first_nested']['inner_key'], 'value_1')
         self.assertEqual(result['second_item'], 'value_2')
+
+    # Regression tests for crashes found by fuzz/fuzz_member.py
+    @responses.activate
+    def test_homepage_url_invalid_idna_host(self):
+        member = Member()
+        member.homepage_url = ''
+        self.assertIsNone(member.homepage_url)
+
+    @responses.activate
+    def test_repo_url_invalid_idna_host(self):
+        member = Member()
+        member.repo_url = 'https://.com/foo'
+        self.assertIsNone(member.repo_url)
+
+    @responses.activate
+    def test_url_setters_unbalanced_ipv6_bracket(self):
+        member = Member()
+        member.repo_url = 'https://[github.com/foo/bar'
+        member.crunchbase = 'https://[crunchbase.com/organization/foo'
+        member.twitter = 'https://[twitter.com/foo'
+        member.linkedin = 'https://[linkedin.com/company/foo'
+        self.assertIsNone(member.crunchbase)
+        self.assertIsNone(member.twitter)
+        self.assertIsNone(member.linkedin)

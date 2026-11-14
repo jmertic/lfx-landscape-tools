@@ -1,0 +1,22 @@
+landscape:
+  - name: Members
+    subcategories:
+      - name: Premier
+        items:
+          - item:
+            name: Example Corp
+            homepage_url: https://example.com
+            logo: example_corp.svg
+            crunchbase: https://www.crunchbase.com/organization/example
+            twitter: https://twitter.com/example
+            repo_url: https://github.com/example/project
+            second_path:
+              - SIG / Example
+            extra:
+              linkedin_url: https://www.linkedin.com/company/example
+              lfx_slug: example
+              other_links:
+                - name: Docs
+                  url: https://example.com/docs
+      - name: General
+        items: []

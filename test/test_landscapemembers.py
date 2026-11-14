@@ -207,3 +207,42 @@ categories:
         ]
         lm.load_data()
         mock_get_logger.return_value.exception.assert_called()
+
+    def _load_from_yaml(self, contents):
+        config = Config()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config.basedir = tmpdir
+            config.landscapefile = 'landscape.yml'
+            with open(os.path.join(tmpdir, 'landscape.yml'), 'w') as f:
+                f.write(contents)
+            return LandscapeMembers(config=config).members
+
+    # Regression tests for crashes found by fuzz/fuzz_landscape_yaml.py
+    @patch('logging.getLogger')
+    def test_load_data_empty_keys(self, mock_get_logger):
+        self.assertEqual(self._load_from_yaml("landscape:\n"), [])
+        self.assertEqual(self._load_from_yaml("landscape:\n  - name: Members\n    subcategories:\n"), [])
+        self.assertEqual(self._load_from_yaml(
+            "landscape:\n  - name: Members\n    subcategories:\n      - name: Premier\n        items:\n"), [])
+
+    @patch('logging.getLogger')
+    def test_load_data_not_a_mapping(self, mock_get_logger):
+        self.assertEqual(self._load_from_yaml("just a string\n"), [])
+        self.assertEqual(self._load_from_yaml("- a\n- list\n"), [])
+
+    @patch('logging.getLogger')
+    def test_load_data_skips_malformed_nodes(self, mock_get_logger):
+        members = self._load_from_yaml("""
+landscape:
+  - not a category
+  - name: Members
+    subcategories:
+      - not a subcategory
+      - name: Premier
+        items:
+          - not an item
+          - item:
+            name: Example
+            homepage_url: https://example.com
+""")
+        self.assertEqual([m.name for m in members], ['Example'])
