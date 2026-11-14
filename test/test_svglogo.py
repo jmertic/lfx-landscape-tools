@@ -265,7 +265,9 @@ class TestSVGLogo(unittest.TestCase):
             ":\U0010ffff~",
             "Org\ufffeName\uffff",
             "Plane\U0010fffeTest",
+            "ArabicBlock\ufdd0Middle\ufdefEnd",
             "Null\x00Byte\uffffName",
+            "\ufdd0\uffff\x00",
         ):
             with self.subTest(name=repr(name)):
                 logo = SVGLogo(name=name)

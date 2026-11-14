@@ -69,13 +69,16 @@ class SVGLogo:
 
     def _generate_from_name(self, name):
         """Helper to handle Cairo SVG generation complexity."""
-        # cairo rejects NUL bytes and Unicode noncharacters (U+FFFE, U+FFFF, etc.)
+        # cairo rejects NUL bytes, surrogates, and all 66 Unicode noncharacters
         sanitized = "".join(
             ch for ch in name
-            if ch != "\x00" and (ord(ch) & 0xFFFE) != 0xFFFE
+            if (cp := ord(ch)) != 0
+            and not (0xD800 <= cp <= 0xDFFF)
+            and not (0xFDD0 <= cp <= 0xFDEF)
+            and (cp & 0xFFFE) != 0xFFFE
         )
         parts = sanitized.split(" ")
-        width = len(max(parts, key=len)) * 34
+        width = max(len(max(parts, key=len)) * 34, 34)
         height = len(parts) * 65
 
         with tempfile.TemporaryFile() as fp:
