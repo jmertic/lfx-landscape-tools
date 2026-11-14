@@ -385,7 +385,7 @@ pycairo==1.29.2 \
     --hash=sha256:c66e08496678ba36d2d2aed2add1fade358b96c4842cb8b558c77ae01ca61fa7 \
     --hash=sha256:edbe75fe4267bda95f3bec1fcb6e90cccf10e72a8e2645bd1b3431e9a75225ce \
     --hash=sha256:fc75fca130e8f9b3d1548b322b0b79b149f482478d1b70e771c66c4dfc654d4f
-pycparser==3.12 ; platform_python_implementation != "PyPy" and implementation_name != "PyPy" and \
+pycparser==3.12 ; platform_python_implementation != "PyPy" and implementation_name != "PyPy" \
     --hash=sha256:a076f3f489b39b43ed13563a1dafe42447445bec2e294154ec5c57fcdda4c85e \
     --hash=sha256:f03387877eab82ce01bbdfd0ba7252ee55a90b1c708d5129e2ce915475cf1db6
 pygithub==2.10.0 \
