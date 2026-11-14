@@ -7,7 +7,8 @@
 
 # The project declares Python >= 3.12, but the OSS-Fuzz base image ships an
 # older Python. The code and its dependencies run fine on it, so skip the check.
-pip3 install --ignore-requires-python .
+pip3 install --no-cache-dir --require-hashes -r .clusterfuzzlite/requirements.txt
+pip3 install --no-cache-dir --no-deps --ignore-requires-python .
 
 # PyInstaller excludes X11/Cairo system libraries (libxcb, libX11, fontconfig, etc.)
 # by default, which are absent in the headless ClusterFuzzLite runner image.
