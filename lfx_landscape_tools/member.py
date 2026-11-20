@@ -209,7 +209,8 @@ class Member:
             self.__linkedin = "https://www.linkedin.com{}".format(self._urlparse(normalized_linkedin).path) if normalized_linkedin else None
         # If it is a URL, make sure it's properly formed
         elif ( self._urlparse(linkedin).netloc == 'linkedin.com' or self._urlparse(linkedin).netloc == 'www.linkedin.com' ):
-            self.__linkedin = "https://www.linkedin.com{}".format(self._urlparse(linkedin).path)
+            normalized_linkedin = self._safe_url_normalize(linkedin)
+            self.__linkedin = "https://www.linkedin.com{}".format(self._urlparse(normalized_linkedin).path) if normalized_linkedin else None
         else:
             self.__linkedin = None
             logging.getLogger().warning("Member.linkedin for '{name}' must be set to a valid LinkedIn URL - '{linkedin}' provided".format(linkedin=linkedin,name=self.name))

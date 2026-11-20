@@ -61,6 +61,11 @@ class TestMember(unittest.TestCase):
             member.linkedin = validLinkedInURL
             self.assertEqual(member.linkedin,'https://www.linkedin.com/company/1nce')
 
+    def testLinkedInInternationalCharacters(self):
+        member = Member()
+        member.linkedin = 'https://www.linkedin.com/company/telefónica-global-solutions'
+        self.assertEqual(member.linkedin, 'https://www.linkedin.com/company/telef%C3%B3nica-global-solutions')
+
     def testSetLinkedInNotValidOnEmpty(self):
         member = Member()
         member.name = 'test'
