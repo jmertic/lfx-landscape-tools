@@ -204,7 +204,7 @@ class Member:
         elif linkedin.startswith('company'):
             self.__linkedin = self._safe_url_normalize("https://www.linkedin.com/{}".format(linkedin))
         # perhaps they forgot to add the https://
-        elif linkedin.startswith(('www.linkedin.com','linkedin.com')) or self._urlparse(linkedin).netloc == 'linkedin.com' or self._urlparse(linkedin).netloc == 'www.linkedin.com' ):
+        elif linkedin.startswith(('www.linkedin.com','linkedin.com')) or self._urlparse(linkedin).netloc == 'linkedin.com' or self._urlparse(linkedin).netloc == 'www.linkedin.com':
             normalized_linkedin = self._safe_url_normalize(linkedin)
             self.__linkedin = "https://www.linkedin.com{}".format(self._urlparse(normalized_linkedin).path) if normalized_linkedin else None
         else:
