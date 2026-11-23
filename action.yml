@@ -20,9 +20,13 @@ runs:
   using: composite
   steps:
     - name: Install cairo
-      uses: gerlero/apt-install@c0fa73fe5c4a22deecf6d629565be92a15dd2026 # v1.3.12
-      with:
-        packages: libcairo2-dev pkg-config python3-dev
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends \
+          libcairo2-dev \
+          pkg-config \
+          python3-dev
     - name: Checkout landscape
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v4.1.7
       with:
