@@ -202,14 +202,11 @@ class Member:
             self.__linkedin = None
         # See if this is just the short form part of the LinkedIn URL
         elif linkedin.startswith('company'):
-            self.__linkedin = "https://www.linkedin.com/{}".format(linkedin)
+            self.__linkedin = self._safe_url_normalize("https://www.linkedin.com/{}".format(linkedin))
         # perhaps they forgot to add the https://
-        elif linkedin.startswith(('www.linkedin.com','linkedin.com')):
+        elif linkedin.startswith(('www.linkedin.com','linkedin.com')) or self._urlparse(linkedin).netloc == 'linkedin.com' or self._urlparse(linkedin).netloc == 'www.linkedin.com':
             normalized_linkedin = self._safe_url_normalize(linkedin)
             self.__linkedin = "https://www.linkedin.com{}".format(self._urlparse(normalized_linkedin).path) if normalized_linkedin else None
-        # If it is a URL, make sure it's properly formed
-        elif ( self._urlparse(linkedin).netloc == 'linkedin.com' or self._urlparse(linkedin).netloc == 'www.linkedin.com' ):
-            self.__linkedin = "https://www.linkedin.com{}".format(self._urlparse(linkedin).path)
         else:
             self.__linkedin = None
             logging.getLogger().warning("Member.linkedin for '{name}' must be set to a valid LinkedIn URL - '{linkedin}' provided".format(linkedin=linkedin,name=self.name))
