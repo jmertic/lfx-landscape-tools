@@ -159,7 +159,32 @@ class LandscapeOutput:
             logging.getLogger().info("Successfully processed {} members and skipped {} members".format(self.items_processed,self.items_errors))
 
     @staticmethod
-    def find_second_paths(categories):
+    def _dict_entries(entries):
+        '''Yield only the dict entries from a list from the landscape data, skipping anything else'''
+        return (entry for entry in entries or [] if isinstance(entry, dict))
+
+    @classmethod
+    def _landscape_items(cls, categories):
+        '''Yield every item in every subcategory of the given categories'''
+        for category in cls._dict_entries(categories):
+            for subcategory in cls._dict_entries(category.get('subcategories')):
+                yield from cls._dict_entries(subcategory.get('items'))
+
+    @staticmethod
+    def _parse_second_path(item, path):
+        '''
+        Split a second_path entry into a (category, subcategory) tuple
+
+        Returns None and logs a warning if it isn't in the form 'Category / Subcategory'
+        '''
+        parts = tuple(p.strip() for p in str(path).split('/'))
+        if len(parts) == 2 and all(parts):
+            return parts
+        logging.getLogger().warning("Item '{}' has an invalid second_path '{}'; expected 'Category / Subcategory'".format(item.get('name'), path))
+        return None
+
+    @classmethod
+    def find_second_paths(cls, categories):
         '''
         Find every second_path entry used by any item in the landscape data
 
@@ -168,28 +193,14 @@ class LandscapeOutput:
 
         Returns an ordered list of unique (category, subcategory) tuples
         '''
-        logger = logging.getLogger()
-        second_paths = []
-        for category in categories or []:
-            if not isinstance(category, dict):
-                continue
-            for subcategory in category.get('subcategories') or []:
-                if not isinstance(subcategory, dict):
-                    continue
-                for item in subcategory.get('items') or []:
-                    if not isinstance(item, dict):
-                        continue
-                    paths = item.get('second_path') or []
-                    if isinstance(paths, str):
-                        paths = [paths]
-                    for path in paths:
-                        parts = [p.strip() for p in str(path).split('/')]
-                        if len(parts) != 2 or not all(parts):
-                            logger.warning("Item '{}' has an invalid second_path '{}'; expected 'Category / Subcategory'".format(item.get('name'), path))
-                            continue
-                        if tuple(parts) not in second_paths:
-                            second_paths.append(tuple(parts))
-        return second_paths
+        second_paths = {}
+        for item in cls._landscape_items(categories):
+            paths = item.get('second_path') or []
+            for path in [paths] if isinstance(paths, str) else paths:
+                parsed = cls._parse_second_path(item, path)
+                if parsed:
+                    second_paths[parsed] = None
+        return list(second_paths)
 
     def add_second_path_categories(self, categories):
         '''
