@@ -27,14 +27,14 @@ jobs:
         run: |
           RAW_TAG="${{ github.event.release.tag_name }}"
           VERSION="${RAW_TAG#v}"
-          
+
           # Dereference the tag to retrieve the underlying 40-character commit SHA
           SHA=$(git rev-parse "${RAW_TAG}^{commit}")
-          
+
           echo "RAW_TAG=${RAW_TAG}" >>"$GITHUB_OUTPUT"
           echo "VERSION=${VERSION}" >>"$GITHUB_OUTPUT"
           echo "SHA=${SHA}" >>"$GITHUB_OUTPUT"
-          
+
           # Debugging log output
           echo "Processing Tag: $RAW_TAG, Version: $VERSION, SHA:$SHA"
 
@@ -64,7 +64,7 @@ jobs:
 
             for (const { owner, repo } of deps) {
               const fullRepo = `${owner}/${repo}`;
-              
+
               // 1. Get latest release tag
               const release = await github.rest.repos.getLatestRelease({ owner, repo });
               const tagName = release.data.tag_name;
@@ -82,7 +82,7 @@ jobs:
               // 3. Update matches in README.md
               const regex = new RegExp(`uses: ${fullRepo}@[a-zA-Z0-9_.-]+(\\s*#[^\\n]*)?`, 'g');
               const replacement = `uses: ${fullRepo}@${sha} # ${tagName}`;
-              
+
               readme = readme.replace(regex, replacement);
               console.log(`Updated ${fullRepo} to ${sha} (# ${tagName})`);
             }

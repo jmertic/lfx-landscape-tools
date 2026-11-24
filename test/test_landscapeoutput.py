@@ -306,6 +306,18 @@ landscape:
               annotations:
                 slug: testme
               artwork_url: https://google.com/art
+  - category:
+    name: Dog
+    subcategories:
+      - subcategory:
+        name: Dog
+        items: []
+  - category:
+    name: Cat
+    subcategories:
+      - subcategory:
+        name: Cat
+        items: []
 """)
 
     @responses.activate
@@ -584,3 +596,107 @@ NOTE: Subsidiary of Comcast for LF membership
 
               NOTE: Subsidiary of Comcast for LF membership
 """)
+
+class TestLandscapeOutputSecondPath(unittest.TestCase):
+
+    def _config(self, filename):
+        config = Config()
+        config.landscape_members_category = 'test me'
+        config.landscape_members_subcategories = [
+            {"name": "Good Membership", "category": "Good"},
+            ]
+        config.landscapefile = os.path.basename(filename)
+        config.basedir = os.path.dirname(filename)
+        config.view = 'members'
+        return config
+
+    def testFindSecondPaths(self):
+        categories = [
+            {'name': 'A', 'subcategories': [
+                {'name': 'B', 'items': [
+                    {'name': 'one', 'second_path': ['Project Group / Foo', 'Industry/Bar', 'Project Group / Foo']},
+                    {'name': 'two', 'second_path': 'Industry / Baz'},
+                    {'name': 'three', 'second_path': ['bogus', 'a / b / c', ' / x']},
+                    {'name': 'four'},
+                    'notadict',
+                ]},
+                'notadict',
+            ]},
+            {'name': 'Other'},
+            'notadict',
+        ]
+        with self.assertLogs(level='WARNING') as cm:
+            paths = LandscapeOutput.find_second_paths(categories)
+        self.assertEqual(paths, [('Project Group', 'Foo'), ('Industry', 'Bar'), ('Industry', 'Baz')])
+        self.assertEqual(len(cm.output), 3)
+
+    def testAddSecondPathCategories(self):
+        categories = [
+            {'name': 'A', 'subcategories': [
+                {'name': 'B', 'items': [
+                    {'name': 'one', 'second_path': ['A / B', 'A / New', 'Industry / Bar', 'Empty / Sub']},
+                ]},
+            ]},
+            {'name': 'Empty'},
+        ]
+        config = Config()
+        LandscapeOutput(config).add_second_path_categories(categories)
+        self.assertEqual([c['name'] for c in categories], ['A', 'Empty', 'Industry'])
+        self.assertEqual([s['name'] for s in categories[0]['subcategories']], ['B', 'New'])
+        self.assertEqual(categories[0]['subcategories'][1]['items'], [])
+        self.assertEqual([s['name'] for s in categories[1]['subcategories']], ['Sub'])
+        self.assertEqual([s['name'] for s in categories[2]['subcategories']], ['Bar'])
+        # running again changes nothing
+        before = repr(categories)
+        LandscapeOutput(config).add_second_path_categories(categories)
+        self.assertEqual(before, repr(categories))
+
+    def testSaveAddsSecondPathCategories(self):
+        tmpfilename = tempfile.NamedTemporaryFile(mode='w', delete=False)
+        tmpfilename.write("""landscape:
+  - category:
+    name: Industry
+    subcategories:
+      - subcategory:
+        name: Existing
+        items: []
+  - category:
+    name: Other
+    subcategories:
+      - subcategory:
+        name: Stuff
+        items:
+          - item:
+            name: Other item
+            homepage_url: https://other.com
+            logo: other.svg
+            second_path:
+              - Project Group / Widgets
+""")
+        tmpfilename.close()
+        config = self._config(tmpfilename.name)
+
+        members = LFXMembers(load_data=False, config=config)
+        member = Member()
+        member.name = 'Good'
+        member.membership = 'Good Membership'
+        member.homepage_url = 'https://good.com'
+        member.logo = 'good.svg'
+        member.second_path = ['Industry / Existing', 'Industry / Healthcare', 'Technology Sector / AI']
+        members.members.append(member)
+
+        landscape = LandscapeOutput(config=config)
+        with patch.object(Member, 'host_logo'):
+            landscape.load(members)
+        landscape.save()
+
+        with open(tmpfilename.name, 'r', encoding='utf8') as fileobject:
+            import ruamel.yaml
+            data = ruamel.yaml.YAML().load(fileobject)
+        os.unlink(tmpfilename.name)
+
+        cats = {c['name']: [s['name'] for s in c['subcategories']] for c in data['landscape']}
+        self.assertEqual(cats['Industry'], ['Existing', 'Healthcare'])
+        self.assertEqual(cats['Technology Sector'], ['AI'])
+        self.assertEqual(cats['Project Group'], ['Widgets'])
+        self.assertEqual(cats['test me'], ['Good'])

@@ -143,6 +143,9 @@ class LandscapeOutput:
                     'subcategories': self.landscape_items
                     })
         finally:
+            rootcategory = 'landscape' if landscape.get('landscape') else 'categories'
+            if isinstance(landscape.get(rootcategory), list):
+                self.add_second_path_categories(landscape[rootcategory])
             with open(self.landscapefile, 'w+', encoding="utf8", errors='ignore') as fileobject:
                 ryaml = ruamel.yaml.YAML(typ='rt')
                 ryaml.Representer.add_representer(str,self._str_presenter)
@@ -154,6 +157,79 @@ class LandscapeOutput:
                 ryaml.preserve_quotes = False
                 ryaml.dump(landscape, fileobject, transform=self._remove_nulls)
             logging.getLogger().info("Successfully processed {} members and skipped {} members".format(self.items_processed,self.items_errors))
+
+    @staticmethod
+    def _dict_entries(entries):
+        '''Yield only the dict entries from a list from the landscape data, skipping anything else'''
+        return (entry for entry in entries or [] if isinstance(entry, dict))
+
+    @classmethod
+    def _landscape_items(cls, categories):
+        '''Yield every item in every subcategory of the given categories'''
+        for category in cls._dict_entries(categories):
+            for subcategory in cls._dict_entries(category.get('subcategories')):
+                yield from cls._dict_entries(subcategory.get('items'))
+
+    @staticmethod
+    def _parse_second_path(item, path):
+        '''
+        Split a second_path entry into a (category, subcategory) tuple
+
+        Returns None and logs a warning if it isn't in the form 'Category / Subcategory'
+        '''
+        parts = tuple(p.strip() for p in str(path).split('/'))
+        if len(parts) == 2 and all(parts):
+            return parts
+        logging.getLogger().warning("Item '{}' has an invalid second_path '{}'; expected 'Category / Subcategory'".format(item.get('name'), path))
+        return None
+
+    @classmethod
+    def find_second_paths(cls, categories):
+        '''
+        Find every second_path entry used by any item in the landscape data
+
+        Keyword arguments:
+        categories -- list of categories from the landscape data file
+
+        Returns an ordered list of unique (category, subcategory) tuples
+        '''
+        second_paths = {}
+        for item in cls._landscape_items(categories):
+            paths = item.get('second_path') or []
+            for path in [paths] if isinstance(paths, str) else paths:
+                parsed = cls._parse_second_path(item, path)
+                if parsed:
+                    second_paths[parsed] = None
+        return list(second_paths)
+
+    def add_second_path_categories(self, categories):
+        '''
+        Make sure every category / subcategory referenced by a second_path in
+        the landscape data exists, adding any that are missing with no items
+
+        Keyword arguments:
+        categories -- list of categories from the landscape data file; updated in place
+        '''
+        logger = logging.getLogger()
+        for category_name, subcategory_name in self.find_second_paths(categories):
+            category = next((c for c in categories if isinstance(c, dict) and str(c.get('name','')).strip() == category_name), None)
+            if category is None:
+                logger.info("Adding category '{}' for second_path entries".format(category_name))
+                category = {
+                    'category': None,
+                    'name': category_name,
+                    'subcategories': []
+                }
+                categories.append(category)
+            if not isinstance(category.get('subcategories'), list):
+                category['subcategories'] = []
+            if not any(isinstance(s, dict) and str(s.get('name','')).strip() == subcategory_name for s in category['subcategories']):
+                logger.info("Adding subcategory '{}' to category '{}' for second_path entries".format(subcategory_name, category_name))
+                category['subcategories'].append({
+                    'subcategory': None,
+                    'name': subcategory_name,
+                    'items': []
+                })
 
     def _remove_nulls(self,yamlout):
         return yamlout.replace('- item: null','- item:') \
