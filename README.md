@@ -97,7 +97,7 @@ jobs:
         with:
           client-id: ${{ vars.APP_CLIENT_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
-      - uses: jmertic/lfx-landscape-tools@bfba2d9288a9099e9f82ccbab647f5f480ad5e56 # 20261123
+      - uses: jmertic/lfx-landscape-tools@5a8f7d6cfe7b7659fb008a74ff3f2eb49039c0e2 # 20261124
         with:
           project_processing: skip # see options in action.yml
         env:
@@ -131,7 +131,7 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - uses: jmertic/lfx-landscape-tools@bfba2d9288a9099e9f82ccbab647f5f480ad5e56 # 20261123
+      - uses: jmertic/lfx-landscape-tools@5a8f7d6cfe7b7659fb008a74ff3f2eb49039c0e2 # 20261124
         with:
           project_processing: skip # see options in action.yml
         env:
