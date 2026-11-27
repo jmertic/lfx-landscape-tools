@@ -1361,21 +1361,21 @@ files = [
 
 [[package]]
 name = "url-normalize"
-version = "3.1.0"
+version = "4.0.0"
 description = "URL normalization for Python"
 optional = false
 python-versions = ">=3.11"
 groups = ["main"]
 files = [
-    {file = "url_normalize-3.1.0-py3-none-any.whl", hash = "sha256:34c386c6b2dbde760eaaaa8542dc29995c75f2baf94acceee18e5b6b29579469"},
-    {file = "url_normalize-3.1.0.tar.gz", hash = "sha256:138912833c0005ec77e756ec220590f8971ff046227280790ceb00f5ab9d56b6"},
+    {file = "url_normalize-4.0.0-py3-none-any.whl", hash = "sha256:dea616fc9c3d4c8bcd46fcaa783bb4e402b4f272789650919e473c5a86a7b3eb"},
+    {file = "url_normalize-4.0.0.tar.gz", hash = "sha256:52ad9004d6278ea4b581f1cf2f4d016c4873bf3d81fd749b7472ac0206355d05"},
 ]
 
 [package.dependencies]
 idna = ">=3.20"
 
 [package.extras]
-dev = ["mypy", "pre-commit", "pytest", "pytest-cov", "pytest-socket", "ruff"]
+dev = ["hypothesis", "pre-commit", "pytest", "pytest-cov", "pytest-socket", "ruff", "ty"]
 
 [[package]]
 name = "urllib3"
@@ -1413,4 +1413,4 @@ crypto-eth-addresses = ["eth-hash[pycryptodome] (>=0.7.0)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">= 3.12"
-content-hash = "b766677a19815d7a18065fb0b046063f7b73b9542adc60914a8fa991c9aa1539"
+content-hash = "7f1064f590d24a73ccbfbe1b17b0e2dcc0ab28707d68d3cee2faf0fb2d23984a"
